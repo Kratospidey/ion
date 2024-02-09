@@ -1,0 +1,87 @@
+<!-- views/partials/sidepanel.ejs -->
+<div class="sidepanel">
+	<button type="button" data-target="chat" class="btn btn-dark sidebuttons">
+		Open Chat
+	</button>
+	<button
+		type="button"
+		data-target="codespace"
+		class="btn btn-dark sidebuttons"
+	>
+		Open Codespace
+	</button>
+	<div class="mb-3 files">
+		<p class="h4 text-white mb-4" style="text-align: center">Uploaded Files</p>
+		<div class="files mb-4">
+			<% if (server && server.filePaths && server.filePaths.length > 0) { %> <%
+			server.filePaths.forEach(function(filePath) { %> <% var fileName =
+			filePath.split('/').pop().replace(/\\/g, '/'); %>
+			<button
+				type="button"
+				class="btn btn-outline-warning file_button"
+				onclick="window.open('<%= filePath %>', '_blank')"
+			>
+				<%= fileName %>
+			</button>
+			<% }); %> <% } else { %>
+			<p class="text-white">No files uploaded yet.</p>
+			<% } %>
+			<!-- views/partials/sidepanel.ejs -->
+
+			<form
+				id="uploadForm"
+				action="/upload"
+				method="post"
+				enctype="multipart/form-data"
+			>
+				<input type="hidden" name="serverId" value="<%= currentServer._id %>" />
+				<label for="file-input" class="form-label text-white"
+					>Add a new file</label
+				>
+				<input
+					class="form-control mb-3"
+					type="file"
+					id="file-input"
+					name="file"
+				/>
+				<button type="submit" class="btn btn-success">Upload File</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- views/partials/sidepanel.ejs -->
+<script>
+	document
+		.getElementById("uploadForm")
+		.addEventListener("submit", function (event) {
+			event.preventDefault(); // Prevent the default form submission
+
+			const fileInput = document.getElementById("file-input");
+			if (!fileInput.files.length) {
+				alert("Please select a file to upload.");
+				return; // Stop the function here if no file is selected
+			}
+
+			const formData = new FormData(this); // Create a FormData instance from the form
+			const xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest instance
+
+			xhr.open("POST", "/upload", true); // Initialize the request
+			xhr.responseType = "json"; // Expect a JSON response
+
+			xhr.onload = function () {
+				if (xhr.status === 200) {
+					// Handle successful upload
+					alert(xhr.response.message); // Show a success message
+					setTimeout(function () {
+						location.reload(); // Reload the page after a delay
+					}, 2000); // Delay in milliseconds (2000ms = 2 seconds)
+				} else {
+					// Handle error
+					alert("An error occurred during the upload.");
+				}
+			};
+
+			xhr.send(formData); // Send the FormData object
+		});
+</script>

@@ -1,0 +1,8 @@
+<!-- views/partials/members.ejs -->
+<div class="members">
+    <p class="h4 mb-4" style="text-align: center; color: #a7c7e7">Users</p>
+    <% members.forEach(function(member) { %>
+      <p class="h6 text-white mb-4" style="text-align: center"><%= member.username %></p>
+    <% }); %>
+  </div>
+  

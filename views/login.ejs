@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-core="modern">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>Ion | Login Page</title>
+
+		<!-- Link to your stylesheet -->
+		<link rel="stylesheet" href="/styles.css" />
+		<script src="/script.js"></script>
+		<!-- Halfmoon CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/halfmoon@2.0.1/css/halfmoon.min.css"
+			rel="stylesheet"
+			integrity="sha256-SsJizWSIG9JT9Qxbiy8xnYJfjCAkhEQ0hihxRn7jt2M="
+			crossorigin="anonymous"
+		/>
+		<link
+			href="https://cdn.jsdelivr.net/npm/halfmoon@2.0.1/css/cores/halfmoon.cores.css"
+			rel="stylesheet"
+			integrity="sha256-MAzAVJMU/ze52ZHcA8CeqRrCOVndMZlHwNeS2c73vP4="
+			crossorigin="anonymous"
+		/>
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="specific-w-300 login">
+				<h2 class="display-3 text-white" id="card-heading">
+					I <span style="color: #1760cf">o</span> n
+				</h2>
+				<form action="/login" method="post" novalidate>
+					<div class="mb-3 text-white">
+						<label for="email" class="form-label">Email</label>
+						<input
+							type="email"
+							class="form-control text-white bg-transparent"
+							id="email"
+							placeholder="name@example.com"
+							required
+						/>
+						<div class="invalid-feedback">
+							Please enter a valid email address.
+						</div>
+					</div>
+					<label for="password" class="form-label text-white">Password</label>
+					<input
+						type="password"
+						id="password"
+						class="form-control text-white bg-transparent mb-5"
+						aria-labelledby="password-help-block"
+						required
+					/>
+					<button type="submit" class="btn btn-outline-light text-white">
+						<p id="login-button">Login</p>
+					</button>
+					<br />
+					<br />
+					<a href="/signup" class="text-white"
+						>Haven't signed up yet? Sign up here.</a
+					>
+				</form>
+				<script>
+					document
+						.querySelector("form")
+						.addEventListener("submit", async function (event) {
+							event.preventDefault();
+							var emailInput = document.getElementById("email");
+							var passwordInput = document.getElementById("password");
+
+							// Validate email format
+							var emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+							if (!emailPattern.test(emailInput.value)) {
+								emailInput.setCustomValidity(
+									"Please enter a valid email address."
+								);
+								emailInput.reportValidity();
+								return;
+							}
+
+							// Validate password length (optional)
+							var minLength = 8; // Minimum length for password
+							if (passwordInput.value.length < minLength) {
+								passwordInput.setCustomValidity(
+									"Password must be at least " + minLength + " characters long."
+								);
+								passwordInput.reportValidity();
+								return;
+							}
+
+							// Clear custom validity messages
+							emailInput.setCustomValidity("");
+							passwordInput.setCustomValidity("");
+
+							// Submit the form data to the server
+							const response = await fetch("/login", {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({
+									email: emailInput.value,
+									password: passwordInput.value,
+								}),
+							});
+
+							if (response.ok) {
+								// Handle successful login
+								window.location.href = "/home"; // Redirect to dashboard or another page
+							} else {
+								// Handle error response
+								const errorMessage = await response.text();
+								alert(errorMessage); // Show the error message to the user
+							}
+						});
+				</script>
+			</div>
+		</div>
+	</body>
+</html>
