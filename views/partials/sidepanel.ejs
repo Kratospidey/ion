@@ -34,7 +34,7 @@
 				method="post"
 				enctype="multipart/form-data"
 			>
-				<input type="hidden" name="serverId" value="<%= currentServer._id %>" />
+				<input type="hidden" name="serverId" value="<%= currentServer.id %>" />
 				<label for="file-input" class="form-label text-white"
 					>Add a new file</label
 				>
@@ -51,7 +51,7 @@
 </div>
 
 <!-- views/partials/sidepanel.ejs -->
-<script>
+<script defer>
 	document
 		.getElementById("uploadForm")
 		.addEventListener("submit", function (event) {

@@ -1,22 +1,39 @@
-const mongoose = require("mongoose");
+// models/User.js
 const bcrypt = require("bcrypt"); // For hashing passwords
 
+module.exports = (sequelize, DataTypes) => {
+	const User = sequelize.define("User", {
+		username: {
+			type: DataTypes.STRING,
+			allowNull: false,
+		},
+		password: {
+			type: DataTypes.STRING,
+			allowNull: false,
+		},
+		email: {
+			type: DataTypes.STRING,
+			allowNull: false,
+			unique: true,
+		},
+		profilePicture: DataTypes.STRING,
+		createdAt: {
+			type: DataTypes.DATE,
+			defaultValue: DataTypes.NOW,
+		},
+		lastLogin: DataTypes.DATE,
+	});
 
-// User model
-const userSchema = new mongoose.Schema({
-	username: String,
-	password: String, // Store hashed passwords
-	email: String,
-	profilePicture: String, // URL to the profile picture
-	createdAt: Date,
-	lastLogin: Date,
-});
+	User.associate = function (models) {
+		User.belongsToMany(models.Server, {
+			through: models.ServerUser,
+			foreignKey: "userId",
+		});
+	};
 
-// Method to compare a plain-text password with the stored hashed password
-userSchema.methods.comparePassword = async function (plainTextPassword) {
-	return await bcrypt.compare(plainTextPassword, this.password);
+	User.prototype.comparePassword = function (password) {
+		return bcrypt.compare(password, this.password);
+	};
+
+	return User;
 };
-
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;

@@ -1,10 +1,9 @@
-<!-- views/partials/header.ejs -->
 <div class="servers">
 	<% servers.forEach(function(server) { %>
-	<a href="/server/<%= server._id %>">
+	<a href="/server/<%= server.id %>">
 		<img
 			class="server-avatar"
-			src="<%= server.profilePicture %>"
+			src="<%= server.profilePicture.startsWith('/img/') ? server.profilePicture : '/img/' + server.profilePicture %>"
 			alt="PFP of <%= server.name %>"
 		/>
 	</a>

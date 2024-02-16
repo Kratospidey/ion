@@ -1,14 +1,31 @@
 require("dotenv").config(); // Load environment variables from .env file
 const express = require("express");
 const cookieParser = require("cookie-parser"); // Import cookie-parser
-const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
+const db = require("./models/index"); // Adjust the path according to your project structure
+const { User, Server, ServerUser } = db;
+
+const sequelize = new Sequelize(
+	process.env.DB_NAME,
+	process.env.DB_USER,
+	process.env.DB_PASSWORD,
+	{
+		host: process.env.DB_HOST,
+		dialect: "mysql", // or 'sqlite', 'postgres', 'mssql'
+		// ... other options
+	}
+);
+
+sequelize
+	.authenticate()
+	.then(() => console.log("Connected to the database"))
+	.catch((err) => console.error("Unable to connect to the database", err));
 
 const fs = require("fs");
 const path = require("path");
-
-const MONGODB_URL = process.env.MONGODB_URL;
 
 // server.js
 const storage = multer.diskStorage({
@@ -32,7 +49,6 @@ const upload = multer({ storage: storage });
 
 const bcrypt = require("bcrypt"); // For hashing passwords
 
-const { User, File, ChatRoom, Server } = require("./models"); // Import your models
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
@@ -46,6 +62,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files after defining routes
 app.use(express.static("public")); // Serve static files from the 'public' directory
+app.use("/img", express.static("img"));
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 app.set("view engine", "ejs");
@@ -65,12 +82,6 @@ app.get("/login", (req, res) => {
 // Secret key for signing JWTs
 const SECRET_KEY = process.env.JWT_SECRET; // Get the secret key from environment variables
 
-// Connect to MongoDB
-mongoose
-	.connect(MONGODB_URL)
-	.then(() => console.log("Connected to MongoDB"))
-	.catch((err) => console.error("Could not connect to MongoDB", err));
-
 // Route to handle user login
 app.post("/login", async (req, res) => {
 	try {
@@ -81,7 +92,7 @@ app.post("/login", async (req, res) => {
 		}
 
 		// Check if the email exists in the database
-		const user = await User.findOne({ email: req.body.email });
+		const user = await User.findOne({ where: { email: req.body.email } });
 		if (!user) {
 			return res.status(401).send("Email not found");
 		}
@@ -93,7 +104,7 @@ app.post("/login", async (req, res) => {
 		}
 
 		// If the email and password are valid, generate a JWT and send it back to the client
-		const token = jwt.sign({ userId: user._id }, SECRET_KEY, {
+		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
 			expiresIn: "1d",
 		});
 		res.cookie("token", token, { httpOnly: true });
@@ -107,12 +118,26 @@ app.post("/login", async (req, res) => {
 // server.js
 app.get("/home", authenticateToken, async (req, res) => {
 	try {
-		// Fetch servers the user is part of
-		const servers = await Server.find({
-			userIds: { $in: [req.user.userId] },
-		}).exec();
+		const user = await User.findByPk(req.user.userId, {
+			include: [
+				{
+					model: Server,
+					as: "Servers", // Adjust based on your association alias
+					through: { attributes: [] },
+					attributes: [
+						"id",
+						"name",
+						"profilePicture",
+						"filePaths",
+						"createdAt",
+						"updatedAt",
+					],
+				},
+			],
+		});
 
-		// Render the layout view with the data and a flag indicating no members section
+		const servers = user ? user.Servers : [];
+
 		res.render("layout", { servers: servers, showMembers: false });
 	} catch (err) {
 		console.error("Error fetching servers:", err);
@@ -123,30 +148,51 @@ app.get("/home", authenticateToken, async (req, res) => {
 // server.js
 app.get("/server/:serverId", authenticateToken, async (req, res) => {
 	try {
-		// Find the server by its ID
-		const server = await Server.findById(req.params.serverId).exec();
+		const server = await Server.findByPk(req.params.serverId, {
+			include: [
+				{
+					model: User,
+					as: "Users",
+					attributes: ["id", "username", "email", "profilePicture"],
+					through: { attributes: [] },
+				},
+			],
+		});
 
-		// If the server exists and the user is part of it, fetch the members
-		if (server && server.userIds.includes(req.user.userId)) {
-			const members = await User.find({ _id: { $in: server.userIds } })
-				.select("username")
-				.exec();
-			// Fetch all servers the user is part of again since it wasn't passed before
-			const servers = await Server.find({
-				userIds: { $in: [req.user.userId] },
-			}).exec();
-			// Render the layout view with the data and a flag indicating the members section
-			res.render("layout", {
-				servers: servers,
-				members: members,
-				showMembers: true,
-				currentServer: server, // Pass the current server data
-			});
-		} else {
-			res.status(404).send("Server not found or user is not a member.");
+		if (!server) {
+			return res.status(404).send("Server not found.");
 		}
+
+		const isMember = server.Users.some((user) => user.id === req.user.userId);
+		if (!isMember) {
+			return res.status(403).send("User is not a member of this server.");
+		}
+
+		const userServers = await User.findByPk(req.user.userId, {
+			include: [
+				{
+					model: Server,
+					as: "Servers",
+					attributes: ["id", "name", "profilePicture", "filePaths"],
+					through: { attributes: [] },
+				},
+			],
+		});
+
+		// Validate file paths before rendering
+		server.filePaths = await validateFilePaths(
+			server.filePaths || [],
+			server.id
+		);
+
+		res.render("layout", {
+			servers: userServers ? userServers.Servers : [],
+			members: server.Users,
+			showMembers: true,
+			currentServer: server,
+		});
 	} catch (err) {
-		console.error("Error fetching server members:", err);
+		console.error("Error:", err);
 		res.status(500).send("Internal server error");
 	}
 });
@@ -158,27 +204,43 @@ app.post(
 	authenticateToken,
 	async (req, res) => {
 		try {
-			// Find the server by its ID
-			const server = await Server.findById(req.body.serverId).exec();
 			const serverId = req.body.serverId;
+			const userId = req.user.userId;
 
-			// If the server exists and the user is part of it, add the file path to the server
-			if (server && server.userIds.includes(req.user.userId)) {
-				// Add the file path to the server's filePaths array
-				// Inside your POST /upload route handler
-				server.filePaths.push(`/uploads/${serverId}/${req.file.filename}`); // Store the server-specific path
-				await server.save();
+			// Check if there's an entry in the ServerUser join table for this user and server
+			const serverUser = await ServerUser.findOne({
+				where: {
+					serverId: serverId,
+					userId: userId,
+				},
+			});
 
-				// Send a response to the client
-				res.json({
-					message: "File uploaded successfully",
-					filePath: "/uploads/" + req.file.filename, // Send only the relative path
-				});
-			} else {
-				res.status(404).send("Server not found or user is not a member.");
+			if (!serverUser) {
+				return res
+					.status(404)
+					.send("Server not found or user is not a member.");
 			}
+
+			// Find the server to update filePaths
+			const server = await Server.findByPk(serverId);
+			if (!server) {
+				return res.status(404).send("Server not found.");
+			}
+
+			// Update the server's filePaths array
+			// Sequelize doesn't support array_append, so you need to handle array updates manually
+			const updatedFilePaths = server.filePaths
+				? [...server.filePaths, `/uploads/${serverId}/${req.file.filename}`]
+				: [`/uploads/${serverId}/${req.file.filename}`];
+			await server.update({ filePaths: updatedFilePaths });
+
+			// Send a response to the client
+			res.json({
+				message: "File uploaded successfully",
+				filePath: `/uploads/${serverId}/${req.file.filename}`, // Send only the relative path
+			});
 		} catch (err) {
-			console.error("Error uploading file:", err);
+			console.error("Error uploading file:", err.message, err.stack);
 			res.status(500).send("Internal server error");
 		}
 	}
@@ -222,10 +284,26 @@ function authenticateToken(req, res, next) {
 	}
 }
 
-// Protected route example
-app.get("/protected", authenticateToken, (req, res) => {
-	res.send("This is a protected route.");
-});
+const validateFilePaths = async (filePaths, serverId) => {
+	const validFilePaths = [];
+
+	for (const filePath of filePaths) {
+		const fullPath = path.join(
+			__dirname,
+			"public/uploads",
+			serverId.toString(),
+			filePath.split("/").pop()
+		);
+
+		if (fs.existsSync(fullPath)) {
+			// Synchronously checks for the existence of a file
+			validFilePaths.push(filePath);
+		}
+	}
+
+	return validFilePaths;
+};
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;
