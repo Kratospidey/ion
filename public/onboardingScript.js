@@ -1,5 +1,3 @@
-// public/onboardingScript.js
-
 // Handle creating a new server
 document
 	.getElementById("createServerForm")
@@ -13,8 +11,13 @@ document
 		});
 
 		if (response.ok) {
-			// Redirect to the home page or display a success message
-			window.location.href = "/home";
+			const result = await response.json();
+			if (result.redirectUrl) {
+				window.location.href = result.redirectUrl;
+			} else {
+				// handle the case where there is no redirectUrl
+				alert("Server created successfully");
+			}
 		} else {
 			// Handle errors
 			alert("Failed to create server. Please try again.");
@@ -38,8 +41,13 @@ document
 		});
 
 		if (response.ok) {
-			// Redirect or display success message
-			window.location.href = "/home";
+			const result = await response.json();
+			if (result.redirectUrl) {
+				window.location.href = result.redirectUrl;
+			} else {
+				// handle the case where there is no redirectUrl
+				alert("Successfully joined the server");
+			}
 		} else {
 			// Handle errors
 			alert("Failed to join server. Please check the code and try again.");

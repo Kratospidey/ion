@@ -309,9 +309,6 @@ app.get("/signup", (req, res) => {
 	res.render("signup");
 });
 
-// Handle sign-up form submission
-// Handle sign-up form submission
-// Handle sign-up form submission
 // Handle sign-up form submission with compulsory profile picture
 app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	try {
@@ -383,7 +380,6 @@ app.get("/onboarding", authenticateToken, (req, res) => {
 	res.render("onboarding");
 });
 
-// Handle creating a new server
 // Handle creating a new server with mandatory server profile picture
 app.post(
 	"/create-server",
@@ -423,12 +419,7 @@ app.post(
 				await server.addUser(userId);
 
 				res.status(201).json({
-					message: "Server created successfully",
-					server: {
-						id: server.id,
-						name: server.name,
-						profilePicture: server.profilePicture,
-					},
+					redirectUrl: "/home",
 				});
 			});
 
@@ -472,7 +463,9 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 			userId: req.user.userId,
 		});
 
-		res.status(200).send("Successfully joined the server.");
+		res.status(200).json({
+			redirectUrl: "/home",
+		});
 	} catch (err) {
 		console.error("Error joining server:", err);
 		res.status(500).send("Internal server error.");

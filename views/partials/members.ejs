@@ -6,18 +6,22 @@
 	>
 		Users
 	</p>
-	<% members.forEach(function(member) { %>
-	<div class="member-entry" style="margin-bottom: auto">
-		<img
-			src="<%= member.profilePicture %>"
-			alt="Profile Picture of <%= member.username %>"
-			class="member-pfp"
-		/>
-		<p class="h6 text-white mb-4" style="text-align: center">
-			<%= member.username %>
-		</p>
+	<div class="member-list">
+		<% members.forEach(function(member) { %>
+		<div class="member-entry">
+			<img
+				src="<%= member.profilePicture %>"
+				alt="Profile Picture of <%= member.username %>"
+				class="member-pfp"
+			/>
+			<p class="h6 text-white mb-4" style="text-align: center">
+				<%= member.username %>
+			</p>
+		</div>
+		<% }); %>
 	</div>
-	<% }); %> <% if (typeof serverCode !== 'undefined') { %>
+	<!-- Make sure this closing tag is here -->
+	<% if (typeof serverCode !== 'undefined') { %>
 	<div class="server-code-display">
 		<p class="h6 text-white" style="text-align: center">
 			Server Code: <%= serverCode %>
@@ -25,3 +29,4 @@
 	</div>
 	<% } %>
 </div>
+<!-- This closes the .members div -->

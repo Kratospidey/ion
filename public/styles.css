@@ -108,13 +108,17 @@ input[type="text"] {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: space-around;
+	justify-content: flex-start;
+	overflow-y: auto; /* Enable vertical scrolling */
+	gap: 40px;
+	padding: 10px;
 }
 
 .server-avatar {
-	border-radius: 80px;
-	width: 70px;
-	height: auto;
+	width: 70px; /* Set width */
+	height: 70px; /* Set height to be the same as width */
+	border-radius: 50%; /* This will make it a perfect circle */
+	object-fit: cover; /* This will ensure the image covers the area without being stretched */
 }
 
 a {
@@ -195,6 +199,7 @@ a {
 	display: flex;
 	align-items: flex-start;
 	flex-direction: column;
+	justify-content: flex-start;
 	background-color: #1e1e1e;
 	border-radius: 20px;
 	height: 97%; /* Adjust this if needed */
@@ -203,9 +208,6 @@ a {
 	padding: 10px;
 	flex-grow: 1;
 	overflow-y: auto; /* Enable vertical scrolling if content overflows */
-	max-width: calc(
-		100% - 20px
-	); /* Ensure it does not exceed the wrapper width */
 }
 
 pre {
@@ -297,4 +299,12 @@ pre {
 
 #file-input {
 	min-width: 90px;
+}
+
+.member-list {
+	overflow-y: auto; /* Enable scrolling for the member list */
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin-bottom: auto; /* Space above the server code */
 }
