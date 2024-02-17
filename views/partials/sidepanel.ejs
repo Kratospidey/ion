@@ -11,17 +11,24 @@
 		Open Codespace
 	</button>
 	<div class="mb-3 files">
+		<% if (server && server.filePaths) { %>
+		<p class="h4 text-white mb-4" style="text-align: center">
+			Uploaded Files (<%= server.filePaths.length %>/10)
+		</p>
+		<% } else { %>
 		<p class="h4 text-white mb-4" style="text-align: center">Uploaded Files</p>
+		<% } %>
 		<div class="files mb-4">
 			<% if (server && server.filePaths && server.filePaths.length > 0) { %> <%
 			server.filePaths.forEach(function(filePath) { %> <% var fileName =
-			filePath.split('/').pop().replace(/\\/g, '/'); %>
+			filePath.split('/').pop().replace(/\\/g, '/'); %> <% var displayFileName =
+			fileName.length > 15 ? fileName.substring(0, 18) + '...' : fileName; %>
 			<button
 				type="button"
 				class="btn btn-outline-warning file_button"
 				onclick="window.open('<%= filePath %>', '_blank')"
 			>
-				<%= fileName %>
+				<%= displayFileName %>
 			</button>
 			<% }); %> <% } else { %>
 			<p class="text-white">No files uploaded yet.</p>
@@ -44,7 +51,9 @@
 					id="file-input"
 					name="file"
 				/>
-				<button type="submit" class="btn btn-success">Upload File</button>
+				<button type="submit" class="uploadbtn btn btn-success">
+					Upload File
+				</button>
 			</form>
 		</div>
 	</div>
@@ -63,6 +72,20 @@
 				return; // Stop the function here if no file is selected
 			}
 
+			if (fileInput.files.length > 10) {
+				alert("You can only upload up to 10 files.");
+				return;
+			}
+
+			// Check the size of each file
+			for (let i = 0; i < fileInput.files.length; i++) {
+				if (fileInput.files[i].size > 20 * 1024 * 1024) {
+					// 20 MB
+					alert("Each file must be no larger than 20 MB.");
+					return;
+				}
+			}
+
 			const formData = new FormData(this); // Create a FormData instance from the form
 			const xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest instance
 
@@ -77,8 +100,11 @@
 						location.reload(); // Reload the page after a delay
 					}, 2000); // Delay in milliseconds (2000ms = 2 seconds)
 				} else {
-					// Handle error
-					alert("An error occurred during the upload.");
+					const errorMsg =
+						xhr.response && xhr.response.message
+							? xhr.response.message
+							: "An error occurred during the upload.";
+					alert(errorMsg);
 				}
 			};
 

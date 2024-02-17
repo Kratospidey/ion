@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
 		username: {
 			type: DataTypes.STRING,
 			allowNull: false,
+			unique: {
+				msg: "The username is already taken.",
+			},
 		},
 		password: {
 			type: DataTypes.STRING,

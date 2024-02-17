@@ -6,7 +6,7 @@ const multer = require("multer");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 const db = require("./models/index"); // Adjust the path according to your project structure
-const { User, Server, ServerUser } = db;
+const { Server, User, ServerUser } = require("./models"); // Adjust the path to your models directory
 
 const sequelize = new Sequelize(
 	process.env.DB_NAME,
@@ -190,6 +190,7 @@ app.get("/server/:serverId", authenticateToken, async (req, res) => {
 			members: server.Users,
 			showMembers: true,
 			currentServer: server,
+			serverCode: server.serverCode,
 		});
 	} catch (err) {
 		console.error("Error:", err);
@@ -225,6 +226,21 @@ app.post(
 			const server = await Server.findByPk(serverId);
 			if (!server) {
 				return res.status(404).send("Server not found.");
+			}
+
+			// Check the number of files already uploaded
+			if (server.filePaths && server.filePaths.length >= 10) {
+				return res
+					.status(400)
+					.json({ message: "You can only upload up to 10 files." });
+			}
+
+			// Check the size of the uploaded file
+			if (req.file.size > 20 * 1024 * 1024) {
+				// 20 MB
+				return res
+					.status(400)
+					.json({ message: "File cannot be larger than 20 MB." });
 			}
 
 			// Update the server's filePaths array
@@ -263,6 +279,7 @@ function authenticateToken(req, res, next) {
 	try {
 		const decoded = jwt.verify(token, SECRET_KEY);
 		req.user = decoded;
+		console.log(`auth token ${req.user.userId}`); // Debugging line
 		next();
 	} catch (ex) {
 		console.error("Token verification failed:", ex);
@@ -304,6 +321,169 @@ const validateFilePaths = async (filePaths, serverId) => {
 	return validFilePaths;
 };
 
+const userStorage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		const userDirectory = path.join(__dirname, "public/uploads/users");
+		fs.mkdirSync(userDirectory, { recursive: true });
+		cb(null, userDirectory);
+	},
+	filename: function (req, file, cb) {
+		const fileName = `${Date.now()}-${file.originalname}`;
+		cb(null, fileName);
+	},
+});
+
+const uploadUser = multer({ storage: userStorage });
+
+// Render the sign-up page
+app.get("/signup", (req, res) => {
+	res.render("signup");
+});
+
+// Handle sign-up form submission
+// Handle sign-up form submission
+// Handle sign-up form submission
+app.post("/signup", uploadUser.single("profilePicture"), async (req, res) => {
+	try {
+		const { username, email, password, confirmPassword } = req.body;
+
+		const lowerCaseUsername = username.toLowerCase();
+
+		// Validate input and passwords match
+		if (password !== confirmPassword) {
+			return res.status(400).send("Passwords do not match.");
+		}
+
+		// Hash the password
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		const userProfilePicturePath = req.file
+			? `/uploads/users/${req.file.filename}`
+			: null;
+
+		// Create the user
+		const user = await User.create({
+			username: lowerCaseUsername,
+			email,
+			password: hashedPassword,
+			profilePicture: userProfilePicturePath,
+		});
+
+		// Generate a token for the user
+		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+			expiresIn: "1d",
+		});
+
+		// Set the token as an HTTP-only cookie
+		res.cookie("token", token, { httpOnly: true });
+
+		// Redirect to the onboarding page after successful signup
+		res.redirect("/onboarding");
+	} catch (err) {
+		if (err.name === "SequelizeUniqueConstraintError") {
+			// Handle the unique constraint error
+			return res.status(409).send("Username or email already in use.");
+		}
+		// Log the error message without the stack trace
+		console.error("Error during sign-up:", err.message);
+		if (!res.headersSent) {
+			res.status(500).send("Internal server error.");
+		}
+	}
+});
+
+// Render the onboarding page
+app.get("/onboarding", authenticateToken, (req, res) => {
+	res.render("onboarding");
+});
+
+const serverStorage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		const serverProfilePicsDir = path.join(
+			__dirname,
+			"public/uploads/serverProfilePics"
+		);
+		fs.mkdirSync(serverProfilePicsDir, { recursive: true }); // Ensure the directory exists
+		cb(null, serverProfilePicsDir);
+	},
+	filename: function (req, file, cb) {
+		// Use the original file name, or you can create a custom file name using Date.now() or similar
+		cb(null, `${Date.now()}-${file.originalname}`);
+	},
+});
+
+const uploadServer = multer({ storage: serverStorage });
+
+// Handle creating a new server
+app.post(
+	"/create-server",
+	[authenticateToken, uploadServer.single("serverProfilePicture")],
+	async (req, res) => {
+		console.log(`trial ${req.user}`);
+		try {
+			const { serverName } = req.body; // From the form field names
+			let serverProfilePicturePath = null;
+
+			if (req.file) {
+				serverProfilePicturePath = `/uploads/serverProfilePics/${req.file.filename}`; // Corrected path
+			}
+
+			const server = await Server.create({
+				name: serverName,
+				profilePicture: serverProfilePicturePath,
+				filePaths: [],
+			});
+
+			console.log(req.user.userId);
+			// Add the current user to the server
+			await server.addUser(req.user.userId); // Assuming 'addUser' is a correct method from your associations
+
+			res.sendStatus(201); // Created
+		} catch (err) {
+			console.error("Error creating server:", err);
+			res.status(500).send("Internal server error.");
+		}
+	}
+);
+
+// Handle joining an existing server
+app.post("/join-server", authenticateToken, async (req, res) => {
+	try {
+		const { serverCode } = req.body;
+		// Find the server by its unique code
+		const server = await Server.findOne({ where: { serverCode } });
+
+		if (!server) {
+			return res.status(404).send("Server not found.");
+		}
+
+		// Retrieve the ServerUser model which is the join table between Server and User
+		const ServerUser = db.ServerUser; // Directly use the imported model
+
+		// Check if the user is already a member of the server to prevent duplicate entries
+		const existingMember = await ServerUser.findOne({
+			where: {
+				serverId: server.id,
+				userId: req.user.userId,
+			},
+		});
+
+		if (existingMember) {
+			return res.status(409).send("User is already a member of this server.");
+		}
+
+		// Add the current user to the server if not already a member
+		await ServerUser.create({
+			serverId: server.id,
+			userId: req.user.userId,
+		});
+
+		res.status(200).send("Successfully joined the server.");
+	} catch (err) {
+		console.error("Error joining server:", err);
+		res.status(500).send("Internal server error.");
+	}
+});
 
 // Start the server
 const PORT = process.env.PORT || 3000;

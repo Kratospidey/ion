@@ -1,0 +1,104 @@
+<!-- views/signup.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>Ion | Login Page</title>
+
+		<!-- Link to your stylesheet -->
+		<link rel="stylesheet" href="/styles.css" />
+		<script src="/script.js"></script>
+		<!-- Halfmoon CSS -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/halfmoon@2.0.1/css/halfmoon.min.css"
+			rel="stylesheet"
+			integrity="sha256-SsJizWSIG9JT9Qxbiy8xnYJfjCAkhEQ0hihxRn7jt2M="
+			crossorigin="anonymous"
+		/>
+		<link
+			href="https://cdn.jsdelivr.net/npm/halfmoon@2.0.1/css/cores/halfmoon.cores.css"
+			rel="stylesheet"
+			integrity="sha256-MAzAVJMU/ze52ZHcA8CeqRrCOVndMZlHwNeS2c73vP4="
+			crossorigin="anonymous"
+		/>
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="specific-w-300 signup">
+				<h2 class="display-3 text-white">Sign Up</h2>
+				<form id="signupForm" enctype="multipart/form-data" novalidate>
+					<div class="mb-3 text-white">
+						<label for="username" class="form-label">Username</label>
+						<input
+							type="text"
+							class="form-control text-white bg-transparent"
+							id="username"
+							maxlength="11"
+							required
+							autocomplete="new-password"
+						/>
+					</div>
+					<div class="mb-3 text-white">
+						<label for="email" class="form-label">Email</label>
+						<input
+							type="email"
+							class="form-control text-white bg-transparent"
+							id="email"
+							required
+							autocomplete="off"
+						/>
+					</div>
+					<div class="mb-3 text-white">
+						<label for="profilePicture" class="form-label"
+							>Profile Picture</label
+						>
+						<input
+							type="file"
+							class="form-control text-white bg-transparent"
+							id="profilePicture"
+							required
+						/>
+					</div>
+					<div class="mb-3 text-white">
+						<label for="password" class="form-label">Password</label>
+						<input
+							type="password"
+							class="form-control text-white bg-transparent"
+							id="password"
+							required
+							autocomplete="new-password"
+						/>
+					</div>
+					<div class="mb-3 text-white">
+						<label for="confirmPassword" class="form-label"
+							>Confirm Password</label
+						>
+						<input
+							type="password"
+							class="form-control text-white bg-transparent"
+							id="confirmPassword"
+							required
+							autocomplete="off"
+						/>
+					</div>
+					<button
+						type="submit"
+						class="btn btn-outline-light text-white"
+						style="min-width: 100%"
+					>
+						Sign Up
+					</button>
+					<br /><br />
+					<a href="/login" class="text-white"
+						>Already have an account? Login here.</a
+					>
+				</form>
+			</div>
+		</div>
+		<!-- JavaScript to handle form submission -->
+		<script src="/signupScript.js"></script>
+	</body>
+</html>

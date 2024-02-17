@@ -1,8 +1,27 @@
 <!-- views/partials/members.ejs -->
 <div class="members">
-    <p class="h4 mb-4" style="text-align: center; color: #a7c7e7">Users</p>
-    <% members.forEach(function(member) { %>
-      <p class="h6 text-white mb-4" style="text-align: center"><%= member.username %></p>
-    <% }); %>
-  </div>
-  
+	<p
+		class="h4 mb-4"
+		style="text-align: center; color: #a7c7e7; align-self: center"
+	>
+		Users
+	</p>
+	<% members.forEach(function(member) { %>
+	<div class="member-entry" style="margin-bottom: auto">
+		<img
+			src="<%= member.profilePicture %>"
+			alt="Profile Picture of <%= member.username %>"
+			class="member-pfp"
+		/>
+		<p class="h6 text-white mb-4" style="text-align: center">
+			<%= member.username %>
+		</p>
+	</div>
+	<% }); %> <% if (typeof serverCode !== 'undefined') { %>
+	<div class="server-code-display">
+		<p class="h6 text-white" style="text-align: center">
+			Server Code: <%= serverCode %>
+		</p>
+	</div>
+	<% } %>
+</div>
