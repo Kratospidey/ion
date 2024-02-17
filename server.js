@@ -100,7 +100,7 @@ app.post("/login", async (req, res) => {
 
 		// If the email and password are valid, generate a JWT and send it back to the client
 		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-			expiresIn: "60m",
+			expiresIn: "1d",
 		});
 		res.cookie("token", token, { httpOnly: true });
 		res.status(200).send("Logged in");
@@ -354,7 +354,7 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 
 			// Generate a token for the user
 			const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-				expiresIn: "60m",
+				expiresIn: "1d",
 			});
 			res.cookie("token", token, { httpOnly: true });
 
@@ -502,6 +502,7 @@ app.post(
 			res.status(200).json({
 				message: "Profile picture uploaded successfully",
 				profilePicture: publicUrl,
+				redirectUrl: "/home",
 			});
 		});
 
@@ -545,6 +546,52 @@ app.post(
 		blobStream.end(file.buffer);
 	}
 );
+
+app.post(
+	"/change-username",
+	authenticateToken,
+	upload.none(),
+	async (req, res) => {
+		const { newUsername } = req.body;
+		const userId = req.user.userId; // Ensure this is correctly obtained
+
+		try {
+			const [updatedRows] = await User.update(
+				{ username: newUsername },
+				{ where: { id: userId } }
+			);
+			if (updatedRows > 0) {
+				res.json({ message: "Username updated successfully." });
+			} else {
+				// No rows updated, user not found or username already taken
+				res.status(404).json({ error: "User not found or update failed." });
+			}
+		} catch (err) {
+			console.error("Error updating username:", err);
+			res.status(500).json({ error: "Internal server error" });
+		}
+	}
+);
+
+app.delete("/delete-account", authenticateToken, async (req, res) => {
+	const userId = req.user.userId;
+
+	try {
+		// First, remove the user from any servers they are a part of
+		await ServerUser.destroy({ where: { userId: userId } });
+
+		// Then, delete the user account
+		await User.destroy({ where: { id: userId } });
+
+		// Optionally, clear the user's session or token to log them out
+		res.cookie("token", "", { expires: new Date(0) });
+
+		res.send("Account and associated memberships deleted successfully.");
+	} catch (err) {
+		console.error("Error deleting account and associated memberships:", err);
+		res.status(500).send("Internal server error.");
+	}
+});
 
 app.get("/logout", (req, res) => {
 	// Clear the cookie named 'token'

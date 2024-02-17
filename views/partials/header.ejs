@@ -31,56 +31,44 @@
 			justify-content: end;
 		"
 	>
-		<!-- Create Server Button -->
+		<!-- plus button -->
 		<button
 			type="button"
-			class="btn btn-success"
+			class="btn"
+			id="plusbutton"
 			data-bs-toggle="modal"
-			data-bs-target="#createServerModal"
-			style="width: 100%; margin-bottom: 20px"
+			data-bs-target="#serverOptionsModal"
+			style="width: 100%; color: white; font-size: 20px"
 		>
-			Create Server
+			<i class="fa-solid fa-plus fa-2xl"></i>
 		</button>
 
-		<!-- Join Server Button -->
 		<button
 			type="button"
-			class="btn btn-primary"
+			class="btn"
+			id="settingsButton"
 			data-bs-toggle="modal"
-			data-bs-target="#joinServerModal"
-			style="width: 100%"
+			data-bs-target="#userSettingsModal"
+			style="width: 100%; color: white; font-size: 20px"
 		>
-			Join Server
+			<i class="fa-solid fa-gear fa-2xl"></i>
 		</button>
-		<<!-- Logout Button -->
-		<button id="logoutButton" class="btn btn-danger" style="width: 100%">
-			Logout
-		</button>
-
-		<script>
-			document
-				.getElementById("logoutButton")
-				.addEventListener("click", function () {
-					// Redirect to the logout route
-					window.location.href = "/logout";
-				});
-		</script>
 	</div>
 </div>
 <!-- End of the sidebar container -->
 
-<!-- Create Server Modal -->
+<!-- Server Options Modal -->
 <div
 	class="modal fade"
-	id="createServerModal"
+	id="serverOptionsModal"
 	tabindex="-1"
-	aria-labelledby="createServerModalLabel"
+	aria-labelledby="serverOptionsModalLabel"
 	aria-hidden="true"
 >
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="createServerModalLabel">Create Server</h5>
+				<h5 class="modal-title" id="serverOptionsModalLabel">Server Options</h5>
 				<button
 					type="button"
 					class="btn-close"
@@ -89,7 +77,9 @@
 				></button>
 			</div>
 			<div class="modal-body">
-				<!-- Create Server Form -->
+				<!-- Join Server Button inside the modal -->
+				<h3>Create a New Server!</h3>
+
 				<form id="createServerForm" enctype="multipart/form-data">
 					<div class="mb-3">
 						<label for="serverName" class="form-label">Server Name</label>
@@ -99,6 +89,7 @@
 							id="serverName"
 							name="serverName"
 							required
+							autocomplete="new-password"
 						/>
 					</div>
 					<div class="mb-3">
@@ -111,33 +102,12 @@
 						/>
 					</div>
 					<button type="submit" class="btn btn-primary">Create</button>
+					<br />
+					<br />
+					<br />
+					<h3>Join an Existing Server!</h3>
 				</form>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Join Server Modal -->
-<div
-	class="modal fade"
-	id="joinServerModal"
-	tabindex="-1"
-	aria-labelledby="joinServerModalLabel"
-	aria-hidden="true"
->
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="joinServerModalLabel">Join Server</h5>
-				<button
-					type="button"
-					class="btn-close"
-					data-bs-dismiss="modal"
-					aria-label="Close"
-				></button>
-			</div>
-			<div class="modal-body">
-				<!-- Join Server Form -->
+				<!-- Create Server Button inside the modal -->
 				<form id="joinServerForm">
 					<div class="mb-3">
 						<label for="serverCode" class="form-label">Server Code</label>
@@ -147,6 +117,7 @@
 							id="serverCode"
 							name="serverCode"
 							required
+							autocomplete="new-password"
 						/>
 					</div>
 					<button type="submit" class="btn btn-primary">Join</button>
@@ -156,4 +127,207 @@
 	</div>
 </div>
 
+<!-- User Settings Modal -->
+<div
+	class="modal fade"
+	id="userSettingsModal"
+	tabindex="-1"
+	aria-labelledby="userSettingsModalLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="userSettingsModalLabel">User Settings</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
+			</div>
+			<div class="modal-body">
+				<!-- Change Username Form -->
+				<form id="changeUsernameForm">
+					<div class="mb-3">
+						<label for="newUsername" class="form-label">New Username</label>
+						<input
+							type="text"
+							class="form-control"
+							id="newUsername"
+							name="newUsername"
+							required
+							autocomplete="new-password"
+						/>
+					</div>
+					<button type="submit" class="btn btn-primary">Change Username</button>
+				</form>
+
+				<hr />
+				<!-- Horizontal Line -->
+				<!-- Change Profile Picture Form -->
+				<form
+					id="changePFPForm"
+					action="/upload-user-profile"
+					method="POST"
+					enctype="multipart/form-data"
+				>
+					<div class="mb-3">
+						<label for="profilePicture" class="form-label"
+							>New Profile Picture</label
+						>
+						<input
+							type="file"
+							class="form-control"
+							id="profilePicture"
+							name="profilePicture"
+							required
+						/>
+					</div>
+					<button type="submit" class="btn btn-primary">Change PFP</button>
+				</form>
+
+				<hr />
+				<!-- Horizontal Line -->
+				<!-- Logout Button -->
+				<button id="logoutButton" class="btn btn-danger" style="width: 100%">
+					Logout
+				</button>
+				<br />
+				<!-- Horizontal Line -->
+				<!-- Delete Account Button -->
+				<button
+					id="deleteAccountButton"
+					class="btn btn-warning"
+					style="width: 100%; margin-top: 10px"
+				>
+					Delete Account
+				</button>
+				<hr>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script src="/onboardingScript.js"></script>
+
+<script defer>
+	window.addEventListener("DOMContentLoaded", (event) => {
+		const changeUsernameForm = document.getElementById("changeUsernameForm");
+
+		if (!changeUsernameForm) {
+			console.error("Change username form not found");
+			return;
+		}
+
+		changeUsernameForm.addEventListener("submit", async (event) => {
+			event.preventDefault(); // Prevent the default form submission
+			console.log("Handling change username form submission");
+
+			const formData = new FormData(changeUsernameForm);
+
+			for (let [key, value] of formData.entries()) {
+				console.log(key, value);
+			}
+
+			try {
+				const response = await fetch("/change-username", {
+					method: "POST",
+					body: formData,
+					credentials: "include", // Include cookies for session management
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					alert(result.message || "Username changed successfully");
+					// Optionally, redirect or update UI here
+				} else {
+					throw new Error("Failed to change username");
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert(error.message || "Error changing username");
+			}
+		});
+	});
+	document
+		.getElementById("logoutButton")
+		.addEventListener("click", function () {
+			// Redirect to the logout route
+			window.location.href = "/logout";
+		});
+</script>
+<script defer>
+	// Target the form for uploading the user profile picture
+	const changePFPForm = document.getElementById("changePFPForm");
+
+	if (!changePFPForm) {
+		console.error("Upload profile picture form not found");
+		// Do not return anything here
+	} else {
+		changePFPForm.addEventListener("submit", async (event) => {
+			event.preventDefault(); // Prevent the default form submission
+			console.log("Handling upload profile picture form submission");
+
+			const formData = new FormData(changePFPForm);
+
+			for (let [key, value] of formData.entries()) {
+				console.log(key, value);
+			}
+
+			try {
+				const response = await fetch("/upload-user-profile", {
+					method: "POST",
+					body: formData,
+					credentials: "include", // Include cookies for session management
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					alert(result.message || "Profile picture uploaded successfully");
+					// Redirect to the home page if a redirectUrl is provided
+					if (result.redirectUrl) {
+						window.location.href = result.redirectUrl;
+					}
+				} else {
+					throw new Error("Failed to upload profile picture");
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert(error.message || "Error uploading profile picture");
+			}
+		});
+	}
+</script>
+<script defer>
+	window.addEventListener("DOMContentLoaded", (event) => {
+		console.log("DOM fully loaded and parsed");
+
+		const deleteAccountButton = document.getElementById("deleteAccountButton");
+
+		if (!deleteAccountButton) {
+			console.error("Delete account button not found");
+			return;
+		}
+
+		deleteAccountButton.addEventListener("click", async () => {
+			try {
+				const response = await fetch("/delete-account", {
+					method: "DELETE",
+					credentials: "include", // Include cookies for session management
+				});
+
+				if (response.ok) {
+					alert("Account deleted successfully. You will be logged out.");
+					// Optionally, redirect to the login page or home page
+					window.location.href = "/login"; // or "/home" if you have a home page
+				} else {
+					throw new Error("Failed to delete account");
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert(error.message || "Error deleting account");
+			}
+		});
+	});
+</script>

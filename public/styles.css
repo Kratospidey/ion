@@ -131,7 +131,7 @@ input[type="text"] {
 	align-items: center;
 	justify-content: flex-start;
 	overflow-y: auto; /* Enable vertical scrolling */
-	gap: 5px;
+	gap: 40px;
 	padding: 20px;
 	width: 100px;
 }
