@@ -1,6 +1,11 @@
 <div class="servers">
 	<% servers.forEach(function(server) { %>
-	<a href="/server/<%= server.id %>">
+	<a
+		href="/server/<%= server.id %>"
+		data-bs-toggle="tooltip"
+		data-bs-placement="right"
+		data-bs-title="<%= server.name%>"
+	>
 		<img
 			class="server-avatar"
 			src="<%= server.profilePicture %>"
