@@ -2,26 +2,30 @@ const db = require("../models"); // Import your Sequelize models
 
 // Function to drop all tables considering dependencies
 async function dropAllTablesConsideringDependencies() {
-	// Drop tables with dependencies first
-	const dependentModels = [db.ServerUser]; // Assuming ServerUser depends on User and Server
-	for (const model of dependentModels) {
-		await model.drop();
-		console.log(`Table ${model.name} dropped (with dependencies).`);
-	}
+    try {
+        // Drop tables with dependencies first
+        if (db.ServerUser) {
+            await db.ServerUser.drop();
+            console.log("Table ServerUser dropped.");
+        }
 
-	// Now drop the independent tables
-	const independentModels = [db.User, db.Server]; // Assuming these have no dependencies or are the base tables
-	for (const model of independentModels) {
-		await model.drop();
-		console.log(`Table ${model.name} dropped.`);
-	}
+        // Drop the Server table next, as it has a foreign key dependency on User
+        if (db.Server) {
+            await db.Server.drop();
+            console.log("Table Server dropped.");
+        }
+
+        // Finally, drop the User table
+        if (db.User) {
+            await db.User.drop();
+            console.log("Table User dropped.");
+        }
+
+        console.log("All tables dropped successfully considering dependencies.");
+    } catch (error) {
+        console.error("Error dropping tables considering dependencies:", error);
+    }
 }
 
 // Execute the drop script
-dropAllTablesConsideringDependencies()
-	.then(() => {
-		console.log("All tables dropped successfully considering dependencies.");
-	})
-	.catch((error) => {
-		console.error("Error dropping tables considering dependencies:", error);
-	});
+dropAllTablesConsideringDependencies();

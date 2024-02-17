@@ -413,6 +413,7 @@ app.post(
 					name: serverName,
 					profilePicture: publicUrl,
 					filePaths: [],
+					ownerId: userId, // Set ownerId to the userId extracted from the JWT token
 				});
 
 				// Add the current user to the server as a member
@@ -590,6 +591,198 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 	} catch (err) {
 		console.error("Error deleting account and associated memberships:", err);
 		res.status(500).send("Internal server error.");
+	}
+});
+
+app.get("/api/is-creator/:serverId", authenticateToken, async (req, res) => {
+	const userId = req.user.userId;
+	const serverId = req.params.serverId;
+
+	try {
+		const server = await Server.findOne({ where: { id: serverId } });
+		if (!server) {
+			return res.status(404).send("Server not found.");
+		}
+
+		const isCreator = server.ownerId === userId;
+		res.status(200).json({ isCreator: isCreator });
+	} catch (err) {
+		console.error("Error checking if user is server creator:", err);
+		res.status(500).send("Internal server error.");
+	}
+});
+
+app.post(
+	"/change-server-name",
+	authenticateToken,
+	upload.none(),
+	async (req, res) => {
+		console.log(req.body); // Check what's being received in the request body
+
+		const { newServerName, serverId } = req.body;
+		try {
+			// Additional validation can be added here (e.g., check newServerName length)
+
+			// Update server name in the database
+			const result = await Server.update(
+				{ name: newServerName },
+				{ where: { id: serverId, ownerId: req.user.userId } } // Ensure the requester is the owner
+			);
+
+			if (result[0] > 0) {
+				// Check how many rows were affected
+				res.json({ message: "Server name updated successfully." });
+			} else {
+				res
+					.status(404)
+					.json({ message: "Server not found or you're not the owner." });
+			}
+		} catch (error) {
+			console.error("Failed to change server name:", error);
+			res.status(500).json({ message: "Internal server error." });
+		}
+	}
+);
+
+// Assuming you have express router setup
+app.post("/remove-member", authenticateToken, async (req, res) => {
+	const { serverId, memberToRemove } = req.body;
+	const userId = req.user.userId; // ID of the user making the request
+
+	try {
+		const server = await Server.findByPk(serverId, {
+			include: ["owner"], // Assuming you have set up an 'owner' association in your model
+		});
+
+		if (!server) {
+			return res.status(404).json({ message: "Server not found." });
+		}
+
+		console.log(`Server owner ID: ${server.ownerId}`);
+		console.log(`Requesting user ID: ${userId}`);
+		console.log(`Member to remove ID: ${memberToRemove}`);
+
+		// Check if the member being removed is the server owner
+		if (parseInt(memberToRemove) === server.ownerId) {
+			return res
+				.status(403)
+				.json({ message: "Cannot remove the server creator." });
+		}
+
+		// Remove the member from the server
+		const result = await ServerUser.destroy({
+			where: {
+				serverId: serverId,
+				userId: memberToRemove,
+			},
+		});
+
+		if (result > 0) {
+			res.json({ message: "Member removed successfully." });
+		} else {
+			res
+				.status(404)
+				.json({ message: "Member not found or not a part of the server." });
+		}
+	} catch (error) {
+		console.error("Error removing member:", error);
+		res.status(500).json({ message: "Internal server error." });
+	}
+});
+
+// Server-Side: Get all members of a server
+app.get(
+	"/api/server/:serverId/members",
+	authenticateToken,
+	async (req, res) => {
+		const { serverId } = req.params;
+
+		try {
+			// Find the server and check if the requester is a member
+			const server = await Server.findByPk(serverId, {
+				include: [
+					{
+						model: User,
+						as: "Users", // Use the alias you defined in your associations
+						attributes: ["id", "username"], // Only send necessary attributes
+						through: { attributes: [] }, // Do not send join table attributes
+					},
+				],
+			});
+
+			if (!server) {
+				return res.status(404).json({ message: "Server not found." });
+			}
+
+			// Check if the requester is a member of the server
+			const isMember = server.Users.some((user) => user.id === req.user.userId);
+			if (!isMember) {
+				return res
+					.status(403)
+					.json({ message: "You are not a member of this server." });
+			}
+
+			// Send the member list, excluding the server creator (owner)
+			const members = server.Users.filter((user) => user.id !== server.ownerId);
+			res.json(members);
+		} catch (error) {
+			console.error("Error fetching server members:", error);
+			res.status(500).json({ message: "Internal server error." });
+		}
+	}
+);
+
+app.delete("/delete-server/:serverId", authenticateToken, async (req, res) => {
+	const serverId = req.params.serverId; // Extract serverId from the URL
+	const userId = req.user.userId; // ID of the user making the request
+
+	try {
+		// Fetch the server to check if the current user is the owner
+		const server = await Server.findByPk(serverId);
+		if (!server) {
+			return res.status(404).json({ message: "Server not found." });
+		}
+
+		// Check if the requesting user is the server owner
+		if (server.ownerId !== userId) {
+			return res
+				.status(403)
+				.json({ message: "You do not have permission to delete this server." });
+		}
+
+		// First, delete any ServerUser entries
+		await ServerUser.destroy({
+			where: { serverId: serverId },
+		});
+
+		// Then, delete the server itself
+		await server.destroy();
+
+		res.json({ message: "Server deleted successfully.", redirectUrl: "/home" });
+	} catch (error) {
+		console.error("Error deleting server:", error);
+		res.status(500).json({ message: "Internal server error." });
+	}
+});
+
+app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
+	const { serverId } = req.params; // Extract serverId from the URL
+
+	try {
+		const server = await Server.findByPk(serverId, {
+			attributes: ["name"], // Only fetch the 'name' field
+		});
+
+		if (server) {
+			// Server found, send back the name
+			res.json({ name: server.name });
+		} else {
+			// Server not found
+			res.status(404).json({ message: "Server not found." });
+		}
+	} catch (error) {
+		console.error("Error fetching server name:", error);
+		res.status(500).json({ message: "Internal server error." });
 	}
 });
 

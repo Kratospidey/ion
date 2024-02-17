@@ -203,7 +203,80 @@
 				>
 					Delete Account
 				</button>
-				<hr>
+				<hr />
+				<!-- Server Creator Message -->
+				<div id="serverCreatorMessage" style="display: none">
+					<h3>Server Settings</h3>
+					<p>
+						You need to be the creator of the server to modify these settings.
+					</p>
+				</div>
+				<div id="serverSettingsSection" style="display: none">
+					<h3>Server Settings</h3>
+					<!-- Change Server Profile Picture Form -->
+					<form id="changeServerPFPForm" enctype="multipart/form-data">
+						<input type="hidden" id="serverIdInput" name="serverId" />
+						<div class="mb-3">
+							<label for="serverPFP" class="form-label"
+								>New Server Profile Picture</label
+							>
+							<input
+								type="file"
+								class="form-control"
+								id="serverPFP"
+								name="serverProfilePicture"
+								required
+							/>
+						</div>
+						<button type="submit" class="btn btn-primary">
+							Change Server PFP
+						</button>
+						<hr />
+					</form>
+
+					<!-- Change Server Name Form -->
+					<form id="changeServerNameForm">
+						<div class="mb-3">
+							<label for="newServerName" class="form-label"
+								>New Server Name</label
+							>
+							<input
+								type="text"
+								class="form-control"
+								id="newServerName"
+								name="newServerName"
+								required
+							/>
+						</div>
+						<button type="submit" class="btn btn-primary">
+							Change Server Name
+						</button>
+					</form>
+					<hr />
+					<!-- Remove Member Form -->
+					<form id="removeMemberForm">
+						<div class="mb-3">
+							<label for="memberToRemove" class="form-label"
+								>Select Member to Remove</label
+							>
+							<select
+								class="form-select"
+								id="memberToRemove"
+								name="memberToRemove"
+								required
+							>
+								<!-- Options will be populated dynamically based on server members -->
+							</select>
+						</div>
+						<button type="submit" class="btn btn-warning">Remove Member</button>
+					</form>
+					<hr />
+
+					<!-- Delete Server Form -->
+					<form id="deleteServerForm">
+						<button type="submit" class="btn btn-danger">Delete Server</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -301,8 +374,6 @@
 </script>
 <script defer>
 	window.addEventListener("DOMContentLoaded", (event) => {
-		console.log("DOM fully loaded and parsed");
-
 		const deleteAccountButton = document.getElementById("deleteAccountButton");
 
 		if (!deleteAccountButton) {
@@ -329,5 +400,255 @@
 				alert(error.message || "Error deleting account");
 			}
 		});
+	});
+</script>
+
+<script defer>
+	function getServerIdFromUrl() {
+		const path = window.location.pathname; // Gets the path part of the URL
+		const match = path.match(/\/server\/(\d+)/); // Regular expression to match the /server/{id} pattern
+
+		if (match && match[1]) {
+			return match[1]; // Return the first capturing group (the server ID)
+		} else {
+			return null; // Return null if the pattern is not found
+		}
+	}
+
+	window.addEventListener("DOMContentLoaded", (event) => {
+		// Change Server Profile Picture Form
+		const changeServerPFPForm = document.getElementById("changeServerPFPForm");
+		changeServerPFPForm.addEventListener("submit", async (event) => {
+			event.preventDefault(); // Prevent default form submission
+
+			const formData = new FormData(changeServerPFPForm);
+			formData.append("serverId", getServerIdFromUrl()); // Assuming you have a function to extract the server ID from the URL
+
+			try {
+				const response = await fetch("/upload-server-profile", {
+					method: "POST",
+					body: formData,
+					credentials: "include", // Include cookies for session management
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					alert("Server profile picture changed successfully");
+				} else {
+					throw new Error("Failed to change server profile picture");
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert("Error changing server profile picture");
+			}
+		});
+
+		// Change Server Name Form
+		const changeServerNameForm = document.getElementById(
+			"changeServerNameForm"
+		);
+		if (changeServerNameForm) {
+			changeServerNameForm.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				console.log("Handling change server name form submission");
+				const formData = new FormData(changeServerNameForm);
+				const serverId = getServerIdFromUrl();
+				formData.append("serverId", serverId); // Add serverId to formData
+
+				console.log("form data for server name now");
+				for (let [key, value] of formData.entries()) {
+					console.log(key, value);
+				}
+				try {
+					const response = await fetch("/change-server-name", {
+						method: "POST",
+						body: formData,
+						credentials: "include",
+					});
+					if (response.ok) {
+						const result = await response.json();
+						alert(result.message || "Server name changed successfully");
+					} else {
+						throw new Error("Failed to change server name");
+					}
+				} catch (error) {
+					console.error("Error:", error);
+					alert(error.message || "Error changing server name");
+				}
+			});
+		}
+
+		// Delete Server Form
+		// Delete Server Form
+		const deleteServerForm = document.getElementById("deleteServerForm");
+		if (deleteServerForm) {
+			deleteServerForm.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				console.log("Handling delete server form submission");
+
+				const serverId = getServerIdFromUrl(); // Use the existing function to get the server ID
+
+				try {
+					const response = await fetch(`/delete-server/${serverId}`, {
+						method: "DELETE",
+						credentials: "include",
+					});
+
+					if (response.ok) {
+						const result = await response.json();
+						alert(result.message || "Server deleted successfully");
+						window.location.href = result.redirectUrl || "/home"; // Redirect to the provided URL or home
+					} else {
+						throw new Error("Failed to delete server");
+					}
+				} catch (error) {
+					console.error("Error:", error);
+					alert(error.message || "Error deleting server");
+				}
+			});
+		}
+
+		// Remove Member Form
+		const removeMemberForm = document.getElementById("removeMemberForm");
+		const memberToRemoveSelect = document.getElementById("memberToRemove");
+
+		// Function to fetch server members and populate the dropdown
+		async function populateMemberDropdown(serverId) {
+			const response = await fetch(`/api/server/${serverId}/members`);
+			const members = await response.json();
+			// Clear existing options
+			memberToRemoveSelect.innerHTML = "";
+			// Populate the dropdown with new options
+			members.forEach((member) => {
+				// Assuming you have the member's ID and username
+				if (member.id !== member.ownerId) {
+					// Ensure ownerId is being sent in the API response
+					// Don't add the server creator
+					const option = document.createElement("option");
+					option.value = member.id;
+					option.textContent = member.username;
+					memberToRemoveSelect.appendChild(option);
+				}
+			});
+		}
+
+		// Call this function when the modal is opened or when you need to populate the dropdown
+		populateMemberDropdown(getServerIdFromUrl());
+
+		if (removeMemberForm) {
+			removeMemberForm.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				console.log("Handling remove member form submission");
+
+				const serverId = getServerIdFromUrl();
+				const memberToRemove = memberToRemoveSelect.value;
+
+				const data = {
+					serverId: serverId,
+					memberToRemove: memberToRemove,
+				};
+
+				try {
+					const response = await fetch("/remove-member", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							// Include other headers as needed
+						},
+						body: JSON.stringify(data),
+						credentials: "include",
+					});
+
+					if (response.ok) {
+						const result = await response.json();
+						alert(result.message || "Member removed successfully");
+						// Optionally, refresh the member list or update the UI
+					} else {
+						const errorText = await response.text();
+						throw new Error(errorText || "Failed to remove member");
+					}
+				} catch (error) {
+					console.error("Error:", error);
+					alert(error.message || "Error removing member");
+				}
+			});
+		}
+	});
+</script>
+
+<script defer>
+	async function checkIfCurrentUserIsServerCreator(serverId) {
+		try {
+			const response = await fetch(`/api/is-creator/${serverId}`, {
+				method: "GET",
+				credentials: "include", // to include cookies with the request
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				return data.isCreator;
+			} else {
+				console.error(
+					"Failed to check if user is server creator",
+					response.status
+				);
+				return false; // Assuming false if the request fails
+			}
+		} catch (error) {
+			console.error("Error checking if user is server creator", error);
+			return false;
+		}
+	}
+
+	window.addEventListener("DOMContentLoaded", async (event) => {
+		// Elements from the DOM
+		const userSettingsModal = document.getElementById("userSettingsModal");
+		const serverSettingsSection = document.getElementById(
+			"serverSettingsSection"
+		);
+		const serverSettingsTitle = serverSettingsSection.querySelector("h3"); // Get the <h3> element inside serverSettingsSection
+		const serverCreatorMessage = document.getElementById(
+			"serverCreatorMessage"
+		);
+		const serverCreatorMessageTitle = serverCreatorMessage.querySelector("h3"); // Get the <h3> element inside serverCreatorMessage
+
+		// Helper function to extract the server ID from the URL
+		function getServerIdFromUrl() {
+			const urlPath = window.location.pathname;
+			const serverIdMatch = urlPath.match(/\/server\/(\d+)/);
+			return serverIdMatch ? serverIdMatch[1] : null;
+		}
+
+		// Function to fetch the server name based on the server ID
+		async function fetchServerName(serverId) {
+			// Placeholder for API call to fetch server name
+			// Replace with your actual API call
+			const response = await fetch(`/api/server/${serverId}/name`);
+			const data = await response.json();
+			return data.name;
+		}
+
+		// Main logic to show/hide sections and set titles based on the server ID and user role
+		const serverId = getServerIdFromUrl();
+		if (serverId) {
+			// Fetch the server name and update the <h3> elements
+			const serverName = await fetchServerName(serverId);
+			serverSettingsTitle.textContent = `Settings for ${serverName}`;
+			serverCreatorMessageTitle.textContent = `Settings for ${serverName}`;
+
+			// Determine if the current user is the creator of the server
+			const isCreator = await checkIfCurrentUserIsServerCreator(serverId); // Assuming this function is defined elsewhere in your code
+			if (isCreator) {
+				serverSettingsSection.style.display = "block";
+				serverCreatorMessage.style.display = "none";
+			} else {
+				serverSettingsSection.style.display = "none";
+				serverCreatorMessage.style.display = "block";
+			}
+		} else {
+			// We're not on a server page, hide both sections
+			serverSettingsSection.style.display = "none";
+			serverCreatorMessage.style.display = "none";
+		}
 	});
 </script>

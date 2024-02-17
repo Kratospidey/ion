@@ -21,12 +21,26 @@ module.exports = (sequelize, DataTypes) => {
 			unique: true,
 			defaultValue: () => nanoid(6), // Synchronously generate the code
 		},
+		ownerId: {
+			// Add this field to represent the server owner
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			references: {
+				model: "Users", // This is a reference to another model
+				key: "id", // This is the column name of the referenced model
+			},
+		},
 	});
 
 	Server.associate = function (models) {
 		Server.belongsToMany(models.User, {
 			through: models.ServerUser,
 			foreignKey: "serverId",
+		});
+		Server.belongsTo(models.User, {
+			// Add this association to represent the owner
+			foreignKey: "ownerId",
+			as: "owner",
 		});
 	};
 
