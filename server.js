@@ -40,24 +40,6 @@ sequelize
 const fs = require("fs");
 const path = require("path");
 
-// server.js
-const storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		// Extract the server ID from the request body
-		const serverId = req.body.serverId;
-		// Create a subdirectory for the server
-		const serverDirectory = path.join(__dirname, "public/uploads", serverId);
-		// Ensure the directory exists
-		fs.mkdirSync(serverDirectory, { recursive: true });
-		cb(null, serverDirectory);
-	},
-	filename: function (req, file, cb) {
-		// Generate a unique filename based on the current timestamp and the original file name
-		const fileName = `${file.originalname}`;
-		cb(null, fileName);
-	},
-});
-
 // const upload = multer({ storage: storage });
 
 const bcrypt = require("bcrypt"); // For hashing passwords
@@ -290,13 +272,6 @@ app.post(
 	}
 );
 
-// server.js
-app.get("/server/:serverId/files/:filename", (req, res) => {
-	const serverId = req.params.serverId;
-	const filename = req.params.filename;
-	res.sendFile(path.join(__dirname, "public/uploads", serverId, filename));
-});
-
 // Middleware to verify JWT
 function authenticateToken(req, res, next) {
 	const token = req.cookies.token;
@@ -328,40 +303,6 @@ function authenticateToken(req, res, next) {
 		}
 	}
 }
-
-const validateFilePaths = async (filePaths, serverId) => {
-	const validFilePaths = [];
-
-	for (const filePath of filePaths) {
-		const fullPath = path.join(
-			__dirname,
-			"public/uploads",
-			serverId.toString(),
-			filePath.split("/").pop()
-		);
-
-		if (fs.existsSync(fullPath)) {
-			// Synchronously checks for the existence of a file
-			validFilePaths.push(filePath);
-		}
-	}
-
-	return validFilePaths;
-};
-
-const userStorage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		const userDirectory = path.join(__dirname, "public/uploads/users");
-		fs.mkdirSync(userDirectory, { recursive: true });
-		cb(null, userDirectory);
-	},
-	filename: function (req, file, cb) {
-		const fileName = `${Date.now()}-${file.originalname}`;
-		cb(null, fileName);
-	},
-});
-
-const uploadUser = multer({ storage: userStorage });
 
 // Render the sign-up page
 app.get("/signup", (req, res) => {
@@ -441,23 +382,6 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 app.get("/onboarding", authenticateToken, (req, res) => {
 	res.render("onboarding");
 });
-
-const serverStorage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		const serverProfilePicsDir = path.join(
-			__dirname,
-			"public/uploads/serverProfilePics"
-		);
-		fs.mkdirSync(serverProfilePicsDir, { recursive: true }); // Ensure the directory exists
-		cb(null, serverProfilePicsDir);
-	},
-	filename: function (req, file, cb) {
-		// Use the original file name, or you can create a custom file name using Date.now() or similar
-		cb(null, `${Date.now()}-${file.originalname}`);
-	},
-});
-
-const uploadServer = multer({ storage: serverStorage });
 
 // Handle creating a new server
 // Handle creating a new server with mandatory server profile picture
