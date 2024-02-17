@@ -1,21 +1,36 @@
-<div class="servers">
-	<% servers.forEach(function(server) { %>
-	<a
-		href="/server/<%= server.id %>"
-		data-bs-toggle="tooltip"
-		data-bs-placement="right"
-		data-bs-title="<%= server.name%>"
-	>
-		<img
-			class="server-avatar"
-			src="<%= server.profilePicture %>"
-			alt="PFP of <%= server.name %>"
-		/>
-	</a>
-	<% }); %>
+<!-- Start of the sidebar container -->
+<div
+	class="sidebar-container"
+	style="display: flex; flex-direction: column; height: 97%"
+>
+	<!-- Container for servers, taking up 66% of the height -->
+	<div class="servers" style="flex-grow: 2; overflow-y: auto">
+		<% servers.forEach(function(server) { %>
+		<a
+			href="/server/<%= server.id %>"
+			data-bs-toggle="tooltip"
+			data-bs-placement="right"
+			data-bs-title="<%= server.name%>"
+		>
+			<img
+				class="server-avatar"
+				src="<%= server.profilePicture %>"
+				alt="PFP of <%= server.name %>"
+			/>
+		</a>
+		<% }); %>
+	</div>
 
-	<!-- Server Buttons -->
-	<div class="server-buttons">
+	<!-- Container for buttons, taking up the remaining space -->
+	<div
+		class="server-buttons"
+		style="
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: end;
+		"
+	>
 		<!-- Create Server Button -->
 		<button
 			type="button"
@@ -37,93 +52,108 @@
 		>
 			Join Server
 		</button>
-	</div>
+		<<!-- Logout Button -->
+		<button id="logoutButton" class="btn btn-danger" style="width: 100%">
+			Logout
+		</button>
 
-	<!-- Create Server Modal -->
-	<div
-		class="modal fade"
-		id="createServerModal"
-		tabindex="-1"
-		aria-labelledby="createServerModalLabel"
-		aria-hidden="true"
-	>
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="createServerModalLabel">Create Server</h5>
-					<button
-						type="button"
-						class="btn-close"
-						data-bs-dismiss="modal"
-						aria-label="Close"
-					></button>
-				</div>
-				<div class="modal-body">
-					<!-- Create Server Form -->
-					<form id="createServerForm" enctype="multipart/form-data">
-						<div class="mb-3">
-							<label for="serverName" class="form-label">Server Name</label>
-							<input
-								type="text"
-								class="form-control"
-								id="serverName"
-								name="serverName"
-								required
-							/>
-						</div>
-						<div class="mb-3">
-							<label for="serverImage" class="form-label">Server Image</label>
-							<input
-								type="file"
-								class="form-control"
-								id="serverImage"
-								name="serverProfilePicture"
-							/>
-						</div>
-						<button type="submit" class="btn btn-primary">Create</button>
-					</form>
-				</div>
+		<script>
+			document
+				.getElementById("logoutButton")
+				.addEventListener("click", function () {
+					// Redirect to the logout route
+					window.location.href = "/logout";
+				});
+		</script>
+	</div>
+</div>
+<!-- End of the sidebar container -->
+
+<!-- Create Server Modal -->
+<div
+	class="modal fade"
+	id="createServerModal"
+	tabindex="-1"
+	aria-labelledby="createServerModalLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="createServerModalLabel">Create Server</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
 			</div>
-		</div>
-	</div>
-
-	<!-- Join Server Modal -->
-	<div
-		class="modal fade"
-		id="joinServerModal"
-		tabindex="-1"
-		aria-labelledby="joinServerModalLabel"
-		aria-hidden="true"
-	>
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="joinServerModalLabel">Join Server</h5>
-					<button
-						type="button"
-						class="btn-close"
-						data-bs-dismiss="modal"
-						aria-label="Close"
-					></button>
-				</div>
-				<div class="modal-body">
-					<!-- Join Server Form -->
-					<form id="joinServerForm">
-						<div class="mb-3">
-							<label for="serverCode" class="form-label">Server Code</label>
-							<input
-								type="text"
-								class="form-control"
-								id="serverCode"
-								name="serverCode"
-								required
-							/>
-						</div>
-						<button type="submit" class="btn btn-primary">Join</button>
-					</form>
-				</div>
+			<div class="modal-body">
+				<!-- Create Server Form -->
+				<form id="createServerForm" enctype="multipart/form-data">
+					<div class="mb-3">
+						<label for="serverName" class="form-label">Server Name</label>
+						<input
+							type="text"
+							class="form-control"
+							id="serverName"
+							name="serverName"
+							required
+						/>
+					</div>
+					<div class="mb-3">
+						<label for="serverImage" class="form-label">Server Image</label>
+						<input
+							type="file"
+							class="form-control"
+							id="serverImage"
+							name="serverProfilePicture"
+						/>
+					</div>
+					<button type="submit" class="btn btn-primary">Create</button>
+				</form>
 			</div>
 		</div>
 	</div>
 </div>
+
+<!-- Join Server Modal -->
+<div
+	class="modal fade"
+	id="joinServerModal"
+	tabindex="-1"
+	aria-labelledby="joinServerModalLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="joinServerModalLabel">Join Server</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
+			</div>
+			<div class="modal-body">
+				<!-- Join Server Form -->
+				<form id="joinServerForm">
+					<div class="mb-3">
+						<label for="serverCode" class="form-label">Server Code</label>
+						<input
+							type="text"
+							class="form-control"
+							id="serverCode"
+							name="serverCode"
+							required
+						/>
+					</div>
+					<button type="submit" class="btn btn-primary">Join</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script src="/onboardingScript.js"></script>

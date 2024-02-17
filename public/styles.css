@@ -100,9 +100,10 @@ input[type="text"] {
 	width: 240px;
 }
 
-.servers {
+.servers,
+.sidebar {
 	background-color: #1e1e1e;
-	height: 97%;
+
 	width: 100px;
 	border-radius: 14px;
 	display: flex;
@@ -112,6 +113,27 @@ input[type="text"] {
 	overflow-y: auto; /* Enable vertical scrolling */
 	gap: 40px;
 	padding: 10px;
+}
+
+.sidebar {
+	height: 97%;
+}
+
+.servers {
+	height: 60%;
+	margin-bottom: 20px;
+}
+
+.server-buttons {
+	background-color: #1e1e1e;
+	border-radius: 14px;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	overflow-y: auto; /* Enable vertical scrolling */
+	gap: 5px;
+	padding: 20px;
+	width: 100px;
 }
 
 .server-avatar {

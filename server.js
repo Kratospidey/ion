@@ -546,6 +546,12 @@ app.post(
 	}
 );
 
+app.get("/logout", (req, res) => {
+	// Clear the cookie named 'token'
+	res.cookie("token", "", { expires: new Date(0) });
+	res.redirect("/login"); // Redirect user to the login page
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
