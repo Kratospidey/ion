@@ -2,11 +2,24 @@ require("dotenv").config(); // Load environment variables from .env file
 const express = require("express");
 const cookieParser = require("cookie-parser"); // Import cookie-parser
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 const db = require("./models/index"); // Adjust the path according to your project structure
 const { Server, User, ServerUser } = require("./models"); // Adjust the path to your models directory
+
+// gdrive conf
+const { Storage } = require("@google-cloud/storage");
+const multer = require("multer");
+
+// Set up multer to store files in memory
+const upload = multer({
+	storage: multer.memoryStorage(),
+});
+
+// Use the environment variable for the bucket name
+const googleStorage = new Storage();
+const bucketName = process.env.GCS_BUCKET_NAME; // Ensure you have this variable in your .env file
+const bucket = googleStorage.bucket(bucketName);
 
 const sequelize = new Sequelize(
 	process.env.DB_NAME,
@@ -45,7 +58,7 @@ const storage = multer.diskStorage({
 	},
 });
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 const bcrypt = require("bcrypt"); // For hashing passwords
 
@@ -105,7 +118,7 @@ app.post("/login", async (req, res) => {
 
 		// If the email and password are valid, generate a JWT and send it back to the client
 		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-			expiresIn: "1d",
+			expiresIn: "60m",
 		});
 		res.cookie("token", token, { httpOnly: true });
 		res.status(200).send("Logged in");
@@ -180,10 +193,10 @@ app.get("/server/:serverId", authenticateToken, async (req, res) => {
 		});
 
 		// Validate file paths before rendering
-		server.filePaths = await validateFilePaths(
-			server.filePaths || [],
-			server.id
-		);
+		// server.filePaths = await validateFilePaths(
+		// 	server.filePaths || [],
+		// 	server.id
+		// );
 
 		res.render("layout", {
 			servers: userServers ? userServers.Servers : [],
@@ -222,13 +235,12 @@ app.post(
 					.send("Server not found or user is not a member.");
 			}
 
-			// Find the server to update filePaths
+			// Check the number of files already uploaded
 			const server = await Server.findByPk(serverId);
 			if (!server) {
 				return res.status(404).send("Server not found.");
 			}
 
-			// Check the number of files already uploaded
 			if (server.filePaths && server.filePaths.length >= 10) {
 				return res
 					.status(400)
@@ -243,20 +255,36 @@ app.post(
 					.json({ message: "File cannot be larger than 20 MB." });
 			}
 
-			// Update the server's filePaths array
-			// Sequelize doesn't support array_append, so you need to handle array updates manually
-			const updatedFilePaths = server.filePaths
-				? [...server.filePaths, `/uploads/${serverId}/${req.file.filename}`]
-				: [`/uploads/${serverId}/${req.file.filename}`];
-			await server.update({ filePaths: updatedFilePaths });
-
-			// Send a response to the client
-			res.json({
-				message: "File uploaded successfully",
-				filePath: `/uploads/${serverId}/${req.file.filename}`, // Send only the relative path
+			// Create a new blob in the bucket and upload the file data
+			const blob = bucket.file(`${serverId}/${req.file.originalname}`);
+			const blobStream = blob.createWriteStream({
+				resumable: true,
 			});
+
+			blobStream.on("error", (err) => {
+				console.error(err);
+				res.status(500).send("Error uploading to Google Cloud Storage.");
+			});
+
+			blobStream.on("finish", async () => {
+				// Make the file public and get its public URL
+				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+				// Update the server's filePaths array
+				const updatedFilePaths = server.filePaths
+					? [...server.filePaths, publicUrl]
+					: [publicUrl];
+				await server.update({ filePaths: updatedFilePaths });
+
+				// Send a response to the client
+				res
+					.status(200)
+					.json({ message: "File uploaded successfully", filePath: publicUrl });
+			});
+
+			blobStream.end(req.file.buffer);
 		} catch (err) {
-			console.error("Error uploading file:", err.message, err.stack);
+			console.error("Error uploading file:", err);
 			res.status(500).send("Internal server error");
 		}
 	}
@@ -343,10 +371,10 @@ app.get("/signup", (req, res) => {
 // Handle sign-up form submission
 // Handle sign-up form submission
 // Handle sign-up form submission
-app.post("/signup", uploadUser.single("profilePicture"), async (req, res) => {
+// Handle sign-up form submission with compulsory profile picture
+app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	try {
 		const { username, email, password, confirmPassword } = req.body;
-
 		const lowerCaseUsername = username.toLowerCase();
 
 		// Validate input and passwords match
@@ -354,37 +382,54 @@ app.post("/signup", uploadUser.single("profilePicture"), async (req, res) => {
 			return res.status(400).send("Passwords do not match.");
 		}
 
+		// Check if profile picture is uploaded
+		if (!req.file) {
+			return res.status(400).send("Profile picture is required.");
+		}
+
 		// Hash the password
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		const userProfilePicturePath = req.file
-			? `/uploads/users/${req.file.filename}`
-			: null;
+		// Upload the profile picture to Google Cloud Storage
+		const file = req.file;
+		const blob = bucket.file(
+			`users/profile-pictures/${Date.now()}-${file.originalname}`
+		);
+		const blobStream = blob.createWriteStream({ resumable: true });
 
-		// Create the user
-		const user = await User.create({
-			username: lowerCaseUsername,
-			email,
-			password: hashedPassword,
-			profilePicture: userProfilePicturePath,
+		blobStream.on("error", (err) => {
+			console.error(err);
+			return res.status(500).send("Error uploading to Google Cloud Storage.");
 		});
 
-		// Generate a token for the user
-		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-			expiresIn: "1d",
+		blobStream.on("finish", async () => {
+			// Make the file public and get its public URL
+			const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+			// Create the user with the public URL of the profile picture
+			const user = await User.create({
+				username: lowerCaseUsername,
+				email,
+				password: hashedPassword,
+				profilePicture: publicUrl,
+			});
+
+			// Generate a token for the user
+			const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+				expiresIn: "60m",
+			});
+			res.cookie("token", token, { httpOnly: true });
+
+			// Redirect to the onboarding page after successful signup
+			res.redirect("/onboarding");
 		});
 
-		// Set the token as an HTTP-only cookie
-		res.cookie("token", token, { httpOnly: true });
-
-		// Redirect to the onboarding page after successful signup
-		res.redirect("/onboarding");
+		blobStream.end(file.buffer);
 	} catch (err) {
 		if (err.name === "SequelizeUniqueConstraintError") {
 			// Handle the unique constraint error
 			return res.status(409).send("Username or email already in use.");
 		}
-		// Log the error message without the stack trace
 		console.error("Error during sign-up:", err.message);
 		if (!res.headersSent) {
 			res.status(500).send("Internal server error.");
@@ -415,30 +460,55 @@ const serverStorage = multer.diskStorage({
 const uploadServer = multer({ storage: serverStorage });
 
 // Handle creating a new server
+// Handle creating a new server with mandatory server profile picture
 app.post(
 	"/create-server",
-	[authenticateToken, uploadServer.single("serverProfilePicture")],
+	[authenticateToken, upload.single("serverProfilePicture")], // Use 'upload' middleware for single file upload
 	async (req, res) => {
-		console.log(`trial ${req.user}`);
 		try {
-			const { serverName } = req.body; // From the form field names
-			let serverProfilePicturePath = null;
+			const { serverName } = req.body;
+			const userId = req.user.userId;
 
-			if (req.file) {
-				serverProfilePicturePath = `/uploads/serverProfilePics/${req.file.filename}`; // Corrected path
+			// Check if server profile picture is uploaded
+			if (!req.file) {
+				return res.status(400).send("Server profile picture is required.");
 			}
 
-			const server = await Server.create({
-				name: serverName,
-				profilePicture: serverProfilePicturePath,
-				filePaths: [],
+			// Upload the server profile picture to Google Cloud Storage
+			const file = req.file;
+			const blob = bucket.file(`servers/${Date.now()}-${file.originalname}`);
+			const blobStream = blob.createWriteStream({ resumable: false });
+
+			blobStream.on("error", (err) => {
+				console.error(err);
+				return res.status(500).send("Error uploading to Google Cloud Storage.");
 			});
 
-			console.log(req.user.userId);
-			// Add the current user to the server
-			await server.addUser(req.user.userId); // Assuming 'addUser' is a correct method from your associations
+			blobStream.on("finish", async () => {
+				// Make the file public and get its public URL
+				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
-			res.sendStatus(201); // Created
+				// Create the server with the public URL of the profile picture
+				const server = await Server.create({
+					name: serverName,
+					profilePicture: publicUrl,
+					filePaths: [],
+				});
+
+				// Add the current user to the server as a member
+				await server.addUser(userId);
+
+				res.status(201).json({
+					message: "Server created successfully",
+					server: {
+						id: server.id,
+						name: server.name,
+						profilePicture: server.profilePicture,
+					},
+				});
+			});
+
+			blobStream.end(file.buffer);
 		} catch (err) {
 			console.error("Error creating server:", err);
 			res.status(500).send("Internal server error.");
@@ -484,6 +554,80 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 		res.status(500).send("Internal server error.");
 	}
 });
+
+// User Profile Picture Upload
+app.post(
+	"/upload-user-profile",
+	upload.single("profilePicture"),
+	authenticateToken,
+	async (req, res) => {
+		const userId = req.user.userId;
+		const file = req.file;
+		const blob = bucket.file(
+			`users/profile-pictures/${userId}/${file.originalname}`
+		);
+		const blobStream = blob.createWriteStream({
+			resumable: true,
+		});
+
+		blobStream.on("error", (err) => {
+			console.error(err);
+			return res.status(500).send("Error uploading to Google Cloud Storage.");
+		});
+
+		blobStream.on("finish", async () => {
+			const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+			// Update user profile in the database with publicUrl
+			await User.update(
+				{ profilePicture: publicUrl },
+				{ where: { id: userId } }
+			);
+			res.status(200).json({
+				message: "Profile picture uploaded successfully",
+				profilePicture: publicUrl,
+			});
+		});
+
+		blobStream.end(file.buffer);
+	}
+);
+
+// Server Profile Picture Upload
+app.post(
+	"/upload-server-profile",
+	upload.single("serverProfilePicture"),
+	authenticateToken,
+	async (req, res) => {
+		const serverId = req.body.serverId; // Ensure you have serverId in your request
+		const file = req.file;
+		const blob = bucket.file(
+			`servers/profile-pictures/${serverId}/${file.originalname}`
+		);
+		const blobStream = blob.createWriteStream({
+			resumable: true,
+		});
+
+		blobStream.on("error", (err) => {
+			console.error(err);
+			return res.status(500).send("Error uploading to Google Cloud Storage.");
+		});
+
+		blobStream.on("finish", async () => {
+			const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+			// Update server profile in the database with publicUrl
+			await Server.update(
+				{ profilePicture: publicUrl },
+				{ where: { id: serverId } }
+			);
+			res.status(200).json({
+				message: "Server profile picture uploaded successfully",
+				profilePicture: publicUrl,
+			});
+		});
+
+		blobStream.end(file.buffer);
+	}
+);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
