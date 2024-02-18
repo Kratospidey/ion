@@ -890,6 +890,11 @@ io.on("connection", (socket) => {
 		.then((decoded) => {
 			console.log("Authenticated user:", decoded.userId);
 			socket.emit("userId", { userId: decoded.userId });
+			// Server-side
+			socket.on("joinRoom", (roomId) => {
+				socket.join(roomId);
+			});
+
 			socket.on("sendMessage", (data) => {
 				const { message, roomId } = data; // Extract roomId from received data
 				const userId = decoded.userId; // Use the authenticated user's ID

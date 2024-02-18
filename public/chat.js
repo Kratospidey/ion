@@ -14,8 +14,8 @@ const roomId = urlPath[urlPath.length - 1]; // This gets the last element, which
 socket.emit("joinRoom", roomId);
 
 socket.on("userId", (data) => {
-	currentUserId = data.userId; // Store the current user's ID in the global variable
-	console.log("Current User ID:", currentUserId);
+    currentUserId = data.userId; // Store the current user's ID in the global variable
+    console.log("Current User ID:", currentUserId);
 });
 
 socket.on("chatMessage", function (data) {
