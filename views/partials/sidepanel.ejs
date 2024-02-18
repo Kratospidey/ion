@@ -20,19 +20,29 @@
 		<% } %>
 		<div class="files mb-4">
 			<% if (server && server.filePaths && server.filePaths.length > 0) { %> <%
-			server.filePaths.forEach(function(filePath) { %> <% var fileName =
+			server.filePaths.forEach(function(filePath, index) { %> <% var fileName =
 			filePath.split('/').pop().replace(/\\/g, '/'); %> <% var displayFileName =
-			fileName.length > 15 ? fileName.substring(0, 18) + '...' : fileName; %>
-			<button
-				type="button"
-				class="btn btn-outline-warning file_button"
-				onclick="window.open('<%= filePath %>', '_blank')"
+			fileName.length > 15 ? fileName.substring(0, 15) + '...' : fileName; %>
+			<div
+				class="file-item"
+				data-filepath="<%= filePath %>"
+				data-serverid="<%= server.id %>"
 			>
-				<%= displayFileName %>
-			</button>
+				<button
+					type="button"
+					class="btn btn-outline-warning file-button"
+					onclick="window.open('<%= filePath %>', '_blank')"
+				>
+					<%= displayFileName %>
+				</button>
+				<button class="btn btn-danger delete-file-btn" title="Delete file">
+					X
+				</button>
+			</div>
 			<% }); %> <% } else { %>
 			<p class="text-white">No files uploaded yet.</p>
 			<% } %>
+
 			<!-- views/partials/sidepanel.ejs -->
 
 			<form
@@ -110,4 +120,47 @@
 
 			xhr.send(formData); // Send the FormData object
 		});
+</script>
+
+<script defer>
+	document.querySelectorAll(".delete-file-btn").forEach((button) => {
+		button.addEventListener("click", async function () {
+			const fileItem = this.closest(".file-item");
+			const filePath = fileItem.getAttribute("data-filepath");
+			const serverId = fileItem.getAttribute("data-serverid");
+			const fileName = filePath.split("/").pop();
+
+			const isConfirmed = confirm(
+				`Are you sure you want to delete "${fileName}"?`
+			);
+			if (!isConfirmed) {
+				return;
+			}
+
+			console.log(filePath, serverId);
+
+			try {
+				const response = await fetch("/delete-file", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ fileUrl: filePath, serverId: serverId }), // Ensure these keys match server expectation
+					credentials: "include",
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					alert(result.message);
+					fileItem.remove();
+				} else {
+					const error = await response.json();
+					throw new Error(error.message);
+				}
+			} catch (error) {
+				console.error("Error:", error);
+				alert("Error deleting file: " + error.message);
+			}
+		});
+	});
 </script>

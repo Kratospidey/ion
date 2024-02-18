@@ -117,7 +117,7 @@ app.get("/home", authenticateToken, async (req, res) => {
 			include: [
 				{
 					model: Server,
-					as: "Servers", // Adjust based on your association alias
+					as: "Servers", // Make sure this alias matches your association alias
 					through: { attributes: [] },
 					attributes: [
 						"id",
@@ -131,11 +131,16 @@ app.get("/home", authenticateToken, async (req, res) => {
 			],
 		});
 
-		const servers = user ? user.Servers : [];
-
-		res.render("layout", { servers: servers, showMembers: false });
+		// Check if the user is part of any servers
+		if (user && user.Servers.length > 0) {
+			// User is part of one or more servers, render the home page with the servers
+			res.render("layout", { servers: user.Servers, showMembers: false });
+		} else {
+			// User is not part of any servers, redirect to the onboarding page
+			res.redirect("/onboarding");
+		}
 	} catch (err) {
-		console.error("Error fetching servers:", err);
+		console.error("Error fetching servers or redirecting user:", err);
 		res.status(500).send("Internal server error");
 	}
 });
@@ -186,6 +191,7 @@ app.get("/server/:serverId", authenticateToken, async (req, res) => {
 			showMembers: true,
 			currentServer: server,
 			serverCode: server.serverCode,
+			id: server.id,
 		});
 	} catch (err) {
 		console.error("Error:", err);
@@ -315,6 +321,12 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 		const { username, email, password, confirmPassword } = req.body;
 		const lowerCaseUsername = username.toLowerCase();
 
+		// Check if user with the same email already exists
+		const existingUser = await User.findOne({ where: { email } });
+		if (existingUser) {
+			return res.status(409).send("A user with this email already exists.");
+		}
+
 		// Validate input and passwords match
 		if (password !== confirmPassword) {
 			return res.status(400).send("Passwords do not match.");
@@ -364,14 +376,8 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 
 		blobStream.end(file.buffer);
 	} catch (err) {
-		if (err.name === "SequelizeUniqueConstraintError") {
-			// Handle the unique constraint error
-			return res.status(409).send("Username or email already in use.");
-		}
 		console.error("Error during sign-up:", err.message);
-		if (!res.headersSent) {
-			res.status(500).send("Internal server error.");
-		}
+		res.status(500).send("Internal server error.");
 	}
 });
 
@@ -555,6 +561,14 @@ app.post(
 	async (req, res) => {
 		const { newUsername } = req.body;
 		const userId = req.user.userId; // Ensure this is correctly obtained
+
+		// Server-side validation for username length
+		if (newUsername.length > 12) {
+			console.log("Executed");
+			return res
+				.status(400)
+				.json({ error: "Username must be 12 characters or less." });
+		}
 
 		try {
 			const [updatedRows] = await User.update(
@@ -783,6 +797,57 @@ app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
 	} catch (error) {
 		console.error("Error fetching server name:", error);
 		res.status(500).json({ message: "Internal server error." });
+	}
+});
+
+// Function to extract file path from URL
+function extractFilePath(fileUrl) {
+	const url = new URL(fileUrl);
+	// Assuming the URL path starts with the bucket name, followed by the actual file path
+	// Adjust the substring start index as per your URL format if needed
+	return url.pathname.substring(url.pathname.indexOf("/", 1) + 1);
+}
+
+async function deleteFileFromCloud(filepath) {
+	const decodedFilepath = decodeURIComponent(filepath);
+	const file = bucket.file(decodedFilepath);
+
+	try {
+		await file.delete();
+		console.log(`File ${decodedFilepath} deleted.`);
+	} catch (error) {
+		console.error(`Failed to delete file ${decodedFilepath}:`, error);
+		throw error;
+	}
+}
+
+// Express route handler
+app.post("/delete-file", authenticateToken, async (req, res) => {
+	const { fileUrl, serverId } = req.body; // Assuming the client sends the full URL and server ID
+	console.log(fileUrl);
+	try {
+		const filePath = extractFilePath(fileUrl);
+		console.log(`filepath: ${filePath}`);
+		await deleteFileFromCloud(filePath);
+
+		// Find the server and update the filePaths array
+		const server = await Server.findByPk(serverId);
+		if (!server) {
+			return res.status(404).json({ message: "Server not found" });
+		}
+
+		// Filter out the deleted file's path
+		server.filePaths = server.filePaths.filter((path) => path !== fileUrl);
+
+		// Save the updated server
+		await server.save();
+
+		res.json({
+			message: "File deleted successfully and reference removed from server",
+		});
+	} catch (error) {
+		console.error("Error deleting file and updating server:", error);
+		res.status(500).json({ error: "Internal server error" });
 	}
 });
 

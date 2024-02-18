@@ -330,3 +330,8 @@ pre {
 	gap: 20px;
 	margin-bottom: auto; /* Space above the server code */
 }
+
+.file-item {
+	display: flex;
+	gap: 10px;
+}
