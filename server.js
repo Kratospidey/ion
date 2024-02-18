@@ -49,6 +49,17 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+const http = require("http");
+const socketIO = require("socket.io"); // Make sure to require the 'socket.io' library
+const server = http.createServer(app);
+const io = require("socket.io")(server, {
+	cors: {
+		origin: "http://localhost:3000", // Adjust according to your setup
+		methods: ["GET", "POST"],
+		credentials: true,
+	},
+});
+
 // Middleware
 app.use(cors());
 app.use(cookieParser()); // Use cookie-parser middleware
@@ -102,7 +113,11 @@ app.post("/login", async (req, res) => {
 		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
 			expiresIn: "1d",
 		});
-		res.cookie("token", token, { httpOnly: true });
+		res.cookie("token", token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: "strict",
+		});
 		res.status(200).send("Logged in");
 	} catch (err) {
 		console.error("Error during login:", err);
@@ -859,6 +874,75 @@ app.get("/logout", (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
+
+io.on("connection", (socket) => {
+	const cookieString = socket.request.headers.cookie;
+	const cookies = parseCookies(cookieString); // You'll need a function to parse the cookie string
+	console.log(cookies);
+	const token = cookies.token; // Replace 'token' with the name of your cookie
+	// console.log("Headers:", socket.request.headers);
+
+	// Verify the token. The implementation depends on your authentication system
+	authenticateSocketToken(token)
+		.then((decoded) => {
+			console.log("Authenticated user:", decoded.userId);
+			socket.emit("userId", { userId: decoded.userId });
+			socket.on("sendMessage", (data) => {
+				const { message, roomId } = data; // Extract roomId from received data
+				const userId = decoded.userId; // Use the authenticated user's ID
+
+				// Ensure the socket is joined to the room
+				socket.join(roomId);
+
+				// Emit the message to the specific room, including the sender's userId
+				io.to(roomId).emit("chatMessage", { userId, message });
+			});
+		})
+		.catch((error) => {
+			console.log("Authentication error:", error.message);
+			socket.disconnect(true); // Disconnect if authentication fails
+		});
+});
+
+function authenticateSocketToken(token) {
+	return new Promise((resolve, reject) => {
+		if (!token) {
+			return reject(new Error("Access denied. No token provided."));
+		}
+
+		jwt.verify(token, SECRET_KEY, (err, decoded) => {
+			if (err) {
+				console.error("Token verification failed:", err);
+				if (err instanceof jwt.JsonWebTokenError) {
+					// Invalid signature or malformed token
+					reject(new Error("Invalid token."));
+				} else if (err instanceof jwt.NotBeforeError) {
+					// Token used before its nbf claim
+					reject(new Error("Token used before its valid date."));
+				} else if (err instanceof jwt.TokenExpiredError) {
+					// Token expired
+					reject(new Error("Token expired."));
+				} else {
+					// Other errors
+					reject(new Error("An error occurred while verifying the token."));
+				}
+			} else {
+				resolve(decoded); // Successfully decoded token
+			}
+		});
+	});
+}
+
+function parseCookies(cookieString) {
+	const list = {};
+	cookieString?.split(";").forEach((cookie) => {
+		const parts = cookie.split("=");
+		const key = parts.shift().trim();
+		const value = parts.join("=");
+		list[key] = decodeURIComponent(value);
+	});
+	return list;
+}

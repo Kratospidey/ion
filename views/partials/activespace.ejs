@@ -7,5 +7,21 @@
 			type="text/javascript"
 		></script>
 	</div>
-	<div class="chat" id="chat" style="display: none"></div>
+	<div class="chat" id="chat" style="display: none">
+		<!-- Inside your existing <div class="chat" id="chat" style="display: none"> -->
+		<div
+			id="messageContainer"
+			style="padding: 10px; overflow-y: auto; height: 90%"
+		></div>
+		<form id="messageForm">
+			<input
+				type="text"
+				id="messageInput"
+				placeholder="Type a message..."
+				autocomplete="off"
+				style="width: 90%"
+			/>
+			<button type="submit">Send</button>
+		</form>
+	</div>
 </div>

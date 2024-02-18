@@ -335,3 +335,50 @@ pre {
 	display: flex;
 	gap: 10px;
 }
+
+.chat {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	background-color: #f4f4f4;
+	border: 1px solid #ddd;
+	height: 300px; /* Adjust as needed */
+}
+
+#messageContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 10px; /* Adds space between messages */
+	padding: 10px;
+}
+
+#messageForm {
+	display: flex;
+	padding: 10px;
+}
+
+#messageInput {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+
+/* Styles for received messages */
+.receivedMessage {
+	max-width: 80%;
+	background-color: #e0e0e0;
+	padding: 10px;
+	border-radius: 20px;
+	margin-left: 10px; /* Aligns messages to the left */
+	align-self: flex-start;
+}
+
+/* Styles for sent messages */
+.sentMessage {
+	max-width: 80%;
+	background-color: #4caf50;
+	color: white;
+	padding: 10px;
+	border-radius: 20px;
+	align-self: flex-end; /* Aligns messages to the right */
+	margin-right: 10px; /* Adds some margin to the right */
+}
