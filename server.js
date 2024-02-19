@@ -872,6 +872,15 @@ app.get("/logout", (req, res) => {
 	res.redirect("/login"); // Redirect user to the login page
 });
 
+app.get("/api/get-current-user", authenticateToken, (req, res) => {
+	// Assuming `authenticateToken` middleware sets `req.user` to the authenticated user
+	if (req.user && req.user.userId) {
+		res.json({ currentUserId: req.user.userId });
+	} else {
+		res.status(401).json({ error: "User not authenticated" });
+	}
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
@@ -890,20 +899,37 @@ io.on("connection", (socket) => {
 		.then((decoded) => {
 			console.log("Authenticated user:", decoded.userId);
 			socket.emit("userId", { userId: decoded.userId });
+			console.log(`server side id: ${decoded.userId}`);
 			// Server-side
 			socket.on("joinRoom", (roomId) => {
 				socket.join(roomId);
 			});
 
-			socket.on("sendMessage", (data) => {
+			socket.on("sendMessage", async (data) => {
 				const { message, roomId } = data; // Extract roomId from received data
 				const userId = decoded.userId; // Use the authenticated user's ID
 
 				// Ensure the socket is joined to the room
 				socket.join(roomId);
 
-				// Emit the message to the specific room, including the sender's userId
-				io.to(roomId).emit("chatMessage", { userId, message });
+				// Get the user data
+				const userData = await getUserDataById(userId);
+
+				if (!userData) {
+					// Handle error - user not found
+					return;
+				}
+
+				const chatMessage = {
+					userId,
+					message,
+					username: userData.username,
+					profilePicture: userData.profilePicture,
+					timestamp: new Date().toISOString(), // or use Sequelize's `createdAt` if storing the message
+				};
+
+				// Emit the message to the specific room, including the sender's user data
+				io.to(roomId).emit("chatMessage", chatMessage);
 			});
 		})
 		.catch((error) => {
@@ -950,4 +976,24 @@ function parseCookies(cookieString) {
 		list[key] = decodeURIComponent(value);
 	});
 	return list;
+}
+
+async function getUserDataById(userId) {
+	try {
+		const user = await User.findByPk(userId, {
+			attributes: ["username", "profilePicture"],
+		});
+
+		if (!user) {
+			return null; // or throw new Error('User not found');
+		}
+
+		return {
+			username: user.username,
+			profilePicture: user.profilePicture,
+		};
+	} catch (error) {
+		console.error("Error fetching user:", error);
+		throw error;
+	}
 }

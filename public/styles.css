@@ -382,3 +382,34 @@ pre {
 	align-self: flex-end; /* Aligns messages to the right */
 	margin-right: 10px; /* Adds some margin to the right */
 }
+
+.message {
+	display: flex;
+	align-items: flex-end;
+	margin-bottom: 10px;
+}
+
+.profile-picture {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	margin-right: 10px;
+}
+
+.message-content {
+	background-color: #e0e0e0;
+	padding: 10px;
+	border-radius: 20px;
+}
+
+.username {
+	font-weight: bold;
+}
+
+.timestamp {
+	font-size: 0.75rem;
+	color: #666;
+	margin-left: 10px;
+}
+
+/* Additional styles for .sentMessage and .receivedMessage to adjust background colors, etc. */
