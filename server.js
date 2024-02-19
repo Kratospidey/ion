@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 const db = require("./models/index"); // Adjust the path according to your project structure
-const { Server, User, ServerUser } = require("./models"); // Adjust the path to your models directory
+const { Server, User, ServerUser, Message } = require("./models"); // Adjust the path to your models directory
 
 // gdrive conf
 const { Storage } = require("@google-cloud/storage");
@@ -881,6 +881,29 @@ app.get("/api/get-current-user", authenticateToken, (req, res) => {
 	}
 });
 
+app.get("/messages/:serverId", authenticateToken, async (req, res) => {
+	const { serverId } = req.params;
+
+	try {
+		const messages = await Message.findAll({
+			where: { serverId: serverId },
+			include: [
+				{
+					model: User,
+					as: "sender",
+					attributes: ["username", "profilePicture"],
+				},
+			],
+			order: [["createdAt", "ASC"]], // Order by creation time
+		});
+
+		res.json(messages);
+	} catch (error) {
+		console.error("Error fetching messages:", error);
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
@@ -906,30 +929,34 @@ io.on("connection", (socket) => {
 			});
 
 			socket.on("sendMessage", async (data) => {
-				const { message, roomId } = data; // Extract roomId from received data
-				const userId = decoded.userId; // Use the authenticated user's ID
+				const { message, roomId } = data;
+				const userId = decoded.userId; // Assuming this is obtained from token authentication
 
-				// Ensure the socket is joined to the room
-				socket.join(roomId);
+				// Store the message in the database
+				try {
+					const newMessage = await Message.create({
+						content: message,
+						userId: userId, // Assuming 'userId' is available from the authenticated user
+						serverId: roomId, // Assuming 'roomId' corresponds to 'serverId'
+					});
 
-				// Get the user data
-				const userData = await getUserDataById(userId);
+					// Fetch additional user data if needed
+					const userData = await getUserDataById(userId);
 
-				if (!userData) {
-					// Handle error - user not found
-					return;
+					const chatMessage = {
+						userId,
+						message: newMessage.content,
+						username: userData.username,
+						profilePicture: userData.profilePicture,
+						timestamp: new Date().toISOString(), // Alternatively, use Sequelize's `createdAt`
+					};
+
+					// Emit the message to the specific room, including the sender's user data
+					io.to(roomId).emit("chatMessage", chatMessage);
+				} catch (error) {
+					console.error("Error saving message:", error);
+					// Handle error appropriately
 				}
-
-				const chatMessage = {
-					userId,
-					message,
-					username: userData.username,
-					profilePicture: userData.profilePicture,
-					timestamp: new Date().toISOString(), // or use Sequelize's `createdAt` if storing the message
-				};
-
-				// Emit the message to the specific room, including the sender's user data
-				io.to(roomId).emit("chatMessage", chatMessage);
 			});
 		})
 		.catch((error) => {

@@ -12,13 +12,19 @@ const roomId = urlPath[urlPath.length - 1];
 // Join the chat room
 socket.emit("joinRoom", roomId);
 
-socket.on("chatMessage", function (data) {
-	const { userId, message, username, timestamp } = data; // Assume these are provided by the server
+// Function to create and append message element
+function appendMessage({
+	userId,
+	message,
+	username,
+	timestamp,
+	profilePicture,
+}) {
 	const div = document.createElement("div");
 	div.classList.add("message");
 
 	const profilePic = document.createElement("img");
-	profilePic.src = data.profilePicture; // The URL of the user's profile picture
+	profilePic.src = profilePicture; // The URL of the user's profile picture
 	profilePic.classList.add("profile-picture");
 
 	const messageContent = document.createElement("div");
@@ -30,7 +36,10 @@ socket.on("chatMessage", function (data) {
 
 	const timestampSpan = document.createElement("span");
 	timestampSpan.classList.add("timestamp");
-	timestampSpan.textContent = new Date(timestamp).toLocaleTimeString(); // Convert timestamp to readable time
+	const date = new Date(timestamp);
+	timestampSpan.textContent = isNaN(date.getTime())
+		? "Time not available"
+		: date.toLocaleTimeString();
 
 	const textDiv = document.createElement("div");
 	textDiv.classList.add("text");
@@ -44,15 +53,46 @@ socket.on("chatMessage", function (data) {
 	messageContainer.appendChild(div);
 
 	messageContainer.scrollTop = messageContainer.scrollHeight;
-});
+}
+
+// Listen for chatMessage event from the server
+socket.on("chatMessage", appendMessage);
 
 // Send message to server
 messageForm.addEventListener("submit", function (e) {
 	e.preventDefault();
-	const message = messageInput.value;
-	// No need to include userId as it's not important for rendering anymore
-	socket.emit("sendMessage", { message, roomId });
-	messageInput.value = "";
+	if (!messageInput.value.trim()) return; // Prevent sending empty messages
+
+	// Emit the message to the server
+	socket.emit("sendMessage", { message: messageInput.value, roomId });
+	messageInput.value = ""; // Clear the input field
 });
 
-// No need to fetch currentUserId anymore, so we don't call initializeChat
+// Fetch and display historical messages when the user enters a chat room
+function fetchAndDisplayMessages(roomId) {
+	fetch(`/messages/${roomId}`)
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error("Failed to fetch messages");
+			}
+			return response.json();
+		})
+		.then((messages) => {
+			// Ensure the messages are sorted by createdAt before displaying
+			messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+			messages.forEach((message) => {
+				// Adapt the message object structure to what appendMessage expects
+				appendMessage({
+					userId: message.senderId, // Or however you get the userId
+					message: message.content,
+					username: message.sender.username,
+					timestamp: message.createdAt,
+					profilePicture: message.sender.profilePicture,
+				});
+			});
+		})
+		.catch((error) => console.error("Failed to fetch messages:", error));
+}
+
+// Call this function when the user enters a chat room
+fetchAndDisplayMessages(roomId);
