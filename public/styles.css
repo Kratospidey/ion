@@ -108,7 +108,6 @@ input[type="text"] {
 	width: 240px;
 }
 
-.servers,
 .sidebar {
 	background-color: #1e1e1e;
 
@@ -128,12 +127,45 @@ input[type="text"] {
 }
 
 .servers {
+	background-color: rgb(30, 30, 30);
+
+	width: 100px;
+	border-radius: 14px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	overflow-y: auto; /* Enable vertical scrolling */
+	gap: 40px;
+	padding: 10px;
 	height: 60%;
 	margin-bottom: 20px;
+
+	/* Inset shadow for a deep, carved-in look */
+	box-shadow: inset 0 5px 5px rgba(255, 255, 255, 0.2),
+		inset 0 -5px 5px rgba(0, 0, 0, 0.2), 0 5px 10px rgba(0, 0, 0, 0.5); /* Outer shadow for depth */
+
+	/* Gradient for a subtle glossy effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1)
+	);
+
+	/* Solid border for definition */
+	border: 1px solid #a0a0a0;
+
+	transition: box-shadow 0.3s ease;
+}
+
+.servers:hover {
+	/* Slightly lighter inset shadows on hover for a subtle interactive effect */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
 }
 
 .server-buttons {
-	background-color: #1e1e1e;
+	background-color: rgb(30, 30, 30); /* Dark base color */
 	border-radius: 14px;
 	flex-direction: column;
 	align-items: center;
@@ -142,13 +174,80 @@ input[type="text"] {
 	gap: 40px;
 	padding: 20px;
 	width: 100px;
+
+	/* Inset shadow for a deep, carved-in look */
+	box-shadow: inset 0 4px 4px rgba(255, 255, 255, 0.2),
+		inset 0 -4px 4px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.2); /* Outer shadow for depth */
+
+	/* Gradient for a subtle glossy effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1)
+	);
+
+	/* Solid border for definition */
+	border: 1px solid #a0a0a0;
+
+	transition: box-shadow 0.3s ease;
 }
 
+.server-buttons:hover {
+	/* Slightly lighter inset shadows on hover for a subtle interactive effect */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Override Bootstrap button styles */
+.server-buttons .btn {
+	background-color: #3a3b3e; /* Match the button color to the panel */
+	padding: 10px;
+	border: none;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+		/* Soft shadow for depth */ inset 0 2px 2px rgba(255, 255, 255, 0.2),
+		/* Inner shadow for a pressed effect */ inset 0 -2px 2px rgba(0, 0, 0, 0.2);
+	color: white; /* White text */
+	border-radius: 10px; /* Slightly rounded edges */
+	margin-bottom: 10px; /* Space between buttons */
+	width: 100%; /* Full width of the parent container */
+	font-size: 20px; /* Larger font size for icons */
+	transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for interaction */
+}
+
+.server-buttons .btn:hover {
+	background-color: #4a4b4e; /* Slightly lighter on hover */
+	box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.server-buttons .btn:active {
+	box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3); /* Pressed effect */
+}
+
+/* Styling for icons */
+.server-buttons .fa-plus,
+.server-buttons .fa-gear {
+	transition: transform 0.3s ease; /* Smooth scaling transition for interaction */
+}
+
+.server-buttons .fa-plus:hover,
+.server-buttons .fa-gear:hover {
+	transform: scale(1.1); /* Slight increase in size on hover */
+}
+
+/* Styling for server avatars */
 .server-avatar {
-	width: 70px; /* Set width */
-	height: 70px; /* Set height to be the same as width */
-	border-radius: 50%; /* This will make it a perfect circle */
-	object-fit: cover; /* This will ensure the image covers the area without being stretched */
+	width: 80px; /* Set your desired size */
+	height: 80px; /* Maintain aspect ratio */
+	border-radius: 50%; /* Circular avatars */
+	border: 3px solid #a0a0a0; /* Border to match the skeuomorphic style */
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+	background-color: #2e2f33; /* Same as the server background for consistency */
+	object-fit: cover; /* Ensure the image covers the area without distortion */
+	transition: transform 0.3s ease; /* Smooth scaling transition for interaction */
+}
+
+.server-avatar:hover {
+	transform: scale(1.05); /* Slight increase in size on hover */
 }
 
 a {
@@ -301,23 +400,80 @@ pre {
 
 .sidepanel {
 	flex-shrink: 0;
-}
-
-.sidepanel {
 	overflow: auto; /* Enables scrolling if content overflows */
 	width: 200px; /* Your set width */
 	box-sizing: border-box; /* Includes padding and border in the element's total width and height */
-	/* Other styles */
+	padding: 10px;
+	background-color: #2e2f33; /* A neutral dark gray as the base */
+	border-radius: 10px; /* Rounded corners */
+
+	/* Inset shadow gives an impression of depth, as if the container is carved into the background */
+	box-shadow: inset 0 4px 4px rgba(255, 255, 255, 0.2),
+		inset 0 -4px 4px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.2); /* Soft shadow outside for a subtle lift off the surface */
+
+	/* Gradient for a subtle glossy effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1)
+	);
+
+	/* Solid border for definition */
+	border: 1px solid #a0a0a0;
+
+	/* Ensures that the content respects the border-radius */
+	overflow: hidden;
+
+	transition: box-shadow 0.3s ease;
 }
 
-.sidepanel .files,
-.sidepanel .btn,
-.sidepanel .form-control {
-	width: calc(
-		100% - 20px
-	); /* Subtracting the total left and right padding from the width */
-	box-sizing: border-box; /* Includes padding and border in the element's total width and height */
-	margin-bottom: 10px; /* Add some space below each element */
+.sidepanel:hover {
+	/* Slightly lighter inset shadows on hover for a subtle interactive effect */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Override Bootstrap button styles */
+.sidepanel .btn {
+	background-color: #3a3b3e; /* Match the button color to the panel */
+	border: 1px solid #a0a0a0;
+	box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2),
+		inset 0 -2px 2px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+	color: #fff; /* White text */
+	border-radius: 5px; /* Slightly rounded edges */
+	margin-bottom: 10px; /* Space between buttons */
+	transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition for interaction */
+}
+
+.sidepanel .btn:hover {
+	background-color: #4a4b4e; /* Slightly lighter on hover */
+	box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.sidepanel .btn:active {
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Pressed effect */
+}
+
+/* Style for the file input and upload button to match skeuomorphic theme */
+.sidepanel .form-control,
+.sidepanel .uploadbtn {
+	background-color: #3a3b3e;
+	border: 1px solid #a0a0a0;
+	box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2),
+		inset 0 -2px 2px rgba(0, 0, 0, 0.2);
+	color: #fff;
+	border-radius: 5px;
+	transition: box-shadow 0.3s;
+}
+
+.sidepanel .form-control:hover,
+.sidepanel .uploadbtn:hover {
+	box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.sidepanel .form-control:active,
+.sidepanel .uploadbtn:active {
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Adjust the .files class if it's not just for the sidepanel */
@@ -369,8 +525,43 @@ pre {
 }
 
 .file-item {
-	display: flex;
+	background-color: #2e2f33; /* Dark background for the file item */
+	border-radius: 5px;
+	margin-bottom: 10px; /* Space between file items */
+	box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.1),
+		/* Inner top shadow for highlight */ inset 0 -2px 2px rgba(0, 0, 0, 0.1); /* Inner bottom shadow for depth */
+	border: 1px solid #a0a0a0; /* Solid border for definition */
+	padding: 5px; /* Padding inside the item for spacing */
+	display: flex; /* Flex display to align button and delete icon */
+	justify-content: space-between; /* Space out items */
+	align-items: center; /* Center items vertically */
+	transition: all 0.3s ease; /* Smooth transition for interactions */
 	gap: 10px;
+}
+
+.file-item:hover {
+	box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.2),
+		/* Brighter on hover */ inset 0 -2px 2px rgba(0, 0, 0, 0.2),
+		/* Deeper shadow on hover */ 0 2px 4px rgba(0, 0, 0, 0.2); /* Outer shadow for lifted effect */
+}
+
+/* Style the delete button specifically, if it's a part of .file-item */
+.delete-file-btn {
+	background-color: #3a3b3e; /* Match the button color to the file item */
+	border: none;
+	border-radius: 5px; /* Slightly rounded edges for the delete button */
+	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+	color: white; /* White text for the delete icon */
+	transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.delete-file-btn:hover {
+	background-color: #e74c3c; /* Red color on hover for delete button */
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow on hover */
+}
+
+.delete-file-btn:active {
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Pressed effect for delete button */
 }
 
 .chat {
