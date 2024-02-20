@@ -958,6 +958,14 @@ io.on("connection", (socket) => {
 					// Handle error appropriately
 				}
 			});
+			socket.on("typing", async (data) => {
+				const { roomId, typing } = data;
+
+				// Broadcast the typing event to all other users in the room
+				const userData = await getUserDataById(decoded.userId);
+				username = userData.username;
+				socket.to(roomId).emit("typing", { username: username, typing });
+			});
 		})
 		.catch((error) => {
 			console.log("Authentication error:", error.message);

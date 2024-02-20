@@ -44,8 +44,7 @@ body {
 	padding: 0;
 }
 
-.wrapper,
-.serverwrapper {
+.wrapper {
 	padding: 1rem;
 	flex-wrap: nowrap; /* This prevents flex items from wrapping */
 
@@ -68,6 +67,15 @@ body {
 	100% {
 		background-position: 0% 50%;
 	}
+}
+
+.serverwrapper {
+	padding: 1rem;
+	flex-wrap: nowrap; /* This prevents flex items from wrapping */
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 input[type="text"] {
@@ -191,30 +199,8 @@ a {
 	min-width: 900px;
 	display: flex;
 	flex-direction: column;
+	padding: 20px;
 	gap: 20px;
-}
-
-.terminal {
-	background-color: #282828;
-	font-size: 16px;
-}
-
-.command {
-	color: #fabd2f;
-	text-shadow: 0 0 5px #fabd2f;
-}
-
-.terminal {
-	color: #ebdbb2;
-	font-family: "Courier New", monospace;
-	height: 200px;
-	padding: 10px;
-	border: solid 2px white;
-	border-radius: 20px;
-}
-
-.output {
-	color: #d3869b;
 }
 
 .members {
@@ -222,14 +208,41 @@ a {
 	align-items: flex-start;
 	flex-direction: column;
 	justify-content: flex-start;
-	background-color: #1e1e1e;
-	border-radius: 20px;
+	background: #3a3b3e; /* Base color matching the chat panel */
+	background-color: rgb(30, 30, 30);
+	border-radius: 15px; /* Consistent with the chat panel */
 	height: 97%; /* Adjust this if needed */
 	width: auto; /* Allow the width to grow with content */
 	margin-left: 10px;
-	padding: 10px;
+	padding: 25px; /* Padding to match the chat panel */
 	flex-grow: 1;
 	overflow-y: auto; /* Enable vertical scrolling if content overflows */
+
+	/* Inset shadows for a deep, carved-in look */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.2),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.2), 0 10px 20px rgba(0, 0, 0, 0.5); /* Outer shadow for depth */
+
+	/* Gradient for a subtle glossy effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1)
+	);
+
+	/* Solid border for definition */
+	border: 1px solid #a0a0a0;
+
+	/* Ensures that the content respects the border-radius */
+	overflow: hidden;
+
+	/* Smooth transition for hover interactions */
+	transition: box-shadow 0.3s ease;
+}
+
+.members:hover {
+	/* Slightly lighter inset shadows on hover for a subtle interactive effect */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
 }
 
 pre {
@@ -254,7 +267,31 @@ pre {
 }
 
 .app-bg {
-	background-color: #669bbc;
+	background-color: #65788b; /* A base color that complements the chat interface */
+
+	/* Layered gradients for a deep inset material effect */
+	background-image: radial-gradient(
+			circle at top left,
+			rgba(255, 255, 255, 0.15),
+			transparent 70%
+		),
+		radial-gradient(
+			circle at bottom right,
+			rgba(0, 0, 0, 0.15),
+			transparent 70%
+		);
+
+	/* Multiple inset shadows for a richly embossed look */
+	box-shadow: inset 0 7px 9px -7px rgba(255, 255, 255, 0.7),
+		/* Top inner white glow */ inset 0 -7px 9px -7px rgba(0, 0, 0, 0.7),
+		/* Bottom inner dark glow */ inset 0 0 16px rgba(0, 0, 0, 0.5),
+		/* Overall inner shadow for depth */ inset 0 0 32px rgba(0, 0, 0, 0.3); /* More diffuse inner shadow for softness */
+
+	/* Smooth transition for interactive elements within the background */
+	transition: box-shadow 0.3s ease;
+
+	/* Overwrite the overflow from parent if necessary */
+	overflow: hidden;
 }
 
 .servers,
@@ -340,9 +377,29 @@ pre {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	background-color: #f4f4f4;
-	border: 1px solid #ddd;
 	height: 300px; /* Adjust as needed */
+	padding: 25px;
+	border-radius: 15px;
+	background: #3a3b3e;
+	border: 1px solid #a0a0a0; /* Solid border for definition */
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.2),
+		/* Inner top shadow for a subtle highlight */ inset 0 -10px 10px rgba(0, 0, 0, 0.2),
+		/* Inner bottom shadow for a subtle depth */ 0 10px 20px rgba(0, 0, 0, 0.5); /* Outer shadow for depth */
+
+	/* Layered gradient for a glossy effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1)
+	);
+
+	overflow: hidden; /* Makes sure the content respects border radius */
+	transition: box-shadow 0.3s ease; /* Smooth transition for interactions */
+}
+
+.chat:hover {
+	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
+		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
 }
 
 #messageContainer {
@@ -354,12 +411,73 @@ pre {
 
 #messageForm {
 	display: flex;
+	align-items: center;
 	padding: 10px;
+	background-color: #2a2b2e;
+	border-radius: 25px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+	transition: all 0.3s ease;
+}
+
+#messageForm button {
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	background-image: linear-gradient(
+		to bottom,
+		#66c466,
+		/* Lighter shade of green for the top */ #5cb85c 50%,
+		/* Original button color */ #509f50
+			/* Slightly darker green for the bottom */
+	);
+	border: 1px solid #4a5b4e; /* Subtle border for depth */
 }
 
 #messageInput {
 	flex-grow: 1;
 	margin-right: 10px;
+	padding: 10px 20px;
+	background-color: #3a3b3e;
+	border: 2px solid #4a4b4e;
+	border-radius: 15px;
+	font-size: 16px;
+	color: #ffffff;
+	outline: none;
+	transition: border-color 0.3s ease;
+	box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2),
+		inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+	background-image: linear-gradient(
+		to top,
+		#3e3f42,
+		/* Slightly lighter shade for the top */ #3a3b3e
+			/* Original input field color */
+	);
+}
+
+#messageInput::placeholder {
+	color: #b1b1b3;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2); /* Slight shadow for depth */
+}
+
+#messageInput:focus {
+	border-color: #5cb85c;
+	box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2),
+		inset 0 -2px 4px rgba(0, 0, 0, 0.2), 0 0 8px #5cb85c; /* Glowing effect */
+}
+
+button:hover {
+	background-color: #449d44;
+	background-image: linear-gradient(
+		to bottom,
+		#53a653,
+		/* Lighter green for the top on hover */ #449d44 50%,
+		/* Darker green color on hover */ #398439
+			/* Even darker green for the bottom on hover */
+	);
+}
+
+button:active {
+	background-color: #398439;
+	box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3); /* Inner shadow for a pressed effect */
 }
 
 /* Styles for received messages */
@@ -397,9 +515,28 @@ pre {
 }
 
 .message-content {
-	background-color: #e0e0e0;
-	padding: 10px;
+	background: #e0e0e0; /* Base color */
 	border-radius: 20px;
+	padding: 10px;
+	border: 2px solid #bfbfbf; /* Light grey border */
+
+	/* Gradient overlay for the 3D effect */
+	background-image: linear-gradient(
+		to bottom,
+		rgba(255, 255, 255, 0.5),
+		rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.1),
+		rgba(0, 0, 0, 0.2)
+	);
+
+	/* Inner shadow for inset effect */
+	box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.5),
+		inset 0 -2px 2px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.1); /* Outer shadow for depth */
+
+	/* Text styling */
+	color: #333; /* Dark grey text for better readability */
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Font similar to that used in Windows XP */
+	text-shadow: 0 1px 0 #fff; /* Slight text shadow for depth */
 }
 
 .username {
@@ -412,4 +549,17 @@ pre {
 	margin-left: 10px;
 }
 
-/* Additional styles for .sentMessage and .receivedMessage to adjust background colors, etc. */
+@keyframes slideFadeUp {
+	0% {
+		transform: translateY(20px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.message-enter-active {
+	animation: slideFadeUp 0.5s ease-out forwards;
+}

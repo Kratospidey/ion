@@ -22,6 +22,7 @@ function appendMessage({
 }) {
 	const div = document.createElement("div");
 	div.classList.add("message");
+	div.classList.add('message-enter-active');
 
 	const profilePic = document.createElement("img");
 	profilePic.src = profilePicture; // The URL of the user's profile picture
@@ -36,10 +37,9 @@ function appendMessage({
 
 	const timestampSpan = document.createElement("span");
 	timestampSpan.classList.add("timestamp");
-	const date = new Date(timestamp);
-	timestampSpan.textContent = isNaN(date.getTime())
+	timestampSpan.textContent = isNaN(new Date(timestamp).getTime())
 		? "Time not available"
-		: date.toLocaleTimeString();
+		: formatTimestamp(timestamp);
 
 	const textDiv = document.createElement("div");
 	textDiv.classList.add("text");
@@ -96,3 +96,45 @@ function fetchAndDisplayMessages(roomId) {
 
 // Call this function when the user enters a chat room
 fetchAndDisplayMessages(roomId);
+
+let typingTimeout;
+const TYPING_TIMER_LENGTH = 2000; // Set the typing timeout to 2 seconds
+
+// Listen for 'input' event on message input
+messageInput.addEventListener("input", () => {
+	// Clear the previous timeout
+	clearTimeout(typingTimeout);
+
+	// Emit the 'typing' event to the server
+	socket.emit("typing", { roomId, typing: true });
+
+	// Set a timeout to emit 'stop typing' event
+	typingTimeout = setTimeout(() => {
+		socket.emit("typing", { roomId, typing: false });
+	}, TYPING_TIMER_LENGTH);
+});
+
+// Listen for 'typing' event from the server
+socket.on("typing", (data) => {
+	const typingIndicator = document.getElementById("typingIndicator");
+	if (data.typing) {
+		typingIndicator.textContent = `${data.username} is typing...`;
+		typingIndicator.style.display = "block";
+		typingIndicator.style.color = "white";
+		typingIndicator.style.marginLeft = "10px";
+	} else {
+		typingIndicator.style.display = "none";
+	}
+});
+
+// Function to format timestamp into "DD/MM/YYYY HH:mm" format
+function formatTimestamp(timestamp) {
+	const date = new Date(timestamp);
+	const day = date.getDate().toString().padStart(2, "0");
+	const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+	const year = date.getFullYear();
+	const hours = date.getHours().toString().padStart(2, "0");
+	const minutes = date.getMinutes().toString().padStart(2, "0");
+
+	return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
