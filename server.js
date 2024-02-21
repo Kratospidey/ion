@@ -22,12 +22,27 @@ const fs = require("fs");
 const path = require("path");
 
 // Use the environment variable for the bucket name
-const googleStorage = new Storage();
+const googleCredentials = {
+	type: "service_account",
+	project_id: "techproject-ion",
+	private_key_id: "4bab25a736c79e915bae8810575cb1ff56b61444",
+	private_key:
+		"-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC5we6XVMqlASFN\ndO64lVaMZKTZN/lZXWIU6C04yWNZpsa8Xuvyv7yt3slkpo4S/X/E9eTOXk7nXfNY\niK/yMbeINUdqerGew6osgMy/wbJRpZeamEKj0X//YrM+3Dmr6czKe2/7vE4HfQ6y\n/iSrLph9hgCHE9yBC1nfXMrONtLROpReZnw5iekwp4jH/rAFXLsiBexivbh1EzPe\nmgPS9PPQck9ex3jDU6tLQk+60uuQF62NYrby2567BpRuQTg8PrkGbMOQ7suFvj2D\nuqo18msaRO0DqoLtRkW0XIMvWkBOgWQtTKNgC6BBE+PUNwRbjT9Yzxk04BX01U5q\nXD41KdPhAgMBAAECggEAM3Mrim7J0foGJ1YD6Mw0NJ6Lqj5+qenbiL7mB5yAEAzJ\nbtM7tvi0YdQbI+2d3FSqVvtkbGRipmK3TAZP9V0f4HIhXbSuDbNUJw9lppcXtNWQ\nsBkMHCOiuDG2Q+rrblpLhqm50pfNZPWWZK1Pqro1Mk8zRjaSFIv4UI16/rLgoWKH\nbB+RQ1I8lOE1++EvW/SNBaiXzhONz6gdVrzVsLuRCPilC+iI5UHN1OmQsKaK0Dh0\n6KAN6qBDup+XftuFcWBy7EoAqKOm6AsUE4y3wo4RVkpstApzs7zywZlMA5pTsmvK\n+7NbTO03iq4OQcdU95Av4uw93c+WKTxkgwm24x4ToQKBgQDgbHu/DJBqqffs/clr\nEMPvtsrnCIobGxSaCgN3+hpR9VAbDUjs1juwKIFAEdIN6vWA6+rku64Sohh7ViHo\nsZt11HjGJ9sRxDBmWEIqkWcFQ1LwfELlX1jfBnolKsW7ugeH0rMzC56UijVbf88l\n6F4BOphXDNVMrhfb6+Rlul6wJwKBgQDT5LsNA9tfD3YHA8K0zi5jBkko6TdlWFTX\ncva5PK+72sV9ekIeENI2KU52+gXIAAY79a2oxVz0++MfxdSPVNmVYLS88zoXr+zk\n10rB/n8oZr5++e8fN0S/t/s48TKYe6lljmjTRfogecCCA4tQTlS1VImPlPRHLW5j\nfw6qYP/YtwKBgQDO9nxwRY/xLen73lefqwhmyrX3tcJXGPQ40j88p6MaLha/u9Ki\nxzaoT9JSWZzTRPk++VHXutTfTikxpM8EnrX1RgpTA3JdwgW4fHAYfZr6GYolSRMQ\nIIv+sSR3nihX5UkIkuC7lF2cMpDeXtGT7eSzUWwn6yfR3UMXh0VMI0ErRQKBgQCr\nGNvtU3r01HAyk9fJ1V7hePbkQQUJIX1Ihz0wMA+aubmUa38t9dk4ALyqF5NJfrOK\nAQRb7hn0e9xXEJBluFcFZpQqqp/y9oxr8GgeI1kcD3Ks5zYt15v8zxvdS+3V8KzF\nI2wDhVLGnGlU0nXQv59o2D1HojhprQag8ryt2SteGwKBgDDL0O1xhj7JnBalvYO7\nDi8XrVeppo2/92VqR107Gk6eQ0PEnsBi3FBaD30AfFsWqoWx9cJIwihjuHiIrpSB\njaLRY85/sOZAJs0pnQXD8PbSQCvQ96EI24Y6TDwCoQdEjPWIo4nWZd2tqKFmgPdt\nPvuLihesLfLnd7WBms1y+vZi\n-----END PRIVATE KEY-----\n",
+	client_email: "tp-ion@techproject-ion.iam.gserviceaccount.com",
+	client_id: "112627571073295599138",
+	auth_uri: "https://accounts.google.com/o/oauth2/auth",
+	token_uri: "https://oauth2.googleapis.com/token",
+	auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+	client_x509_cert_url:
+		"https://www.googleapis.com/robot/v1/metadata/x509/tp-ion%40techproject-ion.iam.gserviceaccount.com",
+	universe_domain: "googleapis.com",
+};
+
+const googleStorage = new Storage({ credentials: googleCredentials });
 const bucketName = process.env.GCS_BUCKET_NAME; // Ensure you have this variable in your .env file
 const bucket = googleStorage.bucket(bucketName);
 
 const sequelize = db.sequelize;
-
 
 sequelize
 	.authenticate()
