@@ -1,0 +1,17 @@
+{
+	"production": {
+		"username": "kratospidey",
+		"password": "Jyde@1728",
+		"database": "Ion",
+		"host": "tpion-azure-db.mysql.database.azure.com",
+		"dialect": "mysql",
+		"ssl": true,
+		"dialectOptions": {
+			"ssl": {
+				"require": true,
+				"rejectUnauthorized": true,
+				"ca": "/home/kratospidey/krato/imp/DigiCertGlobalRootCA.crt.pem"
+			}
+		}
+	}
+}

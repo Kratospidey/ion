@@ -18,29 +18,21 @@ const upload = multer({
 	storage: multer.memoryStorage(),
 });
 
+const fs = require("fs");
+const path = require("path");
+
 // Use the environment variable for the bucket name
 const googleStorage = new Storage();
 const bucketName = process.env.GCS_BUCKET_NAME; // Ensure you have this variable in your .env file
 const bucket = googleStorage.bucket(bucketName);
 
-const sequelize = new Sequelize(
-	process.env.DB_NAME,
-	process.env.DB_USER,
-	process.env.DB_PASSWORD,
-	{
-		host: process.env.DB_HOST,
-		dialect: "mysql", // or 'sqlite', 'postgres', 'mssql'
-		// ... other options
-	}
-);
+const sequelize = db.sequelize;
+
 
 sequelize
 	.authenticate()
 	.then(() => console.log("Connected to the database"))
 	.catch((err) => console.error("Unable to connect to the database", err));
-
-const fs = require("fs");
-const path = require("path");
 
 // const upload = multer({ storage: storage });
 
