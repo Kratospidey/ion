@@ -46,7 +46,10 @@ if (env === "production") {
 			dialect: "mysql",
 			dialectOptions: {
 				ssl: {
-					rejectUnauthorized: false, // This bypasses the certificate validation
+					require: true,
+					rejectUnauthorized: true,
+					ca: process.env.CA_CERT,
+					encrypt: true,
 				},
 			},
 		}
