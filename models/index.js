@@ -45,9 +45,8 @@ if (env === "production") {
 			dialectOptions: {
 				ssl: {
 					require: true,
-					rejectUnauthorized: true,
-					ca: process.env.CA_CERT,
-					encrypt: true,
+					rejectUnauthorized: false,
+					encrpyt: true,
 				},
 			},
 		}
