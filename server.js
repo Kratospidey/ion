@@ -914,7 +914,7 @@ app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3306;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
