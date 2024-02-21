@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/7c38411c-80c1-42a8-9b93-f9a0c670f121/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/TPIon",
+    "appService.deploySubpath": "."
+}
