@@ -49,22 +49,9 @@ function appendMessage({
 	// Check if message is an image URL
 	if (isImageUrl(message)) {
 		const image = document.createElement("img");
+		image.src = message;
 		image.classList.add("chat-image");
-		image.alt = "Loading image..."; // Alt text to display while the image is loading
-
-		image.onload = function () {
-			// Image is loaded and should now be visible.
-			// console.log("Image loaded successfully");
-		};
-
-		image.onerror = function () {
-			console.error("Error loading image.");
-			image.alt = "Failed to load image"; // Update alt text if the image fails to load
-		};
-
-		image.src = message + "?t=" + new Date().getTime(); // Set the image source directly to the URL with a cache-busting query string
-
-		messageContent.appendChild(image); // Append the image element to the DOM immediately
+		messageContent.appendChild(image);
 	} else {
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
