@@ -1069,7 +1069,7 @@ io.on("connection", (socket) => {
 						userId: userId,
 						serverId: roomId, // Assuming 'roomId' corresponds to 'serverId' or similar in your schema
 					});
-
+					// console.log(newMessage.content);
 					// Construct the image message object including user details and database record info
 					const imageMessage = {
 						userId,
@@ -1078,6 +1078,7 @@ io.on("connection", (socket) => {
 						profilePicture: userData.profilePicture,
 						timestamp: newMessage.createdAt, // Use the createdAt timestamp from the saved message
 					};
+					// console.log(imageMessage.message);
 
 					// Broadcast the image message to all clients in the room, including sender's user details
 					io.to(roomId).emit("sendImage", imageMessage);

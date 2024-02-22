@@ -774,31 +774,28 @@ button:active {
 	margin: auto; /* Centers image in the bubble if it's smaller than the max sizes */
 }
 
-
 #messageForm {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: #2a2b2e;
-    border-radius: 25px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    /* other styles... */
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	background-color: #2a2b2e;
+	border-radius: 25px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+	/* other styles... */
 }
 
 #messageInput {
-    flex-grow: 1; /* This will allow the input to grow and fill the space */
-    margin-right: 10px;
-    /* other styles... */
-    width: auto; /* Remove the width: 80% inline style, let flexbox handle it */
+	flex-grow: 1; /* This will allow the input to grow and fill the space */
+	margin-right: 10px;
+	/* other styles... */
+	width: auto; /* Remove the width: 80% inline style, let flexbox handle it */
 }
 
-
-
 .custom-file-upload {
-    margin-left: 10px; /* Add some space between the upload button and the send button */
-    cursor: pointer; /* Changes the cursor to indicate the label is clickable */
-    padding: 8px; /* Adds some padding for better touch target */
-    display: inline-flex; /* Allows you to align icons or text inside properly */
-    align-items: center; /* Vertically centers the content inside */
-    justify-content: center; /* Horizontally centers the content inside */
+	margin-left: 10px; /* Add some space between the upload button and the send button */
+	cursor: pointer; /* Changes the cursor to indicate the label is clickable */
+	padding: 8px; /* Adds some padding for better touch target */
+	display: inline-flex; /* Allows you to align icons or text inside properly */
+	align-items: center; /* Vertically centers the content inside */
+	justify-content: center; /* Horizontally centers the content inside */
 }

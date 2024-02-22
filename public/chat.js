@@ -20,6 +20,7 @@ function appendMessage({
 	timestamp,
 	profilePicture,
 }) {
+	// console.log(`appendMessage called with message: ${message}`);
 	const div = document.createElement("div");
 	div.classList.add("message");
 	div.classList.add("message-enter-active");
@@ -48,9 +49,22 @@ function appendMessage({
 	// Check if message is an image URL
 	if (isImageUrl(message)) {
 		const image = document.createElement("img");
-		image.src = message;
 		image.classList.add("chat-image");
-		messageContent.appendChild(image);
+		image.alt = "Loading image..."; // Alt text to display while the image is loading
+
+		image.onload = function () {
+			// Image is loaded and should now be visible.
+			// console.log("Image loaded successfully");
+		};
+
+		image.onerror = function () {
+			console.error("Error loading image.");
+			image.alt = "Failed to load image"; // Update alt text if the image fails to load
+		};
+
+		image.src = message + "?t=" + new Date().getTime(); // Set the image source directly to the URL with a cache-busting query string
+
+		messageContent.appendChild(image); // Append the image element to the DOM immediately
 	} else {
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
@@ -70,9 +84,10 @@ socket.on("chatMessage", appendMessage);
 // Listen for 'sendImage' event from the server
 socket.on("sendImage", function (data) {
 	// Data contains { userId, imageUrl, username, timestamp, profilePicture }
+	// console.log(`sendImage event received with data: `, data);
 	appendMessage({
 		userId: data.userId,
-		message: data.imageUrl, // URL of the uploaded image
+		message: data.message, // URL of the uploaded image
 		username: data.username,
 		timestamp: data.timestamp,
 		profilePicture: data.profilePicture,
@@ -164,7 +179,7 @@ function formatTimestamp(timestamp) {
 }
 
 function uploadImage(file) {
-	console.log("ran upload image");
+	// console.log("ran upload image");
 	const formData = new FormData();
 	formData.append("image", file);
 	fetch("/upload-image", {
@@ -173,11 +188,11 @@ function uploadImage(file) {
 	})
 		.then((response) => response.json())
 		.then((data) => {
-			console.log(data);
+			// console.log(data);
 			if (data.imageUrl) {
 				// Send the image URL to the chat
-				console.log("ran this code");
-				console.log(`filepath: ${data.imageUrl}`);
+				// console.log("ran this code");
+				// console.log(`filepath: ${data.imageUrl}`);
 				socket.emit("sendImage", { imageUrl: data.imageUrl, roomId });
 			}
 		})
@@ -195,7 +210,7 @@ function fetchUserDetails(userId) {
 		.then((response) => response.json())
 		.then((data) => {
 			// Now you have user details, you can use them in your application
-			console.log("User details:", data);
+			// console.log("User details:", data);
 			// For example, set the profile picture in the chat
 			document.getElementById("userProfilePic").src = data.profilePicture;
 		})
