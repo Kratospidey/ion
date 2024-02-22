@@ -312,7 +312,7 @@ function authenticateToken(req, res, next) {
 	try {
 		const decoded = jwt.verify(token, SECRET_KEY);
 		req.user = decoded;
-		console.log(`auth token ${req.user.userId}`); // Debugging line
+		// console.log(`auth token ${req.user.userId}`); // Debugging line
 		next();
 	} catch (ex) {
 		console.error("Token verification failed:", ex);
@@ -599,7 +599,7 @@ app.post(
 
 		// Server-side validation for username length
 		if (newUsername.length > 12) {
-			console.log("Executed");
+			// console.log("Executed");
 			return res
 				.status(400)
 				.json({ error: "Username must be 12 characters or less." });
@@ -677,7 +677,7 @@ app.post(
 	authenticateToken,
 	upload.none(),
 	async (req, res) => {
-		console.log(req.body); // Check what's being received in the request body
+		// console.log(req.body); // Check what's being received in the request body
 
 		const { newServerName, serverId } = req.body;
 		try {
@@ -718,9 +718,9 @@ app.post("/remove-member", authenticateToken, async (req, res) => {
 			return res.status(404).json({ message: "Server not found." });
 		}
 
-		console.log(`Server owner ID: ${server.ownerId}`);
-		console.log(`Requesting user ID: ${userId}`);
-		console.log(`Member to remove ID: ${memberToRemove}`);
+		// console.log(`Server owner ID: ${server.ownerId}`);
+		// console.log(`Requesting user ID: ${userId}`);
+		// console.log(`Member to remove ID: ${memberToRemove}`);
 
 		// Check if the member being removed is the server owner
 		if (parseInt(memberToRemove) === server.ownerId) {
@@ -870,7 +870,7 @@ async function deleteFileFromCloud(filepath) {
 // Express route handler
 app.post("/delete-file", authenticateToken, async (req, res) => {
 	const { fileUrl, serverId } = req.body; // Assuming the client sends the full URL and server ID
-	console.log(fileUrl);
+	// console.log(fileUrl);
 	try {
 		const filePath = extractFilePath(fileUrl);
 		console.log(`filepath: ${filePath}`);
@@ -1002,16 +1002,16 @@ server.listen(PORT, () => {
 io.on("connection", (socket) => {
 	const cookieString = socket.request.headers.cookie;
 	const cookies = parseCookies(cookieString); // You'll need a function to parse the cookie string
-	console.log(cookies);
+	// console.log(cookies);
 	const token = cookies.token; // Replace 'token' with the name of your cookie
 	// console.log("Headers:", socket.request.headers);
 
 	// Verify the token. The implementation depends on your authentication system
 	authenticateSocketToken(token)
 		.then((decoded) => {
-			console.log("Authenticated user:", decoded.userId);
+			// console.log("Authenticated user:", decoded.userId);
 			socket.emit("userId", { userId: decoded.userId });
-			console.log(`server side id: ${decoded.userId}`);
+			// console.log(`server side id: ${decoded.userId}`);
 			// Server-side
 			socket.on("joinRoom", (roomId) => {
 				socket.join(roomId);
