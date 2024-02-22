@@ -775,10 +775,6 @@ button:active {
 }
 
 
-To improve the layout of your input bar and make it look more balanced, we can adjust the CSS. Given that your #messageInput currently has a style of width: 80%, which might be too much, we will adjust the widths and alignment of the elements within your #messageForm. Here's an updated CSS snippet:
-
-css
-Copy code
 #messageForm {
     display: flex;
     align-items: center;
