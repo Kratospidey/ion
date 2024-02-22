@@ -935,6 +935,64 @@ app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 
+app.post(
+	"/upload-image",
+	upload.single("image"),
+	authenticateToken,
+	async (req, res) => {
+		try {
+			const userId = req.user.userId; // Assuming you have a way to identify the user
+
+			// Validate the file is an image
+			if (!req.file.mimetype.startsWith("image/")) {
+				return res
+					.status(400)
+					.json({ message: "Please upload an image file." });
+			}
+
+			// Check the size of the uploaded image
+			if (req.file.size > 10 * 1024 * 1024) {
+				// 10 MB limit
+				return res
+					.status(400)
+					.json({ message: "Image cannot be larger than 10 MB." });
+			}
+
+			// Create a new blob in the bucket and upload the file data
+			const blob = bucket.file(
+				`images/${userId}/${Date.now()}-${req.file.originalname}`
+			);
+			const blobStream = blob.createWriteStream({
+				resumable: true,
+				metadata: {
+					contentType: req.file.mimetype,
+				},
+			});
+
+			blobStream.on("error", (err) => {
+				console.error(err);
+				return res.status(500).send("Error uploading to Google Cloud Storage.");
+			});
+
+			blobStream.on("finish", async () => {
+				// Make the file public and get its public URL
+				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+				// console.log(publicUrl);
+				// Send the public URL as a response
+				res.status(200).json({
+					message: "Image uploaded successfully",
+					imageUrl: publicUrl,
+				});
+			});
+
+			blobStream.end(req.file.buffer);
+		} catch (err) {
+			console.error("Error uploading image:", err);
+			res.status(500).send("Internal server error");
+		}
+	}
+);
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
@@ -996,6 +1054,37 @@ io.on("connection", (socket) => {
 				const userData = await getUserDataById(decoded.userId);
 				username = userData.username;
 				socket.to(roomId).emit("typing", { username: username, typing });
+			});
+			socket.on("sendImage", async (data) => {
+				const { imageUrl, roomId } = data;
+				const userId = decoded.userId; // Assuming this is obtained from token authentication
+
+				try {
+					// Fetch user details from the database
+					const userData = await getUserDataById(userId); // Replace getUserDataById with your actual function to fetch user details
+
+					// Save the image message in the database
+					const newMessage = await Message.create({
+						content: imageUrl, // Storing the image URL as the message content
+						userId: userId,
+						serverId: roomId, // Assuming 'roomId' corresponds to 'serverId' or similar in your schema
+					});
+
+					// Construct the image message object including user details and database record info
+					const imageMessage = {
+						userId,
+						message: newMessage.content, // The image URL from the saved message
+						username: userData.username,
+						profilePicture: userData.profilePicture,
+						timestamp: newMessage.createdAt, // Use the createdAt timestamp from the saved message
+					};
+
+					// Broadcast the image message to all clients in the room, including sender's user details
+					io.to(roomId).emit("sendImage", imageMessage);
+				} catch (error) {
+					console.error("Error handling sendImage event:", error);
+					// Handle the error appropriately
+				}
 			});
 		})
 		.catch((error) => {

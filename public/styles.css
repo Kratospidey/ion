@@ -598,6 +598,7 @@ pre {
 	flex-direction: column;
 	gap: 10px; /* Adds space between messages */
 	padding: 10px;
+	width: 100%;
 }
 
 #messageForm {
@@ -621,11 +622,13 @@ pre {
 			/* Slightly darker green for the bottom */
 	);
 	border: 1px solid #4a5b4e; /* Subtle border for depth */
+	margin-left: 10px; /* Add some space between the button and the input */
 }
 
 #messageInput {
 	flex-grow: 1;
 	margin-right: 10px;
+	width: auto;
 	padding: 10px 20px;
 	background-color: #3a3b3e;
 	border: 2px solid #4a4b4e;
@@ -696,6 +699,7 @@ button:active {
 	display: flex;
 	align-items: flex-end;
 	margin-bottom: 10px;
+	max-width: 100%;
 }
 
 .profile-picture {
@@ -728,6 +732,11 @@ button:active {
 	color: #333; /* Dark grey text for better readability */
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Font similar to that used in Windows XP */
 	text-shadow: 0 1px 0 #fff; /* Slight text shadow for depth */
+	position: relative;
+	max-width: calc(
+		100% - 60px
+	); /* Adjusts max-width to account for profile picture and padding */
+	word-wrap: break-word; /* Ensures text breaks to prevent overflow */
 }
 
 .username {
@@ -753,4 +762,47 @@ button:active {
 
 .message-enter-active {
 	animation: slideFadeUp 0.5s ease-out forwards;
+}
+
+.chat-image {
+	max-width: 100%; /* Ensures image is not wider than the message bubble */
+	max-height: 200px; /* Sets a maximum height for the image */
+	width: auto; /* Maintains aspect ratio */
+	height: auto; /* Maintains aspect ratio */
+	border-radius: 10px; /* Optional: if you want rounded corners on the image */
+	display: block; /* Fixes issues with extra space below the image */
+	margin: auto; /* Centers image in the bubble if it's smaller than the max sizes */
+}
+
+
+To improve the layout of your input bar and make it look more balanced, we can adjust the CSS. Given that your #messageInput currently has a style of width: 80%, which might be too much, we will adjust the widths and alignment of the elements within your #messageForm. Here's an updated CSS snippet:
+
+css
+Copy code
+#messageForm {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #2a2b2e;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    /* other styles... */
+}
+
+#messageInput {
+    flex-grow: 1; /* This will allow the input to grow and fill the space */
+    margin-right: 10px;
+    /* other styles... */
+    width: auto; /* Remove the width: 80% inline style, let flexbox handle it */
+}
+
+
+
+.custom-file-upload {
+    margin-left: 10px; /* Add some space between the upload button and the send button */
+    cursor: pointer; /* Changes the cursor to indicate the label is clickable */
+    padding: 8px; /* Adds some padding for better touch target */
+    display: inline-flex; /* Allows you to align icons or text inside properly */
+    align-items: center; /* Vertically centers the content inside */
+    justify-content: center; /* Horizontally centers the content inside */
 }

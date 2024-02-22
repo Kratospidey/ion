@@ -22,7 +22,7 @@ function appendMessage({
 }) {
 	const div = document.createElement("div");
 	div.classList.add("message");
-	div.classList.add('message-enter-active');
+	div.classList.add("message-enter-active");
 
 	const profilePic = document.createElement("img");
 	profilePic.src = profilePicture; // The URL of the user's profile picture
@@ -41,22 +41,46 @@ function appendMessage({
 		? "Time not available"
 		: formatTimestamp(timestamp);
 
-	const textDiv = document.createElement("div");
-	textDiv.classList.add("text");
-	textDiv.textContent = message;
-
+	// Append username and timestamp
 	messageContent.appendChild(usernameSpan);
 	messageContent.appendChild(timestampSpan);
-	messageContent.appendChild(textDiv);
+
+	// Check if message is an image URL
+	if (isImageUrl(message)) {
+		const image = document.createElement("img");
+		image.src = message;
+		image.classList.add("chat-image");
+		messageContent.appendChild(image);
+	} else {
+		const textDiv = document.createElement("div");
+		textDiv.classList.add("text");
+		textDiv.textContent = message;
+		messageContent.appendChild(textDiv);
+	}
+
 	div.appendChild(profilePic);
 	div.appendChild(messageContent);
 	messageContainer.appendChild(div);
-
 	messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
 // Listen for chatMessage event from the server
 socket.on("chatMessage", appendMessage);
+
+// Listen for 'sendImage' event from the server
+socket.on("sendImage", function (data) {
+	// Data contains { userId, imageUrl, username, timestamp, profilePicture }
+	appendMessage({
+		userId: data.userId,
+		message: data.imageUrl, // URL of the uploaded image
+		username: data.username,
+		timestamp: data.timestamp,
+		profilePicture: data.profilePicture,
+	});
+
+	// Optionally, you might want to scroll to the latest message
+	messageContainer.scrollTop = messageContainer.scrollHeight;
+});
 
 // Send message to server
 messageForm.addEventListener("submit", function (e) {
@@ -137,4 +161,43 @@ function formatTimestamp(timestamp) {
 	const minutes = date.getMinutes().toString().padStart(2, "0");
 
 	return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
+function uploadImage(file) {
+	console.log("ran upload image");
+	const formData = new FormData();
+	formData.append("image", file);
+	fetch("/upload-image", {
+		method: "POST",
+		body: formData,
+	})
+		.then((response) => response.json())
+		.then((data) => {
+			console.log(data);
+			if (data.imageUrl) {
+				// Send the image URL to the chat
+				console.log("ran this code");
+				console.log(`filepath: ${data.imageUrl}`);
+				socket.emit("sendImage", { imageUrl: data.imageUrl, roomId });
+			}
+		})
+		.catch((error) => {
+			console.error("Error uploading image:", error);
+		});
+}
+
+function isImageUrl(url) {
+	return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(url);
+}
+
+function fetchUserDetails(userId) {
+	fetch(`/user/${userId}`)
+		.then((response) => response.json())
+		.then((data) => {
+			// Now you have user details, you can use them in your application
+			console.log("User details:", data);
+			// For example, set the profile picture in the chat
+			document.getElementById("userProfilePic").src = data.profilePicture;
+		})
+		.catch((error) => console.error("Error fetching user details:", error));
 }

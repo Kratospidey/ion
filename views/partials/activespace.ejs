@@ -13,16 +13,51 @@
 			id="messageContainer"
 			style="padding: 10px; overflow-y: auto; height: 90%"
 		></div>
+		<div id="imagePreviewContainer" style="display: none">
+			<img
+				id="imagePreview"
+				src=""
+				alt="Image Preview"
+				style="max-width: 200px; max-height: 200px"
+			/>
+		</div>
 		<div id="typingIndicator" style="display: none"></div>
 		<form id="messageForm">
+			<!-- Hidden file input -->
+			<input
+				type="file"
+				id="imageUpload"
+				accept="image/*"
+				style="display: none"
+				onchange="handleFiles(this.files)"
+			/>
+
+			<!-- Visible elements -->
 			<input
 				type="text"
 				id="messageInput"
 				placeholder="Type a message..."
 				autocomplete="off"
-				style="width: 90%"
 			/>
 			<button type="submit">Send</button>
+			<!-- Custom styled button that triggers the file input -->
+			<label for="imageUpload" class="custom-file-upload">
+				<i class="fa-solid fa-upload" style="color: white"></i>
+			</label>
 		</form>
 	</div>
 </div>
+
+<script defer>
+	function handleFiles(files) {
+		console.log("ran handleFiles");
+		if (files.length > 0) {
+			const file = files[0];
+			if (file.size <= 20 * 1024 * 1024) {
+				uploadImage(file);
+			} else {
+				alert("File must be less than 20MB.");
+			}
+		}
+	}
+</script>
