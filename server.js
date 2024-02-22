@@ -503,6 +503,11 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 	}
 });
 
+function sanitizeFilename(filename) {
+	// Replace any characters that are not alphanumeric, dashes, underscores, or periods with an underscore
+	return filename.replace(/[^a-zA-Z0-9\-_.]/g, "_");
+}
+
 // User Profile Picture Upload
 app.post(
 	"/upload-user-profile",
@@ -511,8 +516,11 @@ app.post(
 	async (req, res) => {
 		const userId = req.user.userId;
 		const file = req.file;
+
+		const sanitizedFilename = sanitizeFilename(file.originalname);
+
 		const blob = bucket.file(
-			`users/profile-pictures/${userId}/${file.originalname}`
+			`users/profile-pictures/${userId}/${sanitizeFilename}`
 		);
 		const blobStream = blob.createWriteStream({
 			resumable: true,
@@ -549,8 +557,11 @@ app.post(
 	async (req, res) => {
 		const serverId = req.body.serverId; // Ensure you have serverId in your request
 		const file = req.file;
+
+		const sanitizedFilename = sanitizeFilename(file.originalname);
+
 		const blob = bucket.file(
-			`servers/profile-pictures/${serverId}/${file.originalname}`
+			`servers/profile-pictures/${serverId}/${sanitizedFilename}`
 		);
 		const blobStream = blob.createWriteStream({
 			resumable: true,
@@ -616,18 +627,29 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 	const userId = req.user.userId;
 
 	try {
-		// First, remove the user from any servers they are a part of
-		await ServerUser.destroy({ where: { userId: userId } });
+		// Find all servers owned by the user
+		const ownedServers = await Server.findAll({ where: { ownerId: userId } });
 
-		// Then, delete the user account
+		// Extract server IDs for deletion
+		const serverIdsToDelete = ownedServers.map((server) => server.id);
+
+		// Delete all ServerUser associations for these servers
+		await ServerUser.destroy({ where: { serverId: serverIdsToDelete } });
+
+		// Delete all servers owned by the user
+		await Server.destroy({ where: { id: serverIdsToDelete } });
+
+		// Delete the user's account
 		await User.destroy({ where: { id: userId } });
 
-		// Optionally, clear the user's session or token to log them out
+		// Clear the user's session or token to log them out
 		res.cookie("token", "", { expires: new Date(0) });
 
-		res.send("Account and associated memberships deleted successfully.");
+		res.send(
+			"Account, owned servers, and associated memberships deleted successfully."
+		);
 	} catch (err) {
-		console.error("Error deleting account and associated memberships:", err);
+		console.error("Error during account and server deletion:", err);
 		res.status(500).send("Internal server error.");
 	}
 });
