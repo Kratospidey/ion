@@ -1000,6 +1000,46 @@ app.post(
 	}
 );
 
+app.get("/joinserver/:inviteCode", authenticateToken, async (req, res) => {
+	const { inviteCode } = req.params;
+
+	try {
+		// Find the server by its unique code
+		const server = await Server.findOne({ where: { serverCode: inviteCode } });
+
+		if (!server) {
+			return res.status(404).send("Server not found.");
+		}
+
+		// Retrieve the ServerUser model which is the join table between Server and User
+		const ServerUser = db.ServerUser;
+
+		// Check if the user is already a member of the server to prevent duplicate entries
+		const existingMember = await ServerUser.findOne({
+			where: {
+				serverId: server.id,
+				userId: req.user.userId,
+			},
+		});
+
+		if (existingMember) {
+			return res.status(409).send("User is already a member of this server.");
+		}
+
+		// Add the current user to the server if not already a member
+		await ServerUser.create({
+			serverId: server.id,
+			userId: req.user.userId,
+		});
+
+		// Redirect the user to the server's page or home page after joining
+		res.redirect("/home");
+	} catch (err) {
+		console.error("Error joining server:", err);
+		res.status(500).send("Internal server error.");
+	}
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

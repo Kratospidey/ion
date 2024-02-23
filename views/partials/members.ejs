@@ -23,10 +23,29 @@
 	<!-- Make sure this closing tag is here -->
 	<% if (typeof serverCode !== 'undefined') { %>
 	<div class="server-code-display">
-		<p class="h6 text-white" style="text-align: center">
-			Server Code: <%= serverCode %>
-		</p>
+		<button
+			id="copyInviteBtn"
+			class="btn btn-primary"
+			onclick="copyInviteLink('<%= serverCode %>')"
+		>
+			Copy Invite
+		</button>
 	</div>
 	<% } %>
 </div>
-<!-- This closes the .members div -->
+
+<script>
+	function copyInviteLink(code) {
+		const inviteLink = `${window.location.origin}/joinserver/${code}`;
+		navigator.clipboard.writeText(inviteLink).then(
+			function () {
+				/* clipboard successfully set */
+				alert("Invite link copied to clipboard!");
+			},
+			function () {
+				/* clipboard write failed */
+				alert("Failed to copy invite link.");
+			}
+		);
+	}
+</script>

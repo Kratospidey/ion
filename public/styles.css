@@ -804,3 +804,19 @@ button:active {
 	align-items: center; /* Vertically centers the content inside */
 	justify-content: center; /* Horizontally centers the content inside */
 }
+
+#copyInviteBtn {
+	min-width: 222px;
+	max-width: 100%;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	background-image: linear-gradient(
+		to bottom,
+		#66c466,
+		/* Lighter shade of green for the top */ #5cb85c 50%,
+		/* Original button color */ #509f50
+			/* Slightly darker green for the bottom */
+	);
+	border: 1px solid #4a5b4e; /* Subtle border for depth */
+	margin-left: 10px; /* Add some space between the button and the input */
+}
