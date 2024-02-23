@@ -84,14 +84,17 @@ socket.on("sendImage", function (data) {
 	messageContainer.scrollTop = messageContainer.scrollHeight;
 });
 
-// Send message to server
-messageForm.addEventListener("submit", function (e) {
-	e.preventDefault();
-	if (!messageInput.value.trim()) return; // Prevent sending empty messages
+messageInput.addEventListener("keydown", function (e) {
+	if (e.key === "Enter") {
+		e.preventDefault(); // Prevent the default behavior for all 'Enter' presses
 
-	// Emit the message to the server
-	socket.emit("sendMessage", { message: messageInput.value, roomId });
-	messageInput.value = ""; // Clear the input field
+		if (!e.shiftKey && this.value.trim() !== "") {
+			// Emit the message to the server when 'Shift' is not held
+			socket.emit("sendMessage", { message: this.value, roomId });
+			this.value = ""; // Clear the input field
+		}
+		// When 'Shift' is held, the default action is already prevented, allowing for manual insertion of a new line if needed
+	}
 });
 
 // Fetch and display historical messages when the user enters a chat room
@@ -165,6 +168,19 @@ function formatTimestamp(timestamp) {
 	return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
+messageInput.addEventListener("paste", (event) => {
+	const items = (event.clipboardData || window.clipboardData).items;
+	for (let index in items) {
+		const item = items[index];
+		if (item.kind === "file") {
+			const blob = item.getAsFile();
+			if (blob) {
+				uploadImage(blob); // Reuse your existing uploadImage function
+			}
+		}
+	}
+});
+
 function uploadImage(file) {
 	// console.log("ran upload image");
 	const formData = new FormData();
@@ -189,7 +205,9 @@ function uploadImage(file) {
 }
 
 function isImageUrl(url) {
-	return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(url);
+	// Check if the URL has recognizable image file extensions before any query parameters
+	const withoutQuery = url.split("?")[0];
+	return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(withoutQuery);
 }
 
 function fetchUserDetails(userId) {

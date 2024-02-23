@@ -9,6 +9,13 @@ const { Op } = require("sequelize");
 const db = require("./models/index"); // Adjust the path according to your project structure
 const { Server, User, ServerUser, Message } = require("./models"); // Adjust the path to your models directory
 
+const EmojiConvertor = require("emoji-js");
+const emoji = new EmojiConvertor();
+
+// Set the mode to replace shortcodes with actual emojis
+emoji.replace_mode = "unified";
+emoji.allow_native = true; // Use native Unicode emojis where available
+
 // gdrive conf
 const { Storage } = require("@google-cloud/storage");
 const multer = require("multer");
@@ -1021,10 +1028,11 @@ io.on("connection", (socket) => {
 				const { message, roomId } = data;
 				const userId = decoded.userId; // Assuming this is obtained from token authentication
 
-				// Store the message in the database
+				const convertedMessage = emoji.replace_colons(message);
+
 				try {
 					const newMessage = await Message.create({
-						content: message,
+						content: convertedMessage,
 						userId: userId, // Assuming 'userId' is available from the authenticated user
 						serverId: roomId, // Assuming 'roomId' corresponds to 'serverId'
 					});

@@ -5,6 +5,11 @@
 	font-family: Inter;
 }
 
+html > div {
+	padding: 0;
+	margin: 0;
+}
+
 html,
 body {
 	height: 100vh;
@@ -20,11 +25,6 @@ body {
 * {
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
-}
-
-.active-space {
-	width: 100%;
-	height: 100%;
 }
 
 .code-space {
@@ -293,12 +293,11 @@ a {
 	margin-left: 10px;
 	/* background-color: #1e1e1e; */
 	height: 97%;
-	border-radius: 20px;
-	padding: 10px;
+	box-sizing: border-box;
+	border-radius: 30px;
 	min-width: 900px;
 	display: flex;
 	flex-direction: column;
-	padding: 20px;
 	gap: 20px;
 }
 
@@ -568,11 +567,12 @@ pre {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	height: 300px; /* Adjust as needed */
+	box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+	height: 100%;
 	padding: 25px;
 	border-radius: 15px;
 	background: #3a3b3e;
-	border: 1px solid #a0a0a0; /* Solid border for definition */
+	border: 2px solid #a0a0a0; /* Solid border for definition */
 	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.2),
 		/* Inner top shadow for a subtle highlight */ inset 0 -10px 10px rgba(0, 0, 0, 0.2),
 		/* Inner bottom shadow for a subtle depth */ 0 10px 20px rgba(0, 0, 0, 0.5); /* Outer shadow for depth */
@@ -595,10 +595,13 @@ pre {
 
 #messageContainer {
 	display: flex;
+	flex-grow: 1;
 	flex-direction: column;
 	gap: 10px; /* Adds space between messages */
 	padding: 10px;
 	width: 100%;
+	padding-bottom: 30px;
+	overflow: hidden; /* Makes sure the content respects border radius */
 }
 
 #messageForm {
@@ -609,6 +612,7 @@ pre {
 	border-radius: 25px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 	transition: all 0.3s ease;
+	overflow: hidden; /* Makes sure the content respects border radius */
 }
 
 #messageForm button {
@@ -645,6 +649,7 @@ pre {
 		/* Slightly lighter shade for the top */ #3a3b3e
 			/* Original input field color */
 	);
+	overflow: hidden; /* Makes sure the content respects border radius */
 }
 
 #messageInput::placeholder {
