@@ -143,11 +143,23 @@ messageInput.addEventListener("input", () => {
 	}, TYPING_TIMER_LENGTH);
 });
 
-// Listen for 'typing' event from the server
+const currentlyTyping = new Set();
+
 socket.on("typing", (data) => {
 	const typingIndicator = document.getElementById("typingIndicator");
-	if (data.typing) {
-		typingIndicator.textContent = `${data.username} is typing...`;
+	const { username, typing } = data;
+
+	if (typing) {
+		currentlyTyping.add(username);
+	} else {
+		currentlyTyping.delete(username);
+	}
+
+	if (currentlyTyping.size > 0) {
+		typingIndicator.textContent =
+			Array.from(currentlyTyping).join(", ") +
+			(currentlyTyping.size === 1 ? " is" : " are") +
+			" typing...";
 		typingIndicator.style.display = "block";
 		typingIndicator.style.color = "white";
 		typingIndicator.style.marginLeft = "10px";
