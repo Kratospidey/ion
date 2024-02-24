@@ -233,3 +233,25 @@ function fetchUserDetails(userId) {
 		})
 		.catch((error) => console.error("Error fetching user details:", error));
 }
+
+// JavaScript to auto-resize the textarea
+function adjustTextareaHeight(textarea) {
+	textarea.style.height = "auto";
+	textarea.style.height = textarea.scrollHeight + "px";
+}
+
+$(document).ready(function () {
+	$("#messageInput").emojioneArea({
+		pickerPosition: "top", // This will display the emoji picker above the input field
+		filtersPosition: "bottom",
+		tones: false, // If you want to hide the tone selection buttons
+		autocomplete: true,
+		inline: true, // This option attempts to position the picker relative to the input
+		hidePickerOnBlur: true,
+		events: {
+			keyup: function (editor, event) {
+				// Your keyup event code
+			},
+		},
+	});
+});
