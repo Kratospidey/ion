@@ -1068,11 +1068,9 @@ io.on("connection", (socket) => {
 				const { message, roomId } = data;
 				const userId = decoded.userId; // Assuming this is obtained from token authentication
 
-				const convertedMessage = emoji.replace_colons(message);
-
 				try {
 					const newMessage = await Message.create({
-						content: convertedMessage,
+						content: message,
 						userId: userId, // Assuming 'userId' is available from the authenticated user
 						serverId: roomId, // Assuming 'roomId' corresponds to 'serverId'
 					});
