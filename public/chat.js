@@ -240,18 +240,105 @@ function adjustTextareaHeight(textarea) {
 	textarea.style.height = textarea.scrollHeight + "px";
 }
 
-$(document).ready(function () {
-	$("#messageInput").emojioneArea({
-		pickerPosition: "top", // This will display the emoji picker above the input field
-		filtersPosition: "bottom",
-		tones: false, // If you want to hide the tone selection buttons
-		autocomplete: true,
-		inline: true, // This option attempts to position the picker relative to the input
-		hidePickerOnBlur: true,
-		events: {
-			keyup: function (editor, event) {
-				// Your keyup event code
-			},
-		},
+fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
+	.then((response) => response.json())
+	.then((data) => {
+		EmojiMart.init({ data });
+
+		let currentEmojiIndex = -1;
+		let emojiResults = [];
+
+		function isCursorNextToEmoji(input) {
+			const cursorPosition = input.selectionStart;
+			const textBeforeCursor = input.value.slice(0, cursorPosition);
+			const textAfterCursor = input.value.slice(cursorPosition);
+
+			// Regex to match an emoji pattern
+			const emojiRegex = /[\p{Emoji}\u200d]+/gu;
+
+			// Check if the last character before the cursor or the first character after the cursor is an emoji
+			return (
+				emojiRegex.test(textBeforeCursor[textBeforeCursor.length - 1]) ||
+				emojiRegex.test(textAfterCursor[0])
+			);
+		}
+
+		function emojiSearch(query) {
+			if (!query) {
+				document.getElementById("emoji-search-results").style.display = "none";
+				return;
+			}
+
+			EmojiMart.SearchIndex.search(query).then((emojis) => {
+				emojiResults = emojis;
+				const resultsContainer = document.getElementById(
+					"emoji-search-results"
+				);
+				resultsContainer.innerHTML = "";
+				currentEmojiIndex = -1;
+
+				if (emojis.length) {
+					emojis.forEach((emoji, index) => {
+						const emojiSpan = document.createElement("span");
+						emojiSpan.textContent = emoji.skins[0].native;
+						emojiSpan.onclick = function () {
+							insertEmoji(emojiSpan.textContent);
+						};
+						if (index === 0) {
+							// Automatically highlight the first result
+							emojiSpan.classList.add("highlighted");
+							currentEmojiIndex = 0;
+						}
+						resultsContainer.appendChild(emojiSpan);
+					});
+
+					resultsContainer.style.display = "block";
+				} else {
+					resultsContainer.style.display = "none";
+				}
+			});
+		}
+
+		function insertEmoji(emoji) {
+			const input = document.getElementById("messageInput");
+			let currentValue = input.value;
+			const newValue = currentValue.replace(/:[^\s]*$/, emoji + " ");
+			input.value = newValue;
+			document.getElementById("emoji-search-results").style.display = "none";
+			input.focus();
+		}
+
+		const messageInput = document.getElementById("messageInput");
+		messageInput.addEventListener("input", function () {
+			const query = messageInput.value.split(":").pop();
+			if (
+				messageInput.value.includes(":") &&
+				!isCursorNextToEmoji(messageInput)
+			) {
+				emojiSearch(query);
+			}
+		});
+
+		messageInput.addEventListener("keydown", function (e) {
+			const resultsContainer = document.getElementById("emoji-search-results");
+			const emojis = resultsContainer.getElementsByTagName("span");
+			if (!emojis.length) return;
+
+			if (e.key === "ArrowDown") {
+				e.preventDefault();
+				currentEmojiIndex = (currentEmojiIndex + 1) % emojis.length;
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				currentEmojiIndex =
+					(currentEmojiIndex - 1 + emojis.length) % emojis.length;
+			} else if (e.key === "Enter" || e.key === "Tab") {
+				e.preventDefault();
+				emojis[currentEmojiIndex].click();
+				return;
+			}
+
+			Array.from(emojis).forEach((emoji, index) => {
+				emoji.classList.toggle("highlighted", index === currentEmojiIndex);
+			});
+		});
 	});
-});

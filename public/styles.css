@@ -570,6 +570,7 @@ pre {
 	box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 	height: 100%;
 	padding: 25px;
+	padding-bottom: 50px;
 	border-radius: 15px;
 	background: #3a3b3e;
 	border: 2px solid #a0a0a0; /* Solid border for definition */
@@ -819,4 +820,42 @@ button:active {
 	);
 	border: 1px solid #4a5b4e; /* Subtle border for depth */
 	margin-left: 10px; /* Add some space between the button and the input */
+}
+
+#emoji-search-results span {
+	font-size: 20px; /* Or any other size */
+	cursor: pointer;
+	margin: 5px;
+}
+
+#emoji-search-results {
+	max-height: 40px; /* Adjust the height as needed */
+	overflow-y: auto; /* Enables vertical scrolling when content exceeds max-height */
+	display: none; /* Keeps your existing display logic */
+	z-index: 1000; /* Optional: Ensures the div is on top of other elements */
+	/* Add other styling here such as background color, padding, etc. */
+}
+
+#emoji-search-results span.highlighted {
+	font-size: 28px; /* Slightly larger than other emojis */
+	transform: scale(1.1); /* Make it appear larger */
+	animation: vibrate 0.3s infinite; /* Add a vibration effect */
+}
+
+@keyframes vibrate {
+	0% {
+		transform: scale(1.1) translate(0px);
+	}
+	25% {
+		transform: scale(1.1) translate(-10px);
+	}
+	50% {
+		transform: scale(1.1) translate(10px);
+	}
+	75% {
+		transform: scale(1.1) translate(-10px);
+	}
+	100% {
+		transform: scale(1.1) translate(0px);
+	}
 }
