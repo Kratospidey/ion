@@ -90,6 +90,17 @@ app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Set the views directory
 
+app.use((req, res, next) => {
+	if (
+		req.header("x-forwarded-proto") !== "https" &&
+		process.env.NODE_ENV === "production"
+	) {
+		res.redirect(`https://${req.header("host")}${req.url}`);
+	} else {
+		next();
+	}
+});
+
 // Define routes
 app.get("/", (req, res) => {
 	// Redirect to the login page
