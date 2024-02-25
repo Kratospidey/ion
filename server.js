@@ -1076,8 +1076,37 @@ io.on("connection", (socket) => {
 			socket.emit("userId", { userId: decoded.userId });
 			// console.log(`server side id: ${decoded.userId}`);
 			// Server-side
-			socket.on("joinRoom", (roomId) => {
-				socket.join(roomId);
+			socket.on("joinRoom", async (roomId) => {
+				const cookieString = socket.request.headers.cookie;
+				const cookies = parseCookies(cookieString);
+				const token = cookies.token;
+
+				try {
+					const decoded = await authenticateSocketToken(token);
+					const userId = decoded.userId;
+
+					// User joins the specified room
+					socket.join(roomId);
+
+					// Fetch user and server details
+					const user = await getUserDataById(userId); // Make sure you have this function implemented
+					const server = await getServerDataById(roomId); // Make sure you have this function implemented
+
+					// Construct the welcome message
+					const welcomeMessage = {
+						userId: server.id, // Use server ID to represent this system message
+						message: `${user.username} joined ${server.name}`,
+						username: server.name, // Use server name as the username for this system message
+						profilePicture: server.profilePicture, // Server's profile picture
+						timestamp: new Date().toISOString(),
+					};
+
+					// Emit the welcome message to all clients in the room
+					io.to(roomId).emit("chatMessage", welcomeMessage);
+				} catch (error) {
+					console.error("Error handling joinRoom event:", error);
+					// Handle the error appropriately
+				}
 			});
 
 			socket.on("sendMessage", async (data) => {
@@ -1212,6 +1241,28 @@ async function getUserDataById(userId) {
 		};
 	} catch (error) {
 		console.error("Error fetching user:", error);
+		throw error;
+	}
+}
+
+async function getServerDataById(serverId) {
+	try {
+		// Assuming 'Server' is your Sequelize model for the server table
+		const server = await Server.findByPk(serverId, {
+			attributes: ["id", "name", "profilePicture"], // Include only the attributes you need
+		});
+
+		if (!server) {
+			return null; // or throw new Error('Server not found');
+		}
+
+		return {
+			id: server.id,
+			name: server.name,
+			profilePicture: server.profilePicture, // Assuming this is the field for the server's profile picture
+		};
+	} catch (error) {
+		console.error("Error fetching server:", error);
 		throw error;
 	}
 }
