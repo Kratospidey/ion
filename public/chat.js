@@ -14,7 +14,7 @@ let isEmojiSelectionMode = false; // Step 1: Introduce the flag
 function scrollToBottom() {
 	setTimeout(() => {
 		messageContainer.scrollTop = messageContainer.scrollHeight;
-	}, 1000); // Adjust the delay as needed
+	}, 5000); // Adjust the delay as needed
 }
 
 // Join the chat room
