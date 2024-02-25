@@ -9,6 +9,8 @@ const messageInput = document.getElementById("messageInput");
 const urlPath = window.location.pathname.split("/");
 const roomId = urlPath[urlPath.length - 1];
 
+let isEmojiSelectionMode = false; // Step 1: Introduce the flag
+
 // Join the chat room
 socket.emit("joinRoom", roomId);
 
@@ -84,16 +86,15 @@ socket.on("sendImage", function (data) {
 	messageContainer.scrollTop = messageContainer.scrollHeight;
 });
 
+// Adjust the keydown event for sending messages
 messageInput.addEventListener("keydown", function (e) {
-	if (e.key === "Enter") {
-		e.preventDefault(); // Prevent the default behavior for all 'Enter' presses
-
-		if (!e.shiftKey && this.value.trim() !== "") {
-			// Emit the message to the server when 'Shift' is not held
+	if (e.key === "Enter" && !e.shiftKey && !isEmojiSelectionMode) {
+		// Check the flag here
+		e.preventDefault(); // Prevent form submission
+		if (this.value.trim() !== "") {
 			socket.emit("sendMessage", { message: this.value, roomId });
 			this.value = ""; // Clear the input field
 		}
-		// When 'Shift' is held, the default action is already prevented, allowing for manual insertion of a new line if needed
 	}
 });
 
@@ -266,6 +267,7 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 		function emojiSearch(query) {
 			if (!query) {
 				document.getElementById("emoji-search-results").style.display = "none";
+				isEmojiSelectionMode = false; // Ensure we exit emoji selection mode if the query is empty
 				return;
 			}
 
@@ -275,7 +277,7 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 					"emoji-search-results"
 				);
 				resultsContainer.innerHTML = "";
-				currentEmojiIndex = -1;
+				currentEmojiIndex = -1; // Reset the emoji index
 
 				if (emojis.length) {
 					emojis.forEach((emoji, index) => {
@@ -283,6 +285,7 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 						emojiSpan.textContent = emoji.skins[0].native;
 						emojiSpan.onclick = function () {
 							insertEmoji(emojiSpan.textContent);
+							isEmojiSelectionMode = false; // Exit emoji selection mode after insertion
 						};
 						if (index === 0) {
 							// Automatically highlight the first result
@@ -293,8 +296,10 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 					});
 
 					resultsContainer.style.display = "block";
+					isEmojiSelectionMode = true; // Enter emoji selection mode when results are displayed
 				} else {
 					resultsContainer.style.display = "none";
+					isEmojiSelectionMode = false; // Exit emoji selection mode if no results
 				}
 			});
 		}
@@ -319,26 +324,35 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 			}
 		});
 
+		// Adjust the keydown event for emoji selection
 		messageInput.addEventListener("keydown", function (e) {
 			const resultsContainer = document.getElementById("emoji-search-results");
 			const emojis = resultsContainer.getElementsByTagName("span");
-			if (!emojis.length) return;
 
-			if (e.key === "ArrowDown") {
-				e.preventDefault();
-				currentEmojiIndex = (currentEmojiIndex + 1) % emojis.length;
-			} else if (e.key === "ArrowUp") {
-				e.preventDefault();
-				currentEmojiIndex =
-					(currentEmojiIndex - 1 + emojis.length) % emojis.length;
-			} else if (e.key === "Enter" || e.key === "Tab") {
-				e.preventDefault();
-				emojis[currentEmojiIndex].click();
-				return;
+			// Check if emoji selection mode should be active
+			isEmojiSelectionMode =
+				resultsContainer.style.display === "block" && emojis.length > 0;
+
+			if (isEmojiSelectionMode) {
+				if (["ArrowDown", "ArrowUp", "Enter", "Tab"].includes(e.key)) {
+					e.preventDefault(); // Prevent default actions for these keys in emoji selection mode
+
+					if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+						currentEmojiIndex = (currentEmojiIndex + 1) % emojis.length;
+					} else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+						currentEmojiIndex =
+							(currentEmojiIndex - 1 + emojis.length) % emojis.length;
+					} else if (e.key === "Enter" || e.key === "Tab") {
+						emojis[currentEmojiIndex].click(); // Simulate a click on the highlighted emoji
+						isEmojiSelectionMode = false; // Exit emoji selection mode
+						return; // Stop further processing
+					}
+
+					// Highlight the current emoji
+					Array.from(emojis).forEach((emoji, index) => {
+						emoji.classList.toggle("highlighted", index === currentEmojiIndex);
+					});
+				}
 			}
-
-			Array.from(emojis).forEach((emoji, index) => {
-				emoji.classList.toggle("highlighted", index === currentEmojiIndex);
-			});
 		});
 	});
