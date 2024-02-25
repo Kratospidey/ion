@@ -362,7 +362,6 @@ app.get("/signup", (req, res) => {
 	res.render("signup");
 });
 
-// Handle sign-up form submission with compulsory profile picture
 app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	try {
 		const { username, email, password, confirmPassword } = req.body;
@@ -377,6 +376,13 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 		// Validate input and passwords match
 		if (password !== confirmPassword) {
 			return res.status(400).send("Passwords do not match.");
+		}
+
+		// Check if the password is at least 8 characters long
+		if (password.length < 8) {
+			return res
+				.status(400)
+				.send("Password must be at least 8 characters long.");
 		}
 
 		// Check if profile picture is uploaded
