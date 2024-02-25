@@ -315,12 +315,21 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 
 		const messageInput = document.getElementById("messageInput");
 		messageInput.addEventListener("input", function () {
+			const cursorPosition = messageInput.selectionStart; // Get the current cursor position
+			const textBeforeCursor = messageInput.value.slice(0, cursorPosition); // Get the text before the cursor
+			const lastColonIndex = textBeforeCursor.lastIndexOf(":"); // Find the last colon before the cursor
+
 			const query = messageInput.value.split(":").pop();
 			if (
 				messageInput.value.includes(":") &&
-				!isCursorNextToEmoji(messageInput)
+				!isCursorNextToEmoji(messageInput) &&
+				!textBeforeCursor.slice(lastColonIndex).includes(" ")
 			) {
+				const query = textBeforeCursor.slice(lastColonIndex + 1); // Extract the query after the last colon
 				emojiSearch(query);
+			} else {
+				document.getElementById("emoji-search-results").style.display = "none";
+				isEmojiSelectionMode = false; // Make sure to exit emoji selection mode
 			}
 		});
 
