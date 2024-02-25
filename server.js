@@ -91,7 +91,12 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Set the views directory
 
 app.use((req, res, next) => {
+	// Check if the request is coming from localhost
+	const isLocalhost =
+		req.hostname === "localhost" || req.hostname === "127.0.0.1";
+
 	if (
+		!isLocalhost &&
 		req.header("x-forwarded-proto") !== "https" &&
 		process.env.NODE_ENV === "production"
 	) {

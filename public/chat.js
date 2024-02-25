@@ -11,6 +11,10 @@ const roomId = urlPath[urlPath.length - 1];
 
 let isEmojiSelectionMode = false; // Step 1: Introduce the flag
 
+function scrollToBottom() {
+	messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+
 // Join the chat room
 socket.emit("joinRoom", roomId);
 
@@ -64,8 +68,10 @@ function appendMessage({
 	div.appendChild(profilePic);
 	div.appendChild(messageContent);
 	messageContainer.appendChild(div);
-	messageContainer.scrollTop = messageContainer.scrollHeight;
+	scrollToBottom();
 }
+
+
 
 // Listen for chatMessage event from the server
 socket.on("chatMessage", appendMessage);
@@ -120,6 +126,7 @@ function fetchAndDisplayMessages(roomId) {
 					profilePicture: message.sender.profilePicture,
 				});
 			});
+			scrollToBottom(); // Scroll to the bottom after rendering messages
 		})
 		.catch((error) => console.error("Failed to fetch messages:", error));
 }
