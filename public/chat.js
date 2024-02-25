@@ -249,6 +249,22 @@ function adjustTextareaHeight(textarea) {
 	textarea.style.height = textarea.scrollHeight + "px";
 }
 
+messageForm.addEventListener("submit", function (e) {
+	e.preventDefault(); // Prevent the default form submission which reloads the page
+
+	// Check if there's text in the message input field
+	if (messageInput.value.trim() !== "") {
+		// Emit the message to the server using the existing socket connection
+		socket.emit("sendMessage", { message: messageInput.value, roomId });
+
+		// Clear the message input field after sending
+		messageInput.value = "";
+	}
+
+	// Optionally, you can also call scrollToBottom() here to ensure the view scrolls to the latest message
+	scrollToBottom();
+});
+
 fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 	.then((response) => response.json())
 	.then((data) => {
