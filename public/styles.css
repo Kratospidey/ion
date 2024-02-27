@@ -297,6 +297,7 @@ a {
 	box-sizing: border-box;
 	border-radius: 30px;
 	min-width: 800px;
+	max-width: 800px;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -570,7 +571,6 @@ pre {
 	box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 	height: 100%;
 	padding: 25px;
-	padding-bottom: 50px;
 	border-radius: 15px;
 	background: #3a3b3e;
 	border: 2px solid #a0a0a0; /* Solid border for definition */
@@ -585,7 +585,7 @@ pre {
 		rgba(0, 0, 0, 0.1)
 	);
 
-	overflow: hidden; /* Makes sure the content respects border radius */
+	overflow: auto; /* Makes sure the content respects border radius */
 	transition: box-shadow 0.3s ease; /* Smooth transition for interactions */
 }
 
@@ -633,7 +633,6 @@ pre {
 #messageInput {
 	flex-grow: 1;
 	margin-right: 10px;
-	width: auto;
 	padding: 10px 20px;
 	background-color: #3a3b3e;
 	border: 2px solid #4a4b4e;
@@ -678,27 +677,6 @@ button:hover {
 button:active {
 	background-color: #398439;
 	box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3); /* Inner shadow for a pressed effect */
-}
-
-/* Styles for received messages */
-.receivedMessage {
-	max-width: 80%;
-	background-color: #e0e0e0;
-	padding: 10px;
-	border-radius: 20px;
-	margin-left: 10px; /* Aligns messages to the left */
-	align-self: flex-start;
-}
-
-/* Styles for sent messages */
-.sentMessage {
-	max-width: 80%;
-	background-color: #4caf50;
-	color: white;
-	padding: 10px;
-	border-radius: 20px;
-	align-self: flex-end; /* Aligns messages to the right */
-	margin-right: 10px; /* Adds some margin to the right */
 }
 
 .message {
@@ -892,5 +870,3 @@ button:active {
 	z-index: 3;
 	border-radius: 10px;
 }
-
-

@@ -78,8 +78,9 @@ function appendMessage({
 	} else {
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
-		textDiv.textContent = message;
-		textDiv.innerHTML = linkify(message);
+		const formattedMessage = message.replace(/\n/g, "<br>");
+		textDiv.textContent = formattedMessage;
+		textDiv.innerHTML = linkify(formattedMessage);
 		messageContent.appendChild(textDiv);
 	}
 
@@ -105,15 +106,16 @@ socket.on("sendImage", function (data) {
 	messageContainer.scrollTop = messageContainer.scrollHeight;
 });
 
-// Adjust the keydown event for sending messages
 messageInput.addEventListener("keydown", function (e) {
 	if (e.key === "Enter" && !e.shiftKey && !isEmojiSelectionMode) {
-		// Check the flag here
-		e.preventDefault(); // Prevent form submission
+		e.preventDefault(); // Prevent form submission or newline insertion
 		if (this.value.trim() !== "") {
 			socket.emit("sendMessage", { message: this.value, roomId });
 			this.value = ""; // Clear the input field
 		}
+	} else if (e.key === "Enter" && e.shiftKey) {
+		// Allow the default behavior which is to insert a new line
+		// No need to explicitly handle this case unless you want to add custom logic here
 	}
 });
 
@@ -186,6 +188,7 @@ socket.on("typing", (data) => {
 		typingIndicator.style.display = "block";
 		typingIndicator.style.color = "white";
 		typingIndicator.style.marginLeft = "10px";
+		scrollToBottomOfChat();
 	} else {
 		typingIndicator.style.display = "none";
 	}
@@ -325,6 +328,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	});
 });
 
+function scrollToBottomOfChat() {
+	var chatDiv = document.getElementById("chat"); // Replace "chat" with the actual ID of your chat div
+	chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
 fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 	.then((response) => response.json())
 	.then((data) => {
@@ -402,6 +410,7 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 			const cursorPosition = messageInput.selectionStart; // Get the current cursor position
 			const textBeforeCursor = messageInput.value.slice(0, cursorPosition); // Get the text before the cursor
 			const lastColonIndex = textBeforeCursor.lastIndexOf(":"); // Find the last colon before the cursor
+			scrollToBottomOfChat();
 
 			const query = messageInput.value.split(":").pop();
 			if (
