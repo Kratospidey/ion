@@ -106,6 +106,9 @@ app.use((req, res, next) => {
 	}
 });
 
+// Secret key for signing JWTs
+const SECRET_KEY = process.env.JWT_SECRET; // Get the secret key from environment variables
+
 // Define routes
 app.get("/", (req, res) => {
 	// Redirect to the login page
@@ -113,12 +116,25 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-	// Render the login page
+	// Check if the user's request contains a token cookie
+	const token = req.cookies.token;
+
+	if (token) {
+		try {
+			// Verify the token using the same secret key used to sign the JWT
+			const decoded = jwt.verify(token, SECRET_KEY);
+
+			// If the token is valid, redirect to /home
+			return res.redirect("/home");
+		} catch (err) {
+			// If the token is not valid, catch the error (it might be expired or invalid)
+			console.error("Error verifying token:", err);
+		}
+	}
+
+	// If there's no token or it's invalid, render the login page
 	res.render("login");
 });
-
-// Secret key for signing JWTs
-const SECRET_KEY = process.env.JWT_SECRET; // Get the secret key from environment variables
 
 // Route to handle user login
 app.post("/login", async (req, res) => {
