@@ -1016,3 +1016,15 @@ button:active {
 .modal-body .btn:active {
 	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Pressed effect */
 }
+
+.illustration {
+	width: 100%;
+	height: 100%;
+	display: flex; /* Make the parent a Flex container */
+	justify-content: center; /* Center children horizontally */
+	align-items: center; /* Center children vertically */
+	max-width: 100%; /* Limit image width to prevent overflow */
+	max-height: 100%; /* Limit image height to prevent overflow */
+	object-fit: contain; /* Preserve aspect ratio */
+	margin-top: 10%;
+}

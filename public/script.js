@@ -12,6 +12,7 @@ const buttons = document.querySelectorAll(".sidebuttons");
 function hideAllSections() {
 	document.getElementById("chat").style.display = "none";
 	document.getElementById("codespace").style.display = "none";
+	document.getElementById("illustration").style.display = "none"; // Hide the illustration as well
 }
 
 // Loop through each button and attach a click event listener
@@ -23,17 +24,8 @@ buttons.forEach((button) => {
 		// Get the target from the button's data attribute
 		const targetId = this.getAttribute("data-target");
 		const targetDiv = document.getElementById(targetId);
-		if (targetId === "chat") {
-			targetDiv.style.backgroundColor = "#1e1e1e";
-			console.log("executed");
-		}
 
-		// Toggle the display property of the target div
-		if (targetDiv.style.display === "none") {
-			targetDiv.style.display = "block";
-		} else {
-			targetDiv.style.display = "none";
-		}
+		targetDiv.style.display = "block";
 	});
 });
 
