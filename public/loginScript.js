@@ -2,12 +2,22 @@ document
 	.querySelector("form")
 	.addEventListener("submit", async function (event) {
 		event.preventDefault();
-		var emailOrUsernameInput = document.getElementById("email"); // Consider renaming the ID to 'emailOrUsername'
+
+		// Target the existing <p> element inside the button
+		const loginButton = document.getElementById("login-button");
+
+		// Save the original button text
+		const originalButtonText = loginButton.textContent;
+
+		// Change the button text to "Logging in..." and add a spinner icon
+		loginButton.innerHTML =
+			'Logging in... <i class="fa fa-spinner fa-spin"></i>'; // Ensure you have a font-awesome or similar library for the spinner icon
+
+		var emailOrUsernameInput = document.getElementById("email");
 		var passwordInput = document.getElementById("password");
 
-		// Validate email or username format
 		var emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-		var usernamePattern = /^[a-zA-Z0-9._]+$/; // Adjust this pattern as needed
+		var usernamePattern = /^[a-zA-Z0-9._]+$/;
 		var isEmail = emailPattern.test(emailOrUsernameInput.value);
 		var isUsername = usernamePattern.test(emailOrUsernameInput.value);
 
@@ -16,35 +26,35 @@ document
 				"Please enter a valid email address or username."
 			);
 			emailOrUsernameInput.reportValidity();
+			// Restore button text
+			loginButton.innerHTML = originalButtonText;
 			return;
 		}
 
-		// Validate password length (optional)
-		var minLength = 8; // Minimum length for password
+		var minLength = 8;
 		if (passwordInput.value.length < minLength) {
 			passwordInput.setCustomValidity(
 				"Password must be at least " + minLength + " characters long."
 			);
 			passwordInput.reportValidity();
+			// Restore button text
+			loginButton.innerHTML = originalButtonText;
 			return;
 		}
 
-		// Clear custom validity messages
 		emailOrUsernameInput.setCustomValidity("");
 		passwordInput.setCustomValidity("");
 
-		// Prepare the data to be sent to the server
 		const loginData = {
 			password: passwordInput.value,
 		};
-		// Determine if the input is an email or username and add to the loginData accordingly
+
 		if (isEmail) {
 			loginData.email = emailOrUsernameInput.value;
 		} else {
 			loginData.username = emailOrUsernameInput.value;
 		}
 
-		// Submit the form data to the server
 		const response = await fetch("/login", {
 			method: "POST",
 			headers: {
@@ -54,11 +64,12 @@ document
 		});
 
 		if (response.ok) {
-			// Handle successful login
-			window.location.href = "/home"; // Redirect to dashboard or another page
+			window.location.href = "/home";
 		} else {
-			// Handle error response
 			const errorMessage = await response.text();
-			alert(errorMessage); // Show the error message to the user
+			alert(errorMessage);
 		}
+
+		// Restore the button text to its original state
+		loginButton.innerHTML = originalButtonText;
 	});

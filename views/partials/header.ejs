@@ -161,7 +161,13 @@
 							maxlength="12"
 						/>
 					</div>
-					<button type="submit" class="btn btn-primary">Change Username</button>
+					<button
+						type="submit"
+						class="btn btn-primary"
+						id="change-username-button"
+					>
+						<span id="change-username-button-text">Change Username</span>
+					</button>
 				</form>
 
 				<hr />
@@ -185,7 +191,9 @@
 							required
 						/>
 					</div>
-					<button type="submit" class="btn">Change PFP</button>
+					<button type="submit" class="btn" id="changePFPButton">
+						<span id="changePFPButtonText">Change PFP</span>
+					</button>
 				</form>
 
 				<hr />
@@ -229,8 +237,12 @@
 								required
 							/>
 						</div>
-						<button type="submit" class="btn btn-primary">
-							Change Server PFP
+						<button
+							type="submit"
+							class="btn btn-primary"
+							id="changeServerPFPButton"
+						>
+							<span id="changeServerPFPButtonText">Change Server PFP</span>
 						</button>
 						<hr />
 					</form>
@@ -250,8 +262,12 @@
 								autocomplete="new-password"
 							/>
 						</div>
-						<button type="submit" class="btn btn-primary">
-							Change Server Name
+						<button
+							type="submit"
+							class="btn btn-primary"
+							id="changeServerNameButton"
+						>
+							<span id="changeServerNameButtonText">Change Server Name</span>
 						</button>
 					</form>
 					<hr />
@@ -270,7 +286,13 @@
 								<!-- Options will be populated dynamically based on server members -->
 							</select>
 						</div>
-						<button type="submit" class="btn btn-warning">Remove Member</button>
+						<button
+							type="submit"
+							class="btn btn-warning"
+							id="removeMemberButton"
+						>
+							<span id="removeMemberButtonText">Remove Member</span>
+						</button>
 					</form>
 					<hr />
 
@@ -289,15 +311,26 @@
 <script defer>
 	window.addEventListener("DOMContentLoaded", (event) => {
 		const changeUsernameForm = document.getElementById("changeUsernameForm");
+		const changeUsernameButton = document.getElementById(
+			"change-username-button"
+		);
+		const changeUsernameButtonText = document.getElementById(
+			"change-username-button-text"
+		);
 
-		if (!changeUsernameForm) {
-			console.error("Change username form not found");
+		if (!changeUsernameForm || !changeUsernameButtonText) {
+			console.error("Change username form or button text element not found");
 			return;
 		}
 
 		changeUsernameForm.addEventListener("submit", async (event) => {
 			event.preventDefault(); // Prevent the default form submission
 			console.log("Handling change username form submission");
+
+			// Change button text and show spinner
+			changeUsernameButton.disabled = true;
+			changeUsernameButtonText.innerHTML =
+				'Changing Username... <i class="fa fa-spinner fa-spin"></i>';
 
 			const formData = new FormData(changeUsernameForm);
 
@@ -321,9 +354,14 @@
 			} catch (error) {
 				console.error("Error:", error);
 				alert("An error occurred while trying to change the username.");
+			} finally {
+				// Restore the button text to its original state
+				changeUsernameButton.disabled = false;
+				changeUsernameButtonText.innerHTML = "Change Username";
 			}
 		});
 	});
+
 	document
 		.getElementById("logoutButton")
 		.addEventListener("click", function () {
@@ -334,14 +372,22 @@
 <script defer>
 	// Target the form for uploading the user profile picture
 	const changePFPForm = document.getElementById("changePFPForm");
+	const changePFPButton = document.getElementById("changePFPButton"); // Target the new span in the button
+	const changePFPButtonText = document.getElementById("changePFPButtonText"); // Target the new span in the button
 
-	if (!changePFPForm) {
-		console.error("Upload profile picture form not found");
-		// Do not return anything here
+	if (!changePFPForm || !changePFPButtonText) {
+		console.error(
+			"Upload profile picture form or button text element not found"
+		);
 	} else {
 		changePFPForm.addEventListener("submit", async (event) => {
 			event.preventDefault(); // Prevent the default form submission
 			console.log("Handling upload profile picture form submission");
+
+			// Change button text and show spinner
+			changePFPButton.disabled = true;
+			changePFPButtonText.innerHTML =
+				'Uploading... <i class="fa fa-spinner fa-spin"></i>'; // Ensure you have a spinner icon library
 
 			const formData = new FormData(changePFPForm);
 
@@ -369,6 +415,10 @@
 			} catch (error) {
 				console.error("Error:", error);
 				alert(error.message || "Error uploading profile picture");
+			} finally {
+				// Restore the button text to its original state after the operation is complete
+				changePFPButton.disabled = false;
+				changePFPButtonText.innerHTML = "Change PFP";
 			}
 		});
 	}
@@ -417,13 +467,34 @@
 	}
 
 	window.addEventListener("DOMContentLoaded", (event) => {
-		// Change Server Profile Picture Form
 		const changeServerPFPForm = document.getElementById("changeServerPFPForm");
+		const changeServerPFPButton = document.getElementById(
+			"changeServerPFPButton"
+		);
+		const changeServerPFPButtonText = document.getElementById(
+			"changeServerPFPButtonText"
+		);
+
+		if (!changeServerPFPForm || !changeServerPFPButtonText) {
+			console.error(
+				"Change server profile picture form or button text element not found"
+			);
+			return;
+		}
+
 		changeServerPFPForm.addEventListener("submit", async (event) => {
 			event.preventDefault(); // Prevent default form submission
 
+			// Change button text and show spinner
+			changeServerPFPButton.disabled = true;
+			changeServerPFPButtonText.innerHTML =
+				'Uploading... <i class="fa fa-spinner fa-spin"></i>';
+
 			const formData = new FormData(changeServerPFPForm);
-			formData.append("serverId", getServerIdFromUrl()); // Assuming you have a function to extract the server ID from the URL
+			formData.append(
+				"serverId",
+				document.getElementById("serverIdInput").value
+			); // Use the server ID from the hidden input
 
 			try {
 				const response = await fetch("/upload-server-profile", {
@@ -435,12 +506,17 @@
 				if (response.ok) {
 					const result = await response.json();
 					alert("Server profile picture changed successfully");
+					// Optionally, redirect or update UI here
 				} else {
 					throw new Error("Failed to change server profile picture");
 				}
 			} catch (error) {
 				console.error("Error:", error);
 				alert("Error changing server profile picture");
+			} finally {
+				// Restore the button text to its original state after the operation is complete
+				changeServerPFPButton.disabled = false;
+				changeServerPFPButtonText.innerHTML = "Change Server PFP";
 			}
 		});
 
@@ -448,33 +524,48 @@
 		const changeServerNameForm = document.getElementById(
 			"changeServerNameForm"
 		);
-		if (changeServerNameForm) {
+		const changeServerNameButton = document.getElementById(
+			"changeServerNameButton"
+		);
+		const changeServerNameButtonText = document.getElementById(
+			"changeServerNameButtonText"
+		); // Target the new span in the button
+
+		if (changeServerNameForm && changeServerNameButtonText) {
 			changeServerNameForm.addEventListener("submit", async (event) => {
 				event.preventDefault();
 				console.log("Handling change server name form submission");
+
+				// Change button text and show spinner
+				changeServerNameButton.disabled = true;
+				changeServerNameButtonText.innerHTML =
+					'Updating... <i class="fa fa-spinner fa-spin"></i>';
+
 				const formData = new FormData(changeServerNameForm);
-				const serverId = getServerIdFromUrl();
+				const serverId = getServerIdFromUrl(); // Assuming you have a function to extract the server ID from the URL
 				formData.append("serverId", serverId); // Add serverId to formData
 
-				console.log("form data for server name now");
-				for (let [key, value] of formData.entries()) {
-					console.log(key, value);
-				}
 				try {
 					const response = await fetch("/change-server-name", {
 						method: "POST",
 						body: formData,
 						credentials: "include",
 					});
+
 					if (response.ok) {
 						const result = await response.json();
 						alert(result.message || "Server name changed successfully");
+						// Optionally, redirect or update UI here
 					} else {
 						throw new Error("Failed to change server name");
 					}
 				} catch (error) {
 					console.error("Error:", error);
 					alert(error.message || "Error changing server name");
+				} finally {
+					// Restore the button text to its original state after the operation is complete
+					changeServerNameButton.disabled = false;
+					changeServerNameButtonText.innerHTML = "Change Server Name";
 				}
 			});
 		}
@@ -511,6 +602,10 @@
 		// Remove Member Form
 		const removeMemberForm = document.getElementById("removeMemberForm");
 		const memberToRemoveSelect = document.getElementById("memberToRemove");
+		const removeMemberButton = document.getElementById("removeMemberButton");
+		const removeMemberButtonText = document.getElementById(
+			"removeMemberButtonText"
+		);
 
 		// Function to fetch server members and populate the dropdown
 		async function populateMemberDropdown(serverId) {
@@ -538,26 +633,25 @@
 		// Call this function when the modal is opened or when you need to populate the dropdown
 		populateMemberDropdown(getServerIdFromUrl());
 
-		if (removeMemberForm) {
+		if (removeMemberForm && removeMemberButtonText) {
 			removeMemberForm.addEventListener("submit", async (event) => {
 				event.preventDefault();
 				console.log("Handling remove member form submission");
 
-				const serverId = getServerIdFromUrl();
-				const memberToRemove = memberToRemoveSelect.value;
+				// Change button text and show spinner
+				removeMemberButton.disabled = true;
+				removeMemberButtonText.innerHTML =
+					'Removing... <i class="fa fa-spinner fa-spin"></i>';
 
-				const data = {
-					serverId: serverId,
-					memberToRemove: memberToRemove,
-				};
+				const serverId = getServerIdFromUrl(); // Assuming a function to extract the server ID
+				const memberToRemove = document.getElementById("memberToRemove").value;
+
+				const data = { serverId, memberToRemove };
 
 				try {
 					const response = await fetch("/remove-member", {
 						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							// Include other headers as needed
-						},
+						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify(data),
 						credentials: "include",
 					});
@@ -565,7 +659,7 @@
 					if (response.ok) {
 						const result = await response.json();
 						alert(result.message || "Member removed successfully");
-						// Optionally, refresh the member list or update the UI
+						// Optionally, refresh the member list or update UI here
 					} else {
 						const errorText = await response.text();
 						throw new Error(errorText || "Failed to remove member");
@@ -573,6 +667,10 @@
 				} catch (error) {
 					console.error("Error:", error);
 					alert(error.message || "Error removing member");
+				} finally {
+					// Restore the button text to its original state after the operation is complete
+					removeMemberButton.disabled = false;
+					removeMemberButtonText.innerHTML = "Remove Member";
 				}
 			});
 		}
