@@ -48,4 +48,17 @@
 			}
 		);
 	}
+	let membersDiv = document.querySelector(".members");
+	let hoverTimeout;
+
+	membersDiv.addEventListener("mouseover", function () {
+		clearTimeout(hoverTimeout); // Cancel any pending shrink operation
+	});
+
+	membersDiv.addEventListener("mouseout", function () {
+		hoverTimeout = setTimeout(() => {
+			// This code will execute after 500ms of not hovering over the members div
+			// You can adjust the timeout to control the delay before the div shrinks back
+		}, 500);
+	});
 </script>
