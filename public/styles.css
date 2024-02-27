@@ -867,25 +867,30 @@ button:active {
 
 /* Overlay styles */
 .overlay {
-	position: fixed; /* Sit on top of the page content */
-	display: none; /* Hidden by default */
-	width: 100%; /* Full width */
-	height: 100%; /* Full height */
+	position: fixed;
 	top: 0;
 	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
-	z-index: 2; /* Sit on top */
-	cursor: pointer; /* Indicates that the overlay can be clicked */
+	width: 100%;
+	height: 100%;
+	background-color: rgba(99, 99, 99, 0.087); /* Light white tint */
+	backdrop-filter: blur(10px); /* Increased blur */
+	-webkit-backdrop-filter: blur(10px); /* For Safari */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000; /* Ensure it's above other content */
 }
 
 /* Style for the enlarged image inside the overlay */
 .enlarged-image {
+	cursor: default;
 	margin: auto;
 	display: block;
 	width: 80%;
 	max-width: 700px; /* Adjust based on your preference */
 	max-height: 80%;
 	z-index: 3;
+	border-radius: 10px;
 }
+
+
