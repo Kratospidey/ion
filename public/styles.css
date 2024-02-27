@@ -75,7 +75,7 @@ body {
 	height: 100vh;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-around;
 }
 
 input[type="text"] {
@@ -83,7 +83,8 @@ input[type="text"] {
 }
 
 .login,
-.signup {
+.signup,
+.onboarding {
 	display: flex;
 	flex-direction: column;
 	width: auto;
@@ -136,8 +137,8 @@ input[type="text"] {
 	align-items: center;
 	justify-content: flex-start;
 	overflow-y: auto; /* Enable vertical scrolling */
-	gap: 40px;
-	padding: 10px;
+	gap: 20px;
+	padding: 20px;
 	height: 60%;
 	margin-bottom: 20px;
 
@@ -236,8 +237,8 @@ input[type="text"] {
 
 /* Styling for server avatars */
 .server-avatar {
-	width: 80px; /* Set your desired size */
-	height: 80px; /* Maintain aspect ratio */
+	width: 65px; /* Set your desired size */
+	height: 65px; /* Maintain aspect ratio */
 	border-radius: 50%; /* Circular avatars */
 	border: 3px solid #a0a0a0; /* Border to match the skeuomorphic style */
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
@@ -295,7 +296,7 @@ a {
 	height: 97%;
 	box-sizing: border-box;
 	border-radius: 30px;
-	min-width: 900px;
+	min-width: 800px;
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -313,7 +314,6 @@ a {
 	width: auto; /* Allow the width to grow with content */
 	margin-left: 10px;
 	padding: 25px; /* Padding to match the chat panel */
-	flex-grow: 1;
 	overflow-y: auto; /* Enable vertical scrolling if content overflows */
 
 	/* Inset shadows for a deep, carved-in look */
@@ -365,7 +365,7 @@ pre {
 }
 
 .app-bg {
-	background-color: #65788b; /* A base color that complements the chat interface */
+	background-color: #3f453f; /* A base color that complements the chat interface */
 
 	/* Layered gradients for a deep inset material effect */
 	background-image: radial-gradient(
@@ -519,7 +519,7 @@ pre {
 	overflow-y: auto; /* Enable scrolling for the member list */
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 25px;
 	margin-bottom: auto; /* Space above the server code */
 }
 
@@ -858,4 +858,34 @@ button:active {
 	100% {
 		transform: scale(1.1) translate(0px);
 	}
+}
+
+.linkified {
+	color: green;
+	text-decoration: underline;
+}
+
+/* Overlay styles */
+.overlay {
+	position: fixed; /* Sit on top of the page content */
+	display: none; /* Hidden by default */
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+	z-index: 2; /* Sit on top */
+	cursor: pointer; /* Indicates that the overlay can be clicked */
+}
+
+/* Style for the enlarged image inside the overlay */
+.enlarged-image {
+	margin: auto;
+	display: block;
+	width: 80%;
+	max-width: 700px; /* Adjust based on your preference */
+	max-height: 80%;
+	z-index: 3;
 }

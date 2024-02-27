@@ -514,6 +514,9 @@
 
 		// Function to fetch server members and populate the dropdown
 		async function populateMemberDropdown(serverId) {
+			if (!serverId) {
+				return;
+			}
 			const response = await fetch(`/api/server/${serverId}/members`);
 			const members = await response.json();
 			// Clear existing options

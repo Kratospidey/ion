@@ -6,8 +6,23 @@ const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 
 // Extract the server ID from the URL
-const urlPath = window.location.pathname.split("/");
-const roomId = urlPath[urlPath.length - 1];
+// Extract the pathname from the current URL in the address bar
+const path = window.location.pathname;
+
+// Define a regex pattern to match '/server/' followed by one or more digits
+const roomIDPattern = /^\/server\/(\d+)$/;
+
+// Use the match method to test if the path matches the regex pattern
+const match = path.match(roomIDPattern);
+
+let roomId;
+
+if (match) {
+	// If the pattern matches, 'match[1]' will contain the room ID
+	roomId = match[1];
+	// Emit the joinRoom event for this room ID
+	socket.emit("joinRoom", roomId);
+}
 
 let isEmojiSelectionMode = false; // Step 1: Introduce the flag
 
@@ -17,8 +32,8 @@ function scrollToBottom() {
 	}, 3000); // Adjust the delay as needed
 }
 
-// Join the chat room
-socket.emit("joinRoom", roomId);
+// Listen for chatMessage event from the server
+socket.on("chatMessage", appendMessage);
 
 // Function to create and append message element
 function appendMessage({
@@ -64,6 +79,7 @@ function appendMessage({
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
 		textDiv.textContent = message;
+		textDiv.innerHTML = linkify(message);
 		messageContent.appendChild(textDiv);
 	}
 
@@ -72,9 +88,6 @@ function appendMessage({
 	messageContainer.appendChild(div);
 	scrollToBottom();
 }
-
-// Listen for chatMessage event from the server
-socket.on("chatMessage", appendMessage);
 
 // Listen for 'sendImage' event from the server
 socket.on("sendImage", function (data) {
@@ -126,14 +139,15 @@ function fetchAndDisplayMessages(roomId) {
 					profilePicture: message.sender.profilePicture,
 				});
 			});
-			console.log(messageContainer.scrollHeight, messageContainer.scrollTop);
 			scrollToBottom(); // Scroll to the bottom after rendering messages
 		})
 		.catch((error) => console.error("Failed to fetch messages:", error));
 }
 
 // Call this function when the user enters a chat room
-fetchAndDisplayMessages(roomId);
+if (match) {
+	fetchAndDisplayMessages(roomId);
+}
 
 let typingTimeout;
 const TYPING_TIMER_LENGTH = 2000; // Set the typing timeout to 2 seconds
@@ -243,10 +257,27 @@ function fetchUserDetails(userId) {
 		.catch((error) => console.error("Error fetching user details:", error));
 }
 
-// JavaScript to auto-resize the textarea
-function adjustTextareaHeight(textarea) {
-	textarea.style.height = "auto";
-	textarea.style.height = textarea.scrollHeight + "px";
+function linkify(text) {
+	const urlRegex =
+		/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi;
+	const imageExtensions = /\.(jpeg|jpg|gif|png|svg)$/i;
+
+	return text.replace(urlRegex, function (url) {
+		// Check if the URL is an image link
+		if (imageExtensions.test(url)) {
+			// If it's an image link, return the URL without modification
+			return url;
+		} else {
+			// If it's not an image link, convert it to a clickable link with styling
+			return (
+				'<a href="' +
+				url +
+				'" target="_blank" class="linkified">' +
+				url +
+				"</a>"
+			);
+		}
+	});
 }
 
 messageForm.addEventListener("submit", function (e) {
@@ -263,6 +294,35 @@ messageForm.addEventListener("submit", function (e) {
 
 	// Optionally, you can also call scrollToBottom() here to ensure the view scrolls to the latest message
 	scrollToBottom();
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+	const messageContainer = document.getElementById("messageContainer");
+
+	messageContainer.addEventListener("click", function (e) {
+		if (
+			e.target.tagName === "IMG" &&
+			e.target.classList.contains("chat-image")
+		) {
+			// Create overlay div if it doesn't exist
+			let overlay = document.getElementById("imageOverlay");
+			if (!overlay) {
+				overlay = document.createElement("div");
+				overlay.id = "imageOverlay";
+				overlay.className = "overlay";
+				document.body.appendChild(overlay);
+
+				// When the overlay is clicked, hide it
+				overlay.addEventListener("click", function () {
+					overlay.style.display = "none";
+				});
+			}
+
+			// Set the clicked image as the source for the enlarged image
+			overlay.innerHTML = `<img src="${e.target.src}" class="enlarged-image">`;
+			overlay.style.display = "flex"; // Display the overlay
+		}
+	});
 });
 
 fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")

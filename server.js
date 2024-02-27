@@ -1082,37 +1082,8 @@ io.on("connection", (socket) => {
 			socket.emit("userId", { userId: decoded.userId });
 			// console.log(`server side id: ${decoded.userId}`);
 			// Server-side
-			socket.on("joinRoom", async (roomId) => {
-				const cookieString = socket.request.headers.cookie;
-				const cookies = parseCookies(cookieString);
-				const token = cookies.token;
-
-				try {
-					const decoded = await authenticateSocketToken(token);
-					const userId = decoded.userId;
-
-					// User joins the specified room
-					socket.join(roomId);
-
-					// Fetch user and server details
-					const user = await getUserDataById(userId); // Make sure you have this function implemented
-					const server = await getServerDataById(roomId); // Make sure you have this function implemented
-
-					// Construct the welcome message
-					const welcomeMessage = {
-						userId: server.id, // Use server ID to represent this system message
-						message: `${user.username} joined ${server.name}`,
-						username: server.name, // Use server name as the username for this system message
-						profilePicture: server.profilePicture, // Server's profile picture
-						timestamp: new Date().toISOString(),
-					};
-
-					// Emit the welcome message to all clients in the room
-					io.to(roomId).emit("chatMessage", welcomeMessage);
-				} catch (error) {
-					console.error("Error handling joinRoom event:", error);
-					// Handle the error appropriately
-				}
+			socket.on("joinRoom", (roomId) => {
+				socket.join(roomId);
 			});
 
 			socket.on("sendMessage", async (data) => {
