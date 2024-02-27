@@ -32,8 +32,17 @@ function scrollToBottom() {
 	}, 3000); // Adjust the delay as needed
 }
 
-// Listen for chatMessage event from the server
-socket.on("chatMessage", appendMessage);
+socket.on("chatMessage", function (data) {
+	appendMessage({
+		userId: data.userId,
+		message: data.message,
+		username: data.username,
+		timestamp: data.timestamp,
+		profilePicture: data.profilePicture,
+	});
+
+	messageContainer.scrollTop = messageContainer.scrollHeight;
+});
 
 // Function to create and append message element
 function appendMessage({
