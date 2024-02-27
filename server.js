@@ -130,23 +130,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-	// Check if the user's request contains a token cookie
-	const token = req.cookies.token;
-
-	if (token) {
-		try {
-			// Verify the token using the same secret key used to sign the JWT
-			const decoded = jwt.verify(token, SECRET_KEY);
-
-			// If the token is valid, redirect to /home
-			return res.redirect("/home");
-		} catch (err) {
-			// If the token is not valid, catch the error (it might be expired or invalid)
-			console.error("Error verifying token:", err);
-		}
-	}
-
-	// If there's no token or it's invalid, render the login page
+	// Always render the login page regardless of any existing tokens or user state
 	res.render("login");
 });
 
