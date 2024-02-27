@@ -168,9 +168,9 @@ function fetchAndDisplayMessages(roomId) {
 					appendMessage({
 						userId: message.senderId, // Or a placeholder value
 						message: message.content,
-						username: "Unknown", // Placeholder username
+						username: "Deleted Account", // Placeholder username
 						timestamp: message.createdAt,
-						profilePicture: null, // Placeholder or default profile picture
+						profilePicture: "/img/useravatar.png", // Placeholder or default profile picture
 					});
 				}
 			});
