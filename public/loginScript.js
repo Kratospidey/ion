@@ -10,6 +10,7 @@ document
 		const originalButtonText = loginButton.textContent;
 
 		// Change the button text to "Logging in..." and add a spinner icon
+		loginButton.disabled = true;
 		loginButton.innerHTML =
 			'Logging in... <i class="fa fa-spinner fa-spin"></i>'; // Ensure you have a font-awesome or similar library for the spinner icon
 
@@ -71,5 +72,6 @@ document
 		}
 
 		// Restore the button text to its original state
+		loginButton.disabled = false;
 		loginButton.innerHTML = originalButtonText;
 	});
