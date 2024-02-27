@@ -123,25 +123,32 @@ const SECRET_KEY = process.env.JWT_SECRET; // Get the secret key from environmen
 // Route to handle user login
 app.post("/login", async (req, res) => {
 	try {
-		// Validate email format
-		const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-		if (!emailPattern.test(req.body.email)) {
-			return res.status(400).send("Invalid email format");
+		const { email, username, password } = req.body;
+
+		// Initialize a query object
+		let query = {};
+
+		// Check if email or username was provided and adjust the query accordingly
+		if (email) {
+			query.email = email;
+		} else if (username) {
+			query.username = username;
 		}
 
-		// Check if the email exists in the database
-		const user = await User.findOne({ where: { email: req.body.email } });
+		// Find the user by email or username
+		const user = await User.findOne({ where: query });
+
 		if (!user) {
-			return res.status(401).send("Email not found");
+			return res.status(401).send("User not found");
 		}
 
 		// Compare the provided password with the stored hashed password
-		const isMatch = await user.comparePassword(req.body.password);
+		const isMatch = await user.comparePassword(password);
 		if (!isMatch) {
-			return res.status(401).send("Invalid email or password");
+			return res.status(401).send("Invalid password");
 		}
 
-		// If the email and password are valid, generate a JWT and send it back to the client
+		// If the login credentials are valid, generate a JWT and send it back to the client
 		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
 			expiresIn: "1d",
 		});
@@ -150,7 +157,7 @@ app.post("/login", async (req, res) => {
 			secure: true,
 			sameSite: "strict",
 		});
-		res.status(200).send("Logged in");
+		res.status(200).send("Logged in successfully");
 	} catch (err) {
 		console.error("Error during login:", err);
 		res.status(500).send("Internal server error");
@@ -368,9 +375,17 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 		const lowerCaseUsername = username.toLowerCase();
 
 		// Check if user with the same email already exists
-		const existingUser = await User.findOne({ where: { email } });
-		if (existingUser) {
+		const existingUserByEmail = await User.findOne({ where: { email } });
+		if (existingUserByEmail) {
 			return res.status(409).send("A user with this email already exists.");
+		}
+
+		// Check if user with the same username already exists
+		const existingUserByUsername = await User.findOne({
+			where: { username: lowerCaseUsername },
+		});
+		if (existingUserByUsername) {
+			return res.status(409).send("A user with this username already exists.");
 		}
 
 		// Validate input and passwords match
