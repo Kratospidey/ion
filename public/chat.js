@@ -153,14 +153,26 @@ function fetchAndDisplayMessages(roomId) {
 			// Ensure the messages are sorted by createdAt before displaying
 			messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 			messages.forEach((message) => {
-				// Adapt the message object structure to what appendMessage expects
-				appendMessage({
-					userId: message.senderId, // Or however you get the userId
-					message: message.content,
-					username: message.sender.username,
-					timestamp: message.createdAt,
-					profilePicture: message.sender.profilePicture,
-				});
+				// Check if the sender object exists
+				if (message.sender) {
+					// Adapt the message object structure to what appendMessage expects
+					appendMessage({
+						userId: message.senderId, // Or however you get the userId
+						message: message.content,
+						username: message.sender.username,
+						timestamp: message.createdAt,
+						profilePicture: message.sender.profilePicture,
+					});
+				} else {
+					// Handle messages without a sender
+					appendMessage({
+						userId: message.senderId, // Or a placeholder value
+						message: message.content,
+						username: "Unknown", // Placeholder username
+						timestamp: message.createdAt,
+						profilePicture: null, // Placeholder or default profile picture
+					});
+				}
 			});
 			scrollToBottom(); // Scroll to the bottom after rendering messages
 		})

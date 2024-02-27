@@ -709,6 +709,9 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 		// Delete all servers owned by the user
 		await Server.destroy({ where: { id: serverIdsToDelete } });
 
+		// Delete all messages sent by the user in any server
+		await ServerMessages.destroy({ where: { senderId: userId } });
+
 		// Delete the user's account
 		await User.destroy({ where: { id: userId } });
 
@@ -716,10 +719,10 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 		res.cookie("token", "", { expires: new Date(0) });
 
 		res.send(
-			"Account, owned servers, and associated memberships deleted successfully."
+			"Account, owned servers, associated memberships, and messages deleted successfully."
 		);
 	} catch (err) {
-		console.error("Error during account and server deletion:", err);
+		console.error("Error during account, server, and messages deletion:", err);
 		res.status(500).send("Internal server error.");
 	}
 });
