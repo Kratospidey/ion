@@ -119,6 +119,18 @@ messageInput.addEventListener("keydown", function (e) {
 	}
 });
 
+document.getElementById("messageForm").addEventListener("submit", function (e) {
+	e.preventDefault(); // Prevent the default form submission behavior
+
+	var messageInput = document.getElementById("messageInput");
+
+	if (messageInput.value.trim() !== "") {
+		// Assuming 'socket' is already defined and connected
+		socket.emit("sendMessage", { message: messageInput.value, roomId });
+		messageInput.value = ""; // Clear the textarea after sending the message
+	}
+});
+
 // Fetch and display historical messages when the user enters a chat room
 function fetchAndDisplayMessages(roomId) {
 	fetch(`/messages/${roomId}`)
