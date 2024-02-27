@@ -106,6 +106,20 @@ app.use((req, res, next) => {
 	}
 });
 
+app.use((req, res, next) => {
+	const token = req.cookies["token"];
+	if (token && process.env.DB_RESET_INDICATOR === "true") {
+		// Redirect to a logout route or directly clear the cookie and send an appropriate response
+		res.cookie("token", "", { expires: new Date(0) }); // Clear the cookie
+		return res
+			.status(401)
+			.send(
+				"Session has expired due to system maintenance, please log in again"
+			);
+	}
+	next();
+});
+
 // Secret key for signing JWTs
 const SECRET_KEY = process.env.JWT_SECRET; // Get the secret key from environment variables
 
