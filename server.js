@@ -564,7 +564,7 @@ app.post(
 		const sanitizedFilename = sanitizeFilename(file.originalname);
 
 		const blob = bucket.file(
-			`users/profile-pictures/${userId}/${sanitizeFilename}`
+			`users/profile-pictures/${userId}/${sanitizedFilename}`
 		);
 		const blobStream = blob.createWriteStream({
 			resumable: true,
@@ -639,25 +639,35 @@ app.post(
 	upload.none(),
 	async (req, res) => {
 		const { newUsername } = req.body;
-		const userId = req.user.userId; // Ensure this is correctly obtained
+		const userId = req.user.userId; // Ensure this is correctly obtained from your authentication token
 
 		// Server-side validation for username length
 		if (newUsername.length > 12) {
-			// console.log("Executed");
 			return res
 				.status(400)
 				.json({ error: "Username must be 12 characters or less." });
 		}
 
 		try {
+			// Check if the new username is already taken by another user
+			const existingUser = await User.findOne({
+				where: { username: newUsername },
+			});
+			if (existingUser && existingUser.id !== userId) {
+				// If the username is taken and it's not by the current user, return an error
+				return res.status(409).json({ error: "Username is already taken." });
+			}
+
+			// If the username isn't taken, proceed to update
 			const [updatedRows] = await User.update(
 				{ username: newUsername },
 				{ where: { id: userId } }
 			);
+
 			if (updatedRows > 0) {
 				res.json({ message: "Username updated successfully." });
 			} else {
-				// No rows updated, user not found or username already taken
+				// No rows updated, user not found
 				res.status(404).json({ error: "User not found or update failed." });
 			}
 		} catch (err) {
