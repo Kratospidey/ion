@@ -895,3 +895,117 @@ button:active {
 	z-index: 3;
 	border-radius: 10px;
 }
+
+/* General Modal Customizations for Dark Mode */
+.modal-content {
+	background-color: #333; /* Dark background for the modal */
+	color: #fff; /* Light text color for contrast */
+	border-radius: 10px; /* Optional: Adds rounded corners to the modal */
+	border: 1px solid #444; /* Slight border for depth, adjust color as needed */
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Shadow for a "lifted" effect */
+}
+
+.modal-header,
+.modal-body {
+	background: #222; /* Even darker shade for the header and body to add depth */
+	border-bottom: 1px solid #444; /* Subtle border for separation, adjust as needed */
+}
+
+.modal-title {
+	color: #ddd; /* Slightly lighter text color for the title for emphasis */
+}
+
+/* Form Elements Customizations */
+.modal-body form .form-control {
+	background-color: #555; /* Darker background for form fields */
+	color: #eee; /* Light color for the text inside form fields */
+	border: none; /* Remove default borders */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5); /* Inner shadow for a "sunken" effect */
+}
+
+.modal-body form .form-control:focus {
+	background-color: #666; /* Slightly lighter background for focused form fields */
+	outline: none; /* Remove the default focus outline */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5),
+		0 0 5px rgba(255, 255, 255, 0.2); /* Add a glow effect on focus */
+}
+
+.modal-body form .btn {
+	background-color: #444; /* Dark background for buttons */
+	color: #fff; /* Light text color for buttons */
+	border: none; /* Remove default borders */
+	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5); /* Shadow for a "raised" button effect */
+}
+
+.modal-body .btn {
+	background-color: #444; /* Dark background for buttons */
+	color: #fff; /* Light text color for buttons */
+	border: none; /* Remove default borders */
+	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5); /* Shadow for a "raised" button effect */
+}
+
+.modal-body form .btn:hover,
+.modal-body form .btn:focus {
+	background-color: #555; /* Slightly lighter background for hovered or focused buttons */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Enhanced shadow for emphasis */
+}
+
+/* Additional styles for other elements as needed */
+
+/* Styling Dropdowns */
+.modal-body .form-control.select,
+.modal-body .dropdown,
+.modal-body .dropdown-menu {
+	background-color: #555; /* Dark background for dropdown */
+	color: #eee; /* Light text color for dropdown items */
+	border: none; /* Remove default borders */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Outer shadow for a "raised" effect */
+}
+
+.modal-body .dropdown-menu {
+	border: none; /* Remove default borders for the dropdown menu */
+	border-radius: 5px; /* Optional: Rounded corners for the dropdown menu */
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Shadow for a "floating" effect */
+}
+
+.modal-body .dropdown-item {
+	background-color: #555; /* Ensure dropdown items have the same dark background */
+	color: #eee; /* Light text color for readability */
+}
+
+.modal-body h3,
+.modal-body p,
+.modal-body .form-label {
+	color: #eee; /* Light text color for readability */
+}
+
+.modal-body .dropdown-item:hover,
+.modal-body .dropdown-item:focus {
+	background-color: #666; /* Slightly lighter background for hovered or focused items */
+	color: #fff; /* Ensure text remains visible */
+}
+
+.modal-body .dropdown-toggle {
+	background-color: #555; /* Dark background for dropdown toggle */
+	color: #eee; /* Light text color for dropdown toggle */
+	border: none; /* Remove default borders */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5); /* Inner shadow for a "sunken" effect */
+}
+
+.modal-body .dropdown-toggle:after {
+	content: none; /* Optional: Remove default arrow icon if you want a cleaner look */
+}
+
+.modal-body .form-select {
+	background-color: #555; /* Dark background for dropdown toggle */
+	color: #eee; /* Light text color for dropdown toggle */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5); /* Inner shadow for a "sunken" effect */
+}
+
+/* Adjustments for focused or active states */
+.modal-body .form-control.select:focus,
+.modal-body .dropdown-toggle:focus,
+.modal-body .dropdown-menu.show {
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Add a glow effect for focused or active states */
+	border-color: #666; /* Slightly lighter border for emphasis */
+}
