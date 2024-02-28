@@ -12,7 +12,6 @@ const buttons = document.querySelectorAll(".sidebuttons");
 function hideAllSections() {
 	document.getElementById("chat").style.display = "none";
 	document.getElementById("codespace").style.display = "none";
-	document.getElementById("illustration").style.display = "none"; // Hide the illustration as well
 }
 
 // Loop through each button and attach a click event listener
