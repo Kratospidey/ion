@@ -99,6 +99,11 @@
 			const formData = new FormData(this); // Create a FormData instance from the form
 			const xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest instance
 
+			// Change button text and disable it during upload
+			uploadButton.innerHTML =
+				'Uploading... <i class="fa fa-spinner fa-spin"></i>';
+			uploadButton.disabled = true;
+
 			xhr.open("POST", "/upload", true); // Initialize the request
 			xhr.responseType = "json"; // Expect a JSON response
 
@@ -109,15 +114,23 @@
 					setTimeout(function () {
 						location.reload(); // Reload the page after a delay
 					}, 2000); // Delay in milliseconds (2000ms = 2 seconds)
+					// Restore button text and enable it
+					uploadButton.innerHTML = "Upload File";
+					uploadButton.disabled = false;
 				} else {
 					const errorMsg =
 						xhr.response && xhr.response.message
 							? xhr.response.message
 							: "An error occurred during the upload.";
 					alert(errorMsg);
+					// Restore button text and enable it
+					uploadButton.innerHTML = "Upload File";
+					uploadButton.disabled = false;
 				}
 			};
-
+			// Restore button text and enable it
+			uploadButton.innerHTML = "Upload File";
+			uploadButton.disabled = false;
 			xhr.send(formData); // Send the FormData object
 		});
 </script>
