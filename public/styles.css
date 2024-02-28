@@ -370,20 +370,19 @@ pre {
 .app-bg {
 	background-color: #3f453f; /* A base color that complements the chat interface */
 
-	/* Layered gradients for a deep inset material effect */
 	background-image: radial-gradient(
-			circle at top left,
-			rgba(255, 255, 255, 0.15),
-			transparent 70%
+			circle at center,
+			rgba(255, 255, 255, 0.05) 0,
+			rgba(255, 255, 255, 0.05) 1px,
+			transparent 1px
 		),
-		radial-gradient(
-			circle at bottom right,
-			rgba(0, 0, 0, 0.15),
-			transparent 70%
-		);
+		linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+	background-size: 10px 10px; /* sets the size of the grid */
+	background-attachment: fixed;
 
 	/* Multiple inset shadows for a richly embossed look */
-	box-shadow: inset 0 7px 9px -7px rgba(255, 255, 255, 0.7),
+	box-shadow: inset 0 7px 9px -7px rgba(240, 229, 229, 0.7),
 		/* Top inner white glow */ inset 0 -7px 9px -7px rgba(0, 0, 0, 0.7),
 		/* Bottom inner dark glow */ inset 0 0 16px rgba(0, 0, 0, 0.5),
 		/* Overall inner shadow for depth */ inset 0 0 32px rgba(0, 0, 0, 0.3); /* More diffuse inner shadow for softness */
