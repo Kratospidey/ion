@@ -368,7 +368,7 @@ pre {
 }
 
 .app-bg {
-	background-color: #3f453f; /* A base color that complements the chat interface */
+	background-color: #2f2f39; /* A base color that complements the chat interface */
 
 	background-image: radial-gradient(
 			circle at center,
