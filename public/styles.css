@@ -671,7 +671,7 @@ pre {
 		/* Slightly lighter shade for the top */ #3a3b3e
 			/* Original input field color */
 	);
-	overflow: hidden; /* Makes sure the content respects border radius */
+	resize: none;
 }
 
 #messageInput::placeholder {
@@ -739,9 +739,9 @@ button:active {
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Font similar to that used in Windows XP */
 	text-shadow: 0 1px 0 #fff; /* Slight text shadow for depth */
 	position: relative;
-	max-width: calc(
-		100% - 60px
-	); /* Adjusts max-width to account for profile picture and padding */
+	max-width: 800px;
+	min-width: 600px;
+	flex-shrink: 1;
 	height: auto;
 	overflow: hidden; /* Hide overflow */
 	word-wrap: break-word; /* Wrap long words */

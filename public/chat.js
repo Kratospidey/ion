@@ -87,11 +87,8 @@ function appendMessage({
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
 
-		let processedMessage =
-			message.length > 70 ? insertBreaks(message, 70) : message;
-
 		// Use the renderFormattedMessage function to apply rich text formatting
-		let formattedMessage = renderFormattedMessage(processedMessage);
+		let formattedMessage = renderFormattedMessage(message);
 		formattedMessage = formattedMessage.replace(/\n/g, "<br>"); // Convert newlines to <br> tags
 
 		// Sanitize the HTML to prevent XSS attacks before setting innerHTML
@@ -103,16 +100,6 @@ function appendMessage({
 	div.appendChild(messageContent);
 	messageContainer.appendChild(div);
 	scrollToBottom();
-}
-
-function insertBreaks(str, n) {
-	// Insert a break every 'n' characters in 'str'
-	let result = "";
-	while (str.length > 0) {
-		result += str.substring(0, n) + "<br>"; // Add a space after 'n' characters
-		str = str.substring(n);
-	}
-	return result;
 }
 
 document.addEventListener("click", function (e) {
