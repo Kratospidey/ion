@@ -414,37 +414,36 @@ function scrollToBottomOfChat() {
 }
 
 messageInput.addEventListener("keydown", function (e) {
-	if (e.ctrlKey && e.shiftKey && e.key === "y") {
+	if (e.ctrlKey && e.shiftKey && e.key === ";") {
 		applyMarkdownSyntax("**");
 		e.preventDefault();
 	}
 
-	// Italic with Ctrl + Shift + I
-	else if (e.ctrlKey && e.shiftKey && e.key === "q") {
+	else if (e.ctrlKey && e.shiftKey && e.key === "'") {
 		applyMarkdownSyntax("*");
 		e.preventDefault();
 	}
 
 	// Underline with Ctrl + Shift + U
-	else if (e.ctrlKey && e.key === "u") {
+	else if (e.ctrlKey && e.key === ",") {
 		applyMarkdownSyntax("__");
 		e.preventDefault();
 	}
 
 	// Strikethrough with Ctrl + Shift + S
-	else if (e.ctrlKey && e.shiftKey && e.key === "f") {
+	else if (e.ctrlKey && e.shiftKey && e.key === ".") {
 		applyMarkdownSyntax("~~");
 		e.preventDefault();
 	}
 
 	// Spoiler with Ctrl + Shift + P
-	else if (e.ctrlKey && e.shiftKey && e.key === "p") {
+	else if (e.ctrlKey && e.shiftKey && e.key === "/") {
 		applyMarkdownSyntax("||");
 		e.preventDefault();
-	} else if (e.ctrlKey && e.shiftKey && e.key === "m") {
+	} else if (e.ctrlKey && e.shiftKey && e.key === "M") {
 		applyMarkdownSyntax("> ");
 		e.preventDefault();
-	} else if (e.ctrlKey && e.shiftKey && e.key === "b") {
+	} else if (e.ctrlKey && e.shiftKey && e.key === "B") {
 		applyMarkdownSyntax("***");
 		e.preventDefault(); // Prevent default action
 	}
