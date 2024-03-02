@@ -414,30 +414,28 @@ function scrollToBottomOfChat() {
 }
 
 messageInput.addEventListener("keydown", function (e) {
-	if (e.ctrlKey && e.shiftKey && e.key === ";") {
+	if (e.ctrlKey && e.shiftKey && e.key === "Q") {
 		applyMarkdownSyntax("**");
 		e.preventDefault();
-	}
-
-	else if (e.ctrlKey && e.shiftKey && e.key === "'") {
+	} else if (e.ctrlKey && e.shiftKey && e.key === "W") {
 		applyMarkdownSyntax("*");
 		e.preventDefault();
 	}
 
 	// Underline with Ctrl + Shift + U
-	else if (e.ctrlKey && e.key === ",") {
+	else if (e.ctrlKey && e.key === "U") {
 		applyMarkdownSyntax("__");
 		e.preventDefault();
 	}
 
 	// Strikethrough with Ctrl + Shift + S
-	else if (e.ctrlKey && e.shiftKey && e.key === ".") {
+	else if (e.ctrlKey && e.shiftKey && e.key === "S") {
 		applyMarkdownSyntax("~~");
 		e.preventDefault();
 	}
 
 	// Spoiler with Ctrl + Shift + P
-	else if (e.ctrlKey && e.shiftKey && e.key === "/") {
+	else if (e.ctrlKey && e.shiftKey && e.key === "P") {
 		applyMarkdownSyntax("||");
 		e.preventDefault();
 	} else if (e.ctrlKey && e.shiftKey && e.key === "M") {
