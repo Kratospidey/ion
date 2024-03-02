@@ -286,25 +286,39 @@ messageInput.addEventListener("paste", (event) => {
 });
 
 function uploadImage(file) {
-	// console.log("ran upload image");
+	// Get the upload icon element
+	const uploadIcon = document.querySelector(
+		'label[for="imageUpload"] .fa-upload'
+	);
+
+	// Change the icon to a spinner
+	if (uploadIcon) {
+		uploadIcon.classList.remove("fa-upload");
+		uploadIcon.classList.add("fa-spinner", "fa-spin");
+	}
+
 	const formData = new FormData();
 	formData.append("image", file);
+
 	fetch("/upload-image", {
 		method: "POST",
 		body: formData,
 	})
 		.then((response) => response.json())
 		.then((data) => {
-			// console.log(data);
 			if (data.imageUrl) {
-				// Send the image URL to the chat
-				// console.log("ran this code");
-				// console.log(`filepath: ${data.imageUrl}`);
 				socket.emit("sendImage", { imageUrl: data.imageUrl, roomId });
 			}
 		})
 		.catch((error) => {
 			console.error("Error uploading image:", error);
+		})
+		.finally(() => {
+			// Revert the icon back to upload
+			if (uploadIcon) {
+				uploadIcon.classList.remove("fa-spinner", "fa-spin");
+				uploadIcon.classList.add("fa-upload");
+			}
 		});
 }
 
