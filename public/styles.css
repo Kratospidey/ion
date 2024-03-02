@@ -346,7 +346,8 @@ a {
 	/* Slightly lighter inset shadows on hover for a subtle interactive effect */
 	box-shadow: inset 0 10px 10px rgba(255, 255, 255, 0.3),
 		inset 0 -10px 10px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
-	width: 280px; /* Expanded width to accommodate username visibility */
+	width: 500px; /* Expanded width to accommodate username visibility */
+	transition: width 0.3s ease, box-shadow 0.3s ease; /* Add width to the transition properties */
 }
 
 pre {
@@ -738,7 +739,6 @@ button:active {
 	color: #333; /* Dark grey text for better readability */
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Font similar to that used in Windows XP */
 	text-shadow: 0 1px 0 #fff; /* Slight text shadow for depth */
-	position: relative;
 	max-width: 800px;
 	min-width: 600px;
 	flex-shrink: 1;
