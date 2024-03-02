@@ -52,7 +52,6 @@ function appendMessage({
 	timestamp,
 	profilePicture,
 }) {
-	// console.log(`appendMessage called with message: ${message}`);
 	const div = document.createElement("div");
 	div.classList.add("message");
 	div.classList.add("message-enter-active");
@@ -87,9 +86,13 @@ function appendMessage({
 	} else {
 		const textDiv = document.createElement("div");
 		textDiv.classList.add("text");
-		const formattedMessage = message.replace(/\n/g, "<br>");
-		textDiv.textContent = formattedMessage;
-		textDiv.innerHTML = linkify(formattedMessage);
+
+		// Use the renderFormattedMessage function to apply rich text formatting
+		let formattedMessage = renderFormattedMessage(message);
+		formattedMessage = formattedMessage.replace(/\n/g, "<br>"); // Convert newlines to <br> tags
+
+		// Sanitize the HTML to prevent XSS attacks before setting innerHTML
+		textDiv.innerHTML = sanitizeHTML(linkify(formattedMessage));
 		messageContent.appendChild(textDiv);
 	}
 
@@ -97,6 +100,36 @@ function appendMessage({
 	div.appendChild(messageContent);
 	messageContainer.appendChild(div);
 	scrollToBottom();
+}
+
+document.addEventListener("click", function (e) {
+	if (e.target.classList.contains("spoiler")) {
+		e.target.classList.toggle("revealed");
+	}
+});
+
+function renderFormattedMessage(message) {
+	let formattedMessage = message
+		// Bold and Italic
+		.replace(/\*\*\*(.*?)\*\*\*/g, "<strong><em>$1</em></strong>")
+		// Bold
+		.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+		// Italic
+		.replace(/\*(.*?)\*/g, "<em>$1</em>")
+		// Underline
+		.replace(/__(.*?)__/g, "<u>$1</u>")
+		// Strikethrough
+		.replace(/~~(.*?)~~/g, "<del>$1</del>")
+		// Spoiler
+		.replace(/\|\|(.*?)\|\|/g, '<span class="spoiler">$1</span>')
+		// Blockquotes - only replace '>' at the start of a line
+		.replace(/^>\s?(.*)/gm, "<blockquote class='blockquote'>$1</blockquote>");
+
+	return formattedMessage;
+}
+
+function sanitizeHTML(html) {
+	return DOMPurify.sanitize(html);
 }
 
 // Listen for 'sendImage' event from the server
@@ -364,6 +397,90 @@ document.addEventListener("DOMContentLoaded", function () {
 function scrollToBottomOfChat() {
 	var chatDiv = document.getElementById("chat"); // Replace "chat" with the actual ID of your chat div
 	chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+messageInput.addEventListener("keydown", function (e) {
+	// Bold with Ctrl + Shift + B
+	if (e.ctrlKey && e.key === "B") {
+		applyMarkdownSyntax("**");
+		e.preventDefault();
+	}
+
+	// Italic with Ctrl + Shift + I
+	if (e.ctrlKey && e.key === "I") {
+		applyMarkdownSyntax("*");
+		e.preventDefault();
+	}
+
+	// Underline with Ctrl + Shift + U
+	if (e.ctrlKey && e.key === "U") {
+		applyMarkdownSyntax("__");
+		e.preventDefault();
+	}
+
+	// Strikethrough with Ctrl + Shift + S
+	if (e.ctrlKey && e.shiftKey && e.key === "F") {
+		applyMarkdownSyntax("~~");
+		e.preventDefault();
+	}
+
+	// Spoiler with Ctrl + Shift + P
+	if (e.ctrlKey && e.shiftKey && e.key === "P") {
+		applyMarkdownSyntax("||");
+		e.preventDefault();
+	}
+	if (e.ctrlKey && e.shiftKey && e.key === "M") {
+		applyMarkdownSyntax("> ");
+		e.preventDefault();
+	}
+	if (e.ctrlKey && e.shiftKey && e.key === "B") {
+		applyMarkdownSyntax("***");
+		e.preventDefault(); // Prevent default action
+	}
+});
+
+function applyMarkdownSyntax(syntax) {
+	const { value, selectionStart, selectionEnd } = messageInput;
+	let selectedText = value.substring(selectionStart, selectionEnd);
+	const beforeText = value.substring(0, selectionStart);
+	const afterText = value.substring(selectionEnd);
+
+	// Special handling for blockquotes
+	if (syntax === "> ") {
+		// Apply blockquote syntax line by line within the selected text
+		const lines = selectedText.split("\n");
+		const isBlockquote = lines.every((line) => line.startsWith("> "));
+		if (!isBlockquote) {
+			selectedText = lines
+				.map((line) => (line.startsWith("> ") ? line : "> " + line))
+				.join("\n");
+		} else {
+			// Remove blockquote syntax if it's already applied to all lines
+			selectedText = lines.map((line) => line.replace(/^> /, "")).join("\n");
+		}
+	} else {
+		// For other syntax, toggle on or off
+		const isWrapped =
+			selectedText.startsWith(syntax) && selectedText.endsWith(syntax);
+		if (isWrapped) {
+			selectedText = selectedText.slice(syntax.length, -syntax.length);
+		} else {
+			selectedText = syntax + selectedText + syntax;
+		}
+	}
+
+	messageInput.value = beforeText + selectedText + afterText;
+
+	// Adjust cursor position
+	let newCursorPos = selectionStart + syntax.length;
+	if (syntax === "> ") {
+		// Do not move cursor for blockquotes
+		newCursorPos = selectionStart + 1;
+	} else if (selectedText.startsWith(syntax) && selectedText.endsWith(syntax)) {
+		newCursorPos = selectionEnd + 2 * syntax.length;
+	}
+
+	messageInput.setSelectionRange(newCursorPos, newCursorPos);
 }
 
 fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")

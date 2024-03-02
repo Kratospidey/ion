@@ -1031,3 +1031,42 @@ button:active {
 	object-fit: contain; /* Preserve aspect ratio */
 	margin-top: 10%;
 }
+
+.spoiler {
+	background-color: #3e7e3e; /* Green background */
+	color: #3e7e3e; /* Text is hidden because it's the same color as the background */
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 4px 8px;
+	transition: background-color 0.3s, color 0.3s;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+	user-select: none; /* Prevent text selection */
+	text-shadow: none;
+}
+
+.spoiler:hover {
+	background-color: #489848; /* Slightly lighter green on hover */
+	text-shadow: none;
+}
+
+.spoiler.revealed {
+	color: #ffffff; /* White text for high contrast */
+	background-color: #2a2a2a; /* Dark background for revealed state */
+	box-shadow: none; /* No shadow when revealed */
+	cursor: default;
+	text-shadow: none;
+}
+
+blockquote {
+	border-left: 7px solid #54ae69; /* Greenish border color to stand out against dark mode */
+	margin: 8px 0;
+	padding: 4px 16px;
+	color: #ccc; /* Light text for visibility */
+	font-style: italic; /* Italic text for blockquotes */
+	background-color: #333; /* Dark background to contrast with white chat bubbles */
+	box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3),
+		/* Subtle inset shadow for depth */ 0 0 8px rgba(0, 0, 0, 0.3); /* Subtle outer glow for emphasis */
+	display: inline-block; /* Treat as inline block to wrap text */
+	max-width: 90%; /* Ensure it doesn't overflow the chat bubble */
+	word-wrap: break-word; /* Ensure text wraps within the blockquote */
+}
