@@ -498,12 +498,20 @@ app.post(
 			const { serverName } = req.body;
 			const userId = req.user.userId;
 
-			// Check if server profile picture is uploaded
-			if (!req.file) {
-				return res.status(400).send("Server profile picture is required.");
+			// Check if a server with the same name already exists
+			const existingServer = await Server.findOne({
+				where: { name: serverName },
+			});
+			if (existingServer) {
+				return res.status(409).send("A server with this name already exists.");
 			}
 
-			// Upload the server profile picture to Google Cloud Storage
+			// Check if server profile picture is uploaded
+			if (!req.file) {
+				return res.status(400).send("No profile picture attached.");
+			}
+
+			// Proceed with file upload and server creation
 			const file = req.file;
 			const blob = bucket.file(`servers/${Date.now()}-${file.originalname}`);
 			const blobStream = blob.createWriteStream({ resumable: false });

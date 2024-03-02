@@ -8,32 +8,35 @@ document
 		);
 		const originalButtonText = createServerButton.innerHTML;
 
-		// Change the button text to "Creating Server..." and add a spinner icon
 		createServerButton.disabled = true;
 		createServerButton.innerHTML =
 			'Creating Server... <i class="fa fa-spinner fa-spin"></i>';
 
-		const formData = new FormData(this); // 'this' refers to the form
-		const response = await fetch("/create-server", {
-			method: "POST",
-			body: formData,
-			credentials: "include",
-		});
+		const formData = new FormData(this);
+		try {
+			const response = await fetch("/create-server", {
+				method: "POST",
+				body: formData,
+				credentials: "include",
+			});
 
-		if (response.ok) {
-			const result = await response.json();
-			if (result.redirectUrl) {
+			if (response.ok) {
+				const result = await response.json();
 				window.location.href = result.redirectUrl;
+			} else if (response.status === 409 || response.status === 400) {
+				// Check for the status code
+				const result = await response.text(); // Assuming the server sends back a plain text message
+				alert(result); // Show the server's error message
 			} else {
-				// handle the case where there is no redirectUrl
-				alert("Server created successfully");
+				alert("Failed to create server. Please try again.");
 			}
-		} else {
-			// Handle errors
-			alert("Failed to create server. Please try again.");
+		} catch (error) {
+			console.error("Error occurred:", error);
+			alert("An error occurred while trying to create the server.");
+		} finally {
+			createServerButton.innerHTML = originalButtonText;
+			createServerButton.disabled = false;
 		}
-		createServerButton.innerHTML = originalButtonText;
-		createServerButton.disabled = false;
 	});
 
 // Handle joining an existing server
