@@ -414,13 +414,13 @@ function scrollToBottomOfChat() {
 }
 
 messageInput.addEventListener("keydown", function (e) {
-	if (e.ctrlKey && e.altKey && e.key === "B") {
+	if (e.ctrlKey && e.key === "Y") {
 		applyMarkdownSyntax("**");
 		e.preventDefault();
 	}
 
 	// Italic with Ctrl + Shift + I
-	else if (e.ctrlKey && e.altKey && e.key === "I") {
+	else if (e.ctrlKey && e.key === "I") {
 		applyMarkdownSyntax("*");
 		e.preventDefault();
 	}
