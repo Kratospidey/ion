@@ -129,26 +129,26 @@ app.get("/", (req, res) => {
 	res.redirect(302, "/login");
 });
 
-// app.get("/login", (req, res) => {
-// 	// Check if the user's request contains a token cookie
-// 	const token = req.cookies.token;
+app.get("/login", (req, res) => {
+	// Check if the user's request contains a token cookie
+	const token = req.cookies.token;
 
-// 	if (token) {
-// 		try {
-// 			// Verify the token using the same secret key used to sign the JWT
-// 			const decoded = jwt.verify(token, SECRET_KEY);
+	if (token) {
+		try {
+			// Verify the token using the same secret key used to sign the JWT
+			const decoded = jwt.verify(token, SECRET_KEY);
 
-// 			// If the token is valid, redirect to /home
-// 			return res.redirect("/home");
-// 		} catch (err) {
-// 			// If the token is not valid, catch the error (it might be expired or invalid)
-// 			console.error("Error verifying token:", err);
-// 		}
-// 	}
+			// If the token is valid, redirect to /home
+			return res.redirect("/home");
+		} catch (err) {
+			// If the token is not valid, catch the error (it might be expired or invalid)
+			console.error("Error verifying token:", err);
+		}
+	}
 
-// 	// If there's no token or it's invalid, render the login page
-// 	res.render("login");
-// });
+	// If there's no token or it's invalid, render the login page
+	res.render("login");
+});
 
 app.get("/login", (req, res) => {
 	// Always render the login page regardless of any existing tokens or user state
@@ -185,7 +185,7 @@ app.post("/login", async (req, res) => {
 
 		// If the login credentials are valid, generate a JWT and send it back to the client
 		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-			expiresIn: "1d",
+			expiresIn: "7d",
 		});
 		res.cookie("token", token, {
 			httpOnly: true,
