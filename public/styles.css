@@ -56,7 +56,6 @@ body {
 	background-size: 400% 400%;
 }
 
-
 .serverwrapper {
 	padding: 1rem;
 	flex-wrap: nowrap; /* This prevents flex items from wrapping */
@@ -1076,28 +1075,50 @@ blockquote {
 	word-wrap: break-word; /* Ensure text wraps within the blockquote */
 }
 
-
 /* signup code */
 .signupwrapper {
-    padding: 1rem;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #1a1a1a; /* Dark background for the overall page */
+	padding: 1rem;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.signupwrapper {
+	background-color: #2f2f39; /* A base color that complements the chat interface */
+
+	background-image: radial-gradient(
+			circle at center,
+			rgba(255, 255, 255, 0.05) 0,
+			rgba(255, 255, 255, 0.05) 1px,
+			transparent 1px
+		),
+		linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+	background-size: 10px 10px; /* sets the size of the grid */
+	background-attachment: fixed;
+
+	/* Multiple inset shadows for a richly embossed look */
+	box-shadow: inset 0 7px 9px -7px rgba(240, 229, 229, 0.7),
+		/* Top inner white glow */ inset 0 -7px 9px -7px rgba(0, 0, 0, 0.7),
+		/* Bottom inner dark glow */ inset 0 0 16px rgba(0, 0, 0, 0.5),
+		/* Overall inner shadow for depth */ inset 0 0 32px rgba(0, 0, 0, 0.3); /* More diffuse inner shadow for softness */
+
+	/* Smooth transition for interactive elements within the background */
+	transition: box-shadow 0.3s ease;
 }
 
 .signup {
-    display: flex;
-    flex-direction: column;
-    width: auto;
-    height: auto;
-    background: #2c2c2c; /* Slightly lighter dark shade for the form background */
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), /* Outer shadow for depth */
-                inset 0 2px 4px rgba(255, 255, 255, 0.1); /* Subtle inner highlight for a lifted effect */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border to define edges in a dark theme */
+	display: flex;
+	flex-direction: column;
+	width: auto;
+	height: auto;
+	background: #2c2c2c; /* Slightly lighter dark shade for the form background */
+	border-radius: 10px;
+	padding: 20px;
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5),
+		/* Outer shadow for depth */ inset 0 2px 4px rgba(255, 255, 255, 0.1); /* Subtle inner highlight for a lifted effect */
+	border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border to define edges in a dark theme */
 }
 
 /* Ensure all text-based input types have the dark skeuomorphic style */
@@ -1105,65 +1126,62 @@ blockquote {
 .form-control[type="text"],
 .form-control[type="email"],
 .form-control[type="password"] {
-    background-color: #242424; /* Dark background */
-    color: #ccc; /* Light text for readability */
-    border: 1px solid #3a3a3a; /* Subtle border for definition */
-    padding: 10px 15px;
-    border-radius: 5px;
-    box-shadow: 
-        inset 0 1px 3px rgba(0, 0, 0, 0.3), /* Inner shadow for depth */
-        inset 0 -1px 1px rgba(255, 255, 255, 0.05); /* Inner highlight for a subtle glossy effect */
-    font-size: 1rem;
+	background-color: #242424; /* Dark background */
+	color: #ccc; /* Light text for readability */
+	border: 1px solid #3a3a3a; /* Subtle border for definition */
+	padding: 10px 15px;
+	border-radius: 5px;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+		/* Inner shadow for depth */ inset 0 -1px 1px rgba(255, 255, 255, 0.05); /* Inner highlight for a subtle glossy effect */
+	font-size: 1rem;
 }
-
 
 /* Adjustments for the file input type for a dark theme */
 .form-control[type="file"] {
-    background-color: #242424; /* Dark background */
-    border: 1px dashed #3a3a3a; /* Dashed border for file input */
-    color: #ccc;
-    /* You might need additional styling for the file input as browsers handle them differently */
+	background-color: #242424; /* Dark background */
+	border: 1px dashed #3a3a3a; /* Dashed border for file input */
+	color: #ccc;
+	/* You might need additional styling for the file input as browsers handle them differently */
 }
 
 /* Placeholder text styling for better readability on a dark background */
-::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: #888;
-    opacity: 1; /* Firefox */
+::placeholder {
+	/* Chrome, Firefox, Opera, Safari 10.1+ */
+	color: #888;
+	opacity: 1; /* Firefox */
 }
 
 /* Dark theme adjustments for buttons */
 .btn-outline-light {
-    background-color: #333; /* Dark background */
-    color: #ccc; /* Light text */
-    border: 1px solid #444;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	background-color: #333; /* Dark background */
+	color: #ccc; /* Light text */
+	border: 1px solid #444;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline-light:hover {
-    background-color: #444; /* Slightly lighter background on hover */
+	background-color: #444; /* Slightly lighter background on hover */
 }
 
 /* Link adjustments for a dark theme */
 a.logintext {
-    color: #bbb; /* Lighter text for links */
+	color: #bbb; /* Lighter text for links */
 }
 
 a.logintext:hover {
-    color: #ddd; /* Even lighter on hover for better visibility */
+	color: #ddd; /* Even lighter on hover for better visibility */
 }
 
 .signupwrapper label {
 	color: #fff;
 }
 
-
 /* Removing the input field's focus glow */
 .signupwrapper input.form-control:focus {
-    background-color: #242424; /* Maintain the same background color */
-    color: #ccc;
-    border-color: #5cb85c; /* Adjust if you want a different border color on focus */
-    box-shadow: 
-        inset 0 1px 3px rgba(0, 0, 0, 0.4), /* Slightly deeper shadow for inner depth */
-        0 0 8px rgba(92, 184, 92, 0.6); /* A green glow matching the border, adjust color as needed */
-    outline: none; /* Disable the default focus outline */
+	background-color: #242424; /* Maintain the same background color */
+	color: #ccc;
+	border-color: #5cb85c; /* Adjust if you want a different border color on focus */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+		/* Slightly deeper shadow for inner depth */ 0 0 8px rgba(92, 184, 92, 0.6); /* A green glow matching the border, adjust color as needed */
+	outline: none; /* Disable the default focus outline */
 }
