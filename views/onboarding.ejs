@@ -9,7 +9,7 @@
 		<title>Ion | Onboarding</title>
 		<link rel="icon" type="image/png" href="/img/favicon.png" sizes="32x32" />
 		<!-- Link to your stylesheet -->
-		<link rel="stylesheet" href="/styles.css" />
+		<link rel="stylesheet" href="/onboarding.css" />
 		<script src="/script.js"></script>
 		<script
 			src="https://kit.fontawesome.com/ae809ac6b7.js"
@@ -30,12 +30,12 @@
 		/>
 	</head>
 	<body>
-		<div class="wrapper">
+		<div class="onboardingwrapper">
 			<div class="specific-w-300 onboarding">
-				<h2 class="display-5 text-white" id="card-heading">Onboarding</h2>
+				<h2 class="display-5" id="card-heading">Onboarding</h2>
 
 				<!-- Create New Server Form -->
-				<h4 class="text-white">Create a New Server</h4>
+				<h4>Create a New Server</h4>
 				<form
 					id="createServerForm"
 					action="/create-server"
@@ -43,57 +43,56 @@
 					enctype="multipart/form-data"
 					novalidate
 				>
-					<div class="mb-3 text-white">
+					<div class="mb-3">
 						<label for="serverName" class="form-label">Server Name</label>
 						<input
 							type="text"
-							class="form-control text-white bg-transparent"
+							class="form-control"
 							id="serverName"
 							name="serverName"
 							required
 						/>
 					</div>
-					<div class="mb-3 text-white">
+					<div class="mb-3">
 						<label for="serverProfilePicture" class="form-label"
 							>Profile Picture</label
 						>
 						<input
 							type="file"
-							class="form-control text-white bg-transparent"
+							class="form-control"
 							id="serverProfilePicture"
 							name="serverProfilePicture"
 						/>
 					</div>
-					<button type="submit" class="btn btn-outline-light text-white">
+					<button type="submit" class="btn btn-outline-light">
 						Create Server
 					</button>
 				</form>
 
 				<!-- Join Existing Server Form -->
-				<h4 class="text-white mt-5">Join an Existing Server</h4>
+				<h4 class="mt-5">Join an Existing Server</h4>
 				<form
 					id="joinServerForm"
 					action="/join-server"
 					method="post"
 					novalidate
 				>
-					<div class="mb-3 text-white">
+					<div class="mb-3" >
 						<label for="serverCode" class="form-label">Server Code</label>
 						<input
 							type="text"
-							class="form-control text-white bg-transparent"
+							class="form-control"
 							id="serverCode"
 							name="serverCode"
 							placeholder="Enter Server Code"
 							required
 						/>
 					</div>
-					<button type="submit" class="btn btn-outline-light text-white">
+					<button type="submit" class="btn btn-outline-light">
 						Join Server
 					</button>
 				</form>
-
-				<a href="/" class="text-white mt-4 d-block">Back to Home</a>
+				<a href="/home" class="mt-4 d-block">Back to Home</a>
 			</div>
 		</div>
 
