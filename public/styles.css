@@ -54,20 +54,8 @@ body {
 	justify-content: center;
 	background: linear-gradient(-45deg, #0077b6, #669bbc, #001233, #bbd0ff);
 	background-size: 400% 400%;
-	animation: gradient 15s ease infinite;
 }
 
-@keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
-}
 
 .serverwrapper {
 	padding: 1rem;
@@ -1086,4 +1074,96 @@ blockquote {
 	display: inline-block; /* Treat as inline block to wrap text */
 	max-width: 90%; /* Ensure it doesn't overflow the chat bubble */
 	word-wrap: break-word; /* Ensure text wraps within the blockquote */
+}
+
+
+/* signup code */
+.signupwrapper {
+    padding: 1rem;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a; /* Dark background for the overall page */
+}
+
+.signup {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    background: #2c2c2c; /* Slightly lighter dark shade for the form background */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), /* Outer shadow for depth */
+                inset 0 2px 4px rgba(255, 255, 255, 0.1); /* Subtle inner highlight for a lifted effect */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border to define edges in a dark theme */
+}
+
+/* Ensure all text-based input types have the dark skeuomorphic style */
+.form-control,
+.form-control[type="text"],
+.form-control[type="email"],
+.form-control[type="password"] {
+    background-color: #242424; /* Dark background */
+    color: #ccc; /* Light text for readability */
+    border: 1px solid #3a3a3a; /* Subtle border for definition */
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 
+        inset 0 1px 3px rgba(0, 0, 0, 0.3), /* Inner shadow for depth */
+        inset 0 -1px 1px rgba(255, 255, 255, 0.05); /* Inner highlight for a subtle glossy effect */
+    font-size: 1rem;
+}
+
+
+/* Adjustments for the file input type for a dark theme */
+.form-control[type="file"] {
+    background-color: #242424; /* Dark background */
+    border: 1px dashed #3a3a3a; /* Dashed border for file input */
+    color: #ccc;
+    /* You might need additional styling for the file input as browsers handle them differently */
+}
+
+/* Placeholder text styling for better readability on a dark background */
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #888;
+    opacity: 1; /* Firefox */
+}
+
+/* Dark theme adjustments for buttons */
+.btn-outline-light {
+    background-color: #333; /* Dark background */
+    color: #ccc; /* Light text */
+    border: 1px solid #444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-light:hover {
+    background-color: #444; /* Slightly lighter background on hover */
+}
+
+/* Link adjustments for a dark theme */
+a.logintext {
+    color: #bbb; /* Lighter text for links */
+}
+
+a.logintext:hover {
+    color: #ddd; /* Even lighter on hover for better visibility */
+}
+
+.signupwrapper label {
+	color: #fff;
+}
+
+
+/* Removing the input field's focus glow */
+.signupwrapper input.form-control:focus {
+    background-color: #242424; /* Maintain the same background color */
+    color: #ccc;
+    border-color: #5cb85c; /* Adjust if you want a different border color on focus */
+    box-shadow: 
+        inset 0 1px 3px rgba(0, 0, 0, 0.4), /* Slightly deeper shadow for inner depth */
+        0 0 8px rgba(92, 184, 92, 0.6); /* A green glow matching the border, adjust color as needed */
+    outline: none; /* Disable the default focus outline */
 }

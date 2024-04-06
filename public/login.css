@@ -1,0 +1,175 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+* {
+	box-sizing: border-box;
+	font-family: Inter;
+}
+
+html > div {
+	padding: 0;
+	margin: 0;
+}
+
+html,
+body {
+	height: 100vh;
+	width: auto;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+	display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+/* login code */
+/* Reset the form elements to ensure consistent styling */
+input,
+button,
+textarea,
+select {
+	font-family: inherit;
+	color: inherit;
+	background-color: transparent;
+	border-radius: inherit;
+	border: inherit;
+}
+
+/* loginwrapper and form container styles */
+.loginwrapper {
+	padding: 1rem;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #1a1a1a; /* Matching the overall dark background to the signup page */
+}
+
+.login {
+	display: flex;
+	flex-direction: column;
+	width: auto;
+	height: auto;
+	background: #2c2c2c; /* Dark shade for the form background */
+	border-radius: 10px;
+	padding: 20px;
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5),
+		inset 0 2px 4px rgba(255, 255, 255, 0.1); /* Subtle inner highlight */
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Input field styles, including the focus state */
+.form-control {
+	background-color: #242424; /* Dark background */
+	color: #ccc; /* Light text */
+	border: 1px solid #3a3a3a; /* Subtle border */
+	padding: 10px 15px;
+	border-radius: 5px;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.05); /* Subtle glossy effect */
+	font-size: 1rem;
+}
+
+.form-control:focus {
+	background-color: #242424; /* Retain the dark background on focus */
+	border-color: #555; /* Slightly lighter border on focus */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.1), 0 0 8px rgba(255, 255, 255, 0.2); /* Custom focus glow */
+	outline: none;
+}
+
+/* Button styles with center alignment for text */
+.btn-outline-light {
+	display: flex; /* Use flexbox for alignment */
+	justify-content: center; /* Center content horizontally */
+	align-items: center; /* Center content vertically */
+	background-color: #333; /* Dark background for buttons */
+	color: #ccc; /* Light text for contrast */
+	border: 1px solid #444;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	width: 100%; /* Full width to match the signup button */
+	padding: 10px 0;
+	transition: background-color 0.3s ease; /* Smooth transition for hover */
+	text-align: center; /* Center text */
+	font-size: 1rem; /* You can adjust the font size as needed */
+	cursor: pointer; /* Change cursor to pointer on hover */
+    height: 30px;
+}
+
+/* Remove margin and padding from the button text if <p> tag is used (not recommended) */
+#login-button {
+	margin: 0;
+	padding: 0;
+}
+
+.btn-outline-light:hover {
+	background-color: #3d3d3d; /* Slightly lighter on hover */
+}
+
+/* Additional label styles for consistency */
+.login label.form-label {
+	color: #ccc; /* Light color for labels */
+}
+
+/* Invalid feedback styles for error messages */
+.invalid-feedback {
+	color: #ff6b6b; /* Red color to highlight errors */
+}
+
+/* Adjust heading to match the skeuomorphic design */
+#card-heading {
+	color: #ccc; /* Light color for the title */
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Depth effect with text shadow */
+}
+
+/* Style adjustments for the signup link */
+a.signuptext {
+	color: #bbb; /* Lighter text color for the link */
+	transition: color 0.3s ease; /* Smooth transition for hover */
+}
+
+a.signuptext:hover {
+	color: #ddd; /* Brighter color on hover */
+}
+
+/* Input general styles */
+input.form-control {
+	background-color: #242424; /* Dark background for input fields */
+	color: #ccc; /* Light text for readability */
+	border: 1px solid #3a3a3a; /* Subtle border for definition */
+	padding: 10px 15px;
+	border-radius: 5px;
+	font-size: 1rem;
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+		/* Inner shadow for depth */ inset 0 -1px 1px rgba(255, 255, 255, 0.05); /* Inner highlight for a subtle glossy effect */
+	transition: background-color 0.2s, box-shadow 0.2s, border 0.2s; /* Smooth transition for focus */
+}
+
+/* Removing the input field's focus glow */
+input.form-control:focus {
+	background-color: #242424; /* Maintain the same background color */
+	color: #ccc;
+	border-color: #5cb85c; /* Adjust if you want a different border color on focus */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+		/* Slightly deeper shadow for inner depth */ 0 0 8px rgba(92, 184, 92, 0.6); /* A green glow matching the border, adjust color as needed */
+	outline: none; /* Disable the default focus outline */
+}
+
+/* Specific styles for active state of the input fields */
+input.form-control:active {
+	background-color: #242424; /* Maintain the same background color */
+	border-color: #5cb85c; /* A brighter border for when the input is active */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4),
+		/* Retain the depth effect */ 0 0 8px rgba(92, 184, 92, 0.6); /* Keep the glow consistent */
+}

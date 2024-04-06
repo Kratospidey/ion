@@ -8,7 +8,7 @@
 		<title>Ion | Login Page</title>
 
 		<!-- Link to your stylesheet -->
-		<link rel="stylesheet" href="/styles.css" />
+		<link rel="stylesheet" href="/login.css" />
 		<script src="/script.js"></script>
 		<script
 			src="https://kit.fontawesome.com/ae809ac6b7.js"
@@ -30,17 +30,15 @@
 		<link rel="icon" type="image/png" href="/img/favicon.png" sizes="32x32" />
 	</head>
 	<body>
-		<div class="wrapper">
+		<div class="loginwrapper">
 			<div class="specific-w-300 login">
-				<h2 class="display-3 text-white" id="card-heading">
-					I <span style="color: #1760cf">o</span> n
-				</h2>
+				<h2 class="display-3" id="card-heading">Ion</h2>
 				<form action="/login" method="post" novalidate>
-					<div class="mb-3 text-white">
+					<div class="mb-3">
 						<label for="email" class="form-label">Username or Email:</label>
 						<input
 							type="email"
-							class="form-control text-white bg-transparent"
+							class="form-control"
 							id="email"
 							placeholder="username or email"
 							required
@@ -49,20 +47,20 @@
 							Please enter a valid email address or username.
 						</div>
 					</div>
-					<label for="password" class="form-label text-white">Password</label>
+					<label for="password" class="form-label">Password</label>
 					<input
 						type="password"
 						id="password"
-						class="form-control text-white bg-transparent mb-5"
+						class="form-control mb-5"
 						aria-labelledby="password-help-block"
 						required
 					/>
-					<button type="submit" class="btn btn-outline-light text-white">
-						<p id="login-button">Login</p>
+					<button type="submit" id="login-button" class="btn btn-outline-light">
+						Login
 					</button>
 					<br />
 					<br />
-					<a href="/signup" class="text-white"
+					<a href="/signup" class="signuptext"
 						>Haven't signed up yet? Sign up here.</a
 					>
 				</form>
