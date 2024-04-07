@@ -1,6 +1,7 @@
-// start working azure
+// Load environment variables from .env file
+require("dotenv").config();
 
-require("dotenv").config(); // Load environment variables from .env file
+// Import necessary libraries and modules
 const express = require("express");
 const cookieParser = require("cookie-parser"); // Import cookie-parser
 const jwt = require("jsonwebtoken");
@@ -56,27 +57,27 @@ sequelize
 	.then(() => console.log("Connected to the database"))
 	.catch((err) => console.error("Unable to connect to the database", err));
 
-// const upload = multer({ storage: storage });
-
 const bcrypt = require("bcrypt"); // For hashing passwords
 
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const app = express();
-
 const http = require("http");
 const socketIO = require("socket.io"); // Make sure to require the 'socket.io' library
 const server = http.createServer(app);
 const io = require("socket.io")(server, {
 	cors: {
-		origin: "http://localhost:3000", // Adjust according to your setup
+		origin: "http://localhost:3000",
 		methods: ["GET", "POST"],
 		credentials: true,
 	},
 });
 
-// Middleware
+/**
+ * Sets up middleware for the Express application. This includes CORS handling, cookie parsing,
+ * body parsing for JSON and URL-encoded bodies, and serving static files.
+ */
 app.use(cors());
 app.use(cookieParser()); // Use cookie-parser middleware
 app.use(bodyParser.json());
@@ -90,6 +91,10 @@ app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); // Set the views directory
 
+/**
+ * Middleware that redirects HTTP requests to HTTPS. This is especially useful in production environments
+ * where security is paramount. It checks the protocol of incoming requests and redirects to HTTPS if necessary.
+ */
 app.use((req, res, next) => {
 	// Check if the request is coming from localhost
 	const isLocalhost =
@@ -106,6 +111,10 @@ app.use((req, res, next) => {
 	}
 });
 
+/**
+ * Middleware that redirects HTTP requests to HTTPS. This is especially useful in production environments
+ * where security is paramount. It checks the protocol of incoming requests and redirects to HTTPS if necessary.
+ */
 app.use((req, res, next) => {
 	const token = req.cookies["token"];
 	if (token && process.env.DB_RESET_INDICATOR === "true") {
@@ -129,6 +138,12 @@ app.get("/", (req, res) => {
 	res.redirect(302, "/login");
 });
 
+/**
+ * Route to render the login page. If the user already has a valid token, they are redirected to the home page.
+ *
+ * @route GET /login
+ * @access Public
+ */
 app.get("/login", (req, res) => {
 	// Check if the user's request contains a token cookie
 	const token = req.cookies.token;
@@ -155,7 +170,15 @@ app.get("/login", (req, res) => {
 	res.render("login");
 });
 
-// Route to handle user login
+/**
+ * Route to handle user login. It checks the user's credentials, and if valid, a JWT token is generated and sent back to the client.
+ *
+ * @route POST /login
+ * @param {string} req.body.email - The email of the user attempting to log in.
+ * @param {string} [req.body.username] - The username of the user attempting to log in (alternative to email).
+ * @param {string} req.body.password - The password of the user.
+ * @access Public
+ */
 app.post("/login", async (req, res) => {
 	try {
 		const { email, username, password } = req.body;
@@ -199,7 +222,12 @@ app.post("/login", async (req, res) => {
 	}
 });
 
-// server.js
+/**
+ * Route to display the home page for the authenticated user. It fetches and displays servers that the user is a part of.
+ *
+ * @route GET /home
+ * @access Private (requires authentication)
+ */
 app.get("/home", authenticateToken, async (req, res) => {
 	try {
 		const user = await User.findByPk(req.user.userId, {
@@ -234,7 +262,13 @@ app.get("/home", authenticateToken, async (req, res) => {
 	}
 });
 
-// server.js
+/**
+ * Route to display a specific server by its ID. It checks if the user is a member of the server and displays it if they are.
+ *
+ * @route GET /server/:serverId
+ * @param {string} req.params.serverId - The ID of the server to display.
+ * @access Private (requires authentication and server membership)
+ */
 app.get("/server/:serverId", authenticateToken, async (req, res) => {
 	try {
 		const server = await Server.findByPk(req.params.serverId, {
@@ -288,7 +322,14 @@ app.get("/server/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 
-// server.js
+/**
+ * Route for uploading files to a specific server. It validates the user's membership in the server and the file constraints before uploading.
+ *
+ * @route POST /upload
+ * @param {string} req.body.serverId - The ID of the server where the file is to be uploaded.
+ * @param {file} req.file - The file to upload.
+ * @access Private (requires authentication and server membership)
+ */
 app.post(
 	"/upload",
 	upload.single("file"),
@@ -367,7 +408,16 @@ app.post(
 	}
 );
 
-// Middleware to verify JWT
+/**
+ * Middleware function to authenticate the incoming requests by verifying the JWT token stored in cookies.
+ * It checks for the presence of a 'token' cookie and attempts to verify it. If the verification is successful,
+ * the decoded token information is attached to the request object (req.user).
+ * If the token is missing, invalid, or expired, an appropriate HTTP status code and message are sent back.
+ *
+ * @param {Object} req - The request object, containing cookies among other properties.
+ * @param {Object} res - The response object, used to send back the HTTP response.
+ * @param {Function} next - The next middleware function in the stack.
+ */
 function authenticateToken(req, res, next) {
 	const token = req.cookies.token;
 	if (!token) {
@@ -399,11 +449,29 @@ function authenticateToken(req, res, next) {
 	}
 }
 
-// Render the sign-up page
+/**
+ * Route handler for GET requests to the "/signup" endpoint. It renders the sign-up page where new users can register for an account.
+ *
+ * @route GET /signup
+ * @access Public
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object used to render the sign-up page.
+ */
 app.get("/signup", (req, res) => {
 	res.render("signup");
 });
 
+/**
+ * Route handler for POST requests to the "/signup" endpoint. It processes the sign-up form submission, including user details
+ * and a profile picture. It performs validations such as checking for existing users with the same email or username, password
+ * matching, and minimum password length. If validations pass, the user's password is hashed, and their profile picture is uploaded
+ * to Google Cloud Storage. Upon successful registration, the user is redirected to the onboarding page.
+ *
+ * @route POST /signup
+ * @access Public
+ * @param {Object} req - The Express request object containing the user's sign-up information and the uploaded profile picture.
+ * @param {Object} res - The Express response object used to send the HTTP response.
+ */
 app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	try {
 		const { username, email, password, confirmPassword } = req.body;
@@ -484,12 +552,28 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	}
 });
 
-// Render the onboarding page
+/**
+ * Route handler for GET requests to the "/onboarding" endpoint. It renders the onboarding page for newly registered users
+ * to guide them through initial setup or introductions. This route requires the user to be authenticated; unauthenticated users
+ * are redirected to the login page by the "authenticateToken" middleware.
+ *
+ * @route GET /onboarding
+ * @access Private (requires authentication)
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object used to render the onboarding page.
+ */
 app.get("/onboarding", authenticateToken, (req, res) => {
 	res.render("onboarding");
 });
 
-// Handle creating a new server with mandatory server profile picture
+/**
+ * Route for creating a new server with a mandatory server profile picture. The creator of the server automatically becomes a member.
+ *
+ * @route POST /create-server
+ * @param {string} req.body.serverName - The name of the new server.
+ * @param {file} req.file - The profile picture for the new server.
+ * @access Private (requires authentication)
+ */
 app.post(
 	"/create-server",
 	[authenticateToken, upload.single("serverProfilePicture")], // Use 'upload' middleware for single file upload
@@ -549,7 +633,13 @@ app.post(
 	}
 );
 
-// Handle joining an existing server
+/**
+ * Route for joining an existing server using a unique server code.
+ *
+ * @route POST /join-server
+ * @param {string} req.body.serverCode - The unique code of the server to join.
+ * @access Private (requires authentication)
+ */
 app.post("/join-server", authenticateToken, async (req, res) => {
 	try {
 		const { serverCode } = req.body;
@@ -590,12 +680,26 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Utility function to sanitize filenames by replacing any characters that are not alphanumeric, dashes, underscores,
+ * or periods with an underscore. This ensures the filenames are safe for storage and access within the file system
+ * and cloud storage services.
+ *
+ * @param {string} filename - The original filename to be sanitized.
+ * @returns {string} - The sanitized filename.
+ */
 function sanitizeFilename(filename) {
 	// Replace any characters that are not alphanumeric, dashes, underscores, or periods with an underscore
 	return filename.replace(/[^a-zA-Z0-9\-_.]/g, "_");
 }
 
-// User Profile Picture Upload
+/**
+ * Route for uploading a new profile picture for the user.
+ *
+ * @route POST /upload-user-profile
+ * @param {file} req.file - The new profile picture for the user.
+ * @access Private (requires authentication)
+ */
 app.post(
 	"/upload-user-profile",
 	upload.single("profilePicture"),
@@ -636,7 +740,14 @@ app.post(
 	}
 );
 
-// Server Profile Picture Upload
+/**
+ * Route for uploading a new profile picture for a server.
+ *
+ * @route POST /upload-server-profile
+ * @param {string} req.body.serverId - The ID of the server for which the profile picture is being uploaded.
+ * @param {file} req.file - The new profile picture for the server.
+ * @access Private (requires authentication and server ownership)
+ */
 app.post(
 	"/upload-server-profile",
 	upload.single("serverProfilePicture"),
@@ -676,6 +787,13 @@ app.post(
 	}
 );
 
+/**
+ * Route for changing the username of the authenticated user.
+ *
+ * @route POST /change-username
+ * @param {string} req.body.newUsername - The new username for the user.
+ * @access Private (requires authentication)
+ */
 app.post(
 	"/change-username",
 	authenticateToken,
@@ -720,6 +838,12 @@ app.post(
 	}
 );
 
+/**
+ * Route for deleting the authenticated user's account, including owned servers, memberships, and messages.
+ *
+ * @route DELETE /delete-account
+ * @access Private (requires authentication)
+ */
 app.delete("/delete-account", authenticateToken, async (req, res) => {
 	const userId = req.user.userId;
 
@@ -754,6 +878,13 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Route for checking if the authenticated user is the creator of a specified server.
+ *
+ * @route GET /api/is-creator/:serverId
+ * @param {string} req.params.serverId - The ID of the server to check.
+ * @access Private (requires authentication)
+ */
 app.get("/api/is-creator/:serverId", authenticateToken, async (req, res) => {
 	const userId = req.user.userId;
 	const serverId = req.params.serverId;
@@ -772,6 +903,14 @@ app.get("/api/is-creator/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Route for changing the name of a server. Only the server owner can change the name.
+ *
+ * @route POST /change-server-name
+ * @param {string} req.body.newServerName - The new name for the server.
+ * @param {string} req.body.serverId - The ID of the server whose name is to be changed.
+ * @access Private (requires authentication and server ownership)
+ */
 app.post(
 	"/change-server-name",
 	authenticateToken,
@@ -804,7 +943,14 @@ app.post(
 	}
 );
 
-// Assuming you have express router setup
+/**
+ * Route for removing a member from a server. This can only be done by the server owner.
+ *
+ * @route POST /remove-member
+ * @param {string} req.body.serverId - The ID of the server from which to remove a member.
+ * @param {string} req.body.memberToRemove - The ID of the member to remove.
+ * @access Private (requires authentication and server ownership)
+ */
 app.post("/remove-member", authenticateToken, async (req, res) => {
 	const { serverId, memberToRemove } = req.body;
 	const userId = req.user.userId; // ID of the user making the request
@@ -850,7 +996,13 @@ app.post("/remove-member", authenticateToken, async (req, res) => {
 	}
 });
 
-// Server-Side: Get all members of a server
+/**
+ * Route for fetching the members of a server. Only accessible to members of the server.
+ *
+ * @route GET /api/server/:serverId/members
+ * @param {string} req.params.serverId - The ID of the server whose members are to be listed.
+ * @access Private (requires authentication and server membership)
+ */
 app.get(
 	"/api/server/:serverId/members",
 	authenticateToken,
@@ -892,6 +1044,13 @@ app.get(
 	}
 );
 
+/**
+ * Route for deleting a server. This can only be done by the server owner.
+ *
+ * @route DELETE /delete-server/:serverId
+ * @param {string} req.params.serverId - The ID of the server to delete.
+ * @access Private (requires authentication and server ownership)
+ */
 app.delete("/delete-server/:serverId", authenticateToken, async (req, res) => {
 	const serverId = req.params.serverId; // Extract serverId from the URL
 	const userId = req.user.userId; // ID of the user making the request
@@ -925,6 +1084,13 @@ app.delete("/delete-server/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Route for fetching the name of a server.
+ *
+ * @route GET /api/server/:serverId/name
+ * @param {string} req.params.serverId - The ID of the server whose name is to be fetched.
+ * @access Private (requires authentication)
+ */
 app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
 	const { serverId } = req.params; // Extract serverId from the URL
 
@@ -946,7 +1112,13 @@ app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
 	}
 });
 
-// Function to extract file path from URL
+/**
+ * Extracts the file path from a given URL. This is useful for operations that require the path portion of a URL,
+ * such as deleting or accessing a specific file in cloud storage.
+ *
+ * @param {string} fileUrl - The URL from which to extract the file path.
+ * @returns {string} - The extracted file path.
+ */
 function extractFilePath(fileUrl) {
 	const url = new URL(fileUrl);
 	// Assuming the URL path starts with the bucket name, followed by the actual file path
@@ -954,6 +1126,14 @@ function extractFilePath(fileUrl) {
 	return url.pathname.substring(url.pathname.indexOf("/", 1) + 1);
 }
 
+/**
+ * Deletes a file from cloud storage based on the provided file path. This function encapsulates the operation
+ * to delete a file and logs the outcome, making it reusable across different parts of the application where
+ * file deletion is needed.
+ *
+ * @param {string} filepath - The path of the file to be deleted from cloud storage.
+ * @returns {Promise<void>} - A promise that resolves when the file is successfully deleted or rejects with an error.
+ */
 async function deleteFileFromCloud(filepath) {
 	const decodedFilepath = decodeURIComponent(filepath);
 	const file = bucket.file(decodedFilepath);
@@ -967,7 +1147,15 @@ async function deleteFileFromCloud(filepath) {
 	}
 }
 
-// Express route handler
+/**
+ * Route to delete a specific file from a server's storage. Validates that the user belongs to the server
+ * and updates the server's file list upon successful deletion.
+ *
+ * @route POST /delete-file
+ * @param {string} req.body.fileUrl - The URL of the file to be deleted.
+ * @param {string} req.body.serverId - The ID of the server from which the file is being deleted.
+ * @access Private (requires authentication and server membership)
+ */
 app.post("/delete-file", authenticateToken, async (req, res) => {
 	const { fileUrl, serverId } = req.body; // Assuming the client sends the full URL and server ID
 	// console.log(fileUrl);
@@ -997,12 +1185,24 @@ app.post("/delete-file", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Route to log out the current user. Clears the user's authentication token and redirects to the login page.
+ *
+ * @route GET /logout
+ * @access Private (requires authentication)
+ */
 app.get("/logout", (req, res) => {
 	// Clear the cookie named 'token'
 	res.cookie("token", "", { expires: new Date(0) });
 	res.redirect("/login"); // Redirect user to the login page
 });
 
+/**
+ * Route to retrieve the current authenticated user's ID. Useful for client-side operations that require the user's identity.
+ *
+ * @route GET /api/get-current-user
+ * @access Private (requires authentication)
+ */
 app.get("/api/get-current-user", authenticateToken, (req, res) => {
 	// Assuming `authenticateToken` middleware sets `req.user` to the authenticated user
 	if (req.user && req.user.userId) {
@@ -1012,6 +1212,13 @@ app.get("/api/get-current-user", authenticateToken, (req, res) => {
 	}
 });
 
+/**
+ * Route to fetch all messages for a given server. Includes sender information for display.
+ *
+ * @route GET /messages/:serverId
+ * @param {string} req.params.serverId - The ID of the server whose messages are being fetched.
+ * @access Private (requires authentication and server membership)
+ */
 app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 	const { serverId } = req.params;
 
@@ -1035,6 +1242,13 @@ app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 
+/**
+ * Route to upload an image file. Validates that the file is an image and within size limits before uploading.
+ *
+ * @route POST /upload-image
+ * @param {file} req.file - The image file to be uploaded.
+ * @access Private (requires authentication)
+ */
 app.post(
 	"/upload-image",
 	upload.single("image"),
@@ -1093,6 +1307,13 @@ app.post(
 	}
 );
 
+/**
+ * Route to allow a user to join a server using an invite code. Validates the invite code and adds the user to the server.
+ *
+ * @route GET /joinserver/:inviteCode
+ * @param {string} req.params.inviteCode - The invite code for the server.
+ * @access Private (requires authentication)
+ */
 app.get("/joinserver/:inviteCode", authenticateToken, async (req, res) => {
 	const { inviteCode } = req.params;
 
@@ -1133,30 +1354,99 @@ app.get("/joinserver/:inviteCode", authenticateToken, async (req, res) => {
 	}
 });
 
-// Start the server
+/**
+ * Route for an authenticated user to leave a server. If the user is the owner of the server, the entire server is deleted.
+ * The server ID is obtained from the route parameter, and the user ID is expected to be sent in the request body.
+ *
+ * @route POST /leave-server/:serverId
+ * @param {string} req.params.serverId - The ID of the server the user wishes to leave.
+ * @param {number} req.body.userId - The ID of the user leaving the server, should match the authenticated user.
+ * @access Private (requires authentication)
+ */
+app.post("/leave-server/:serverId", authenticateToken, async (req, res) => {
+	const serverId = req.params.serverId; // The ID of the server to leave, obtained from the URL
+	const userId = req.body.userId; // The ID of the user leaving the server, obtained from the request body
+
+	try {
+		// Ensure the user making the request is the same as the userId provided in the body
+		if (req.user.userId !== userId) {
+			return res.status(403).json({ message: "Unauthorized action." });
+		}
+
+		// Find the server to determine if the user is the owner
+		const server = await Server.findByPk(serverId);
+		if (!server) {
+			return res.status(404).json({ message: "Server not found." });
+		}
+
+		if (server.ownerId === userId) {
+			// If the user is the server owner, first remove all ServerUser relationships
+			await ServerUser.destroy({ where: { serverId: serverId } });
+
+			// Then delete the entire server
+			await Server.destroy({ where: { id: serverId } });
+
+			res.json({
+				message: "Server deleted successfully as you were the owner.",
+				redirectUrl: "/home", // Include the redirect URL in the response
+			});
+		} else {
+			// If the user is not the owner, remove their membership from the server
+			await ServerUser.destroy({
+				where: {
+					serverId: serverId,
+					userId: userId,
+				},
+			});
+			res.json({
+				message: "You have successfully left the server.",
+				redirectUrl: "/home", // Include the redirect URL in the response
+			});
+		}
+	} catch (error) {
+		console.error("Error leaving server:", error);
+		res.status(500).json({ message: "Internal server error." });
+	}
+});
+
+// Starts the server on a specified port. Logs a message to the console once the server is running.
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
 
+/**
+ * Establishes WebSocket connections with clients using Socket.IO.
+ * Handles various events such as joining rooms, sending messages, and broadcasting typing status.
+ */
 io.on("connection", (socket) => {
+	// Extract cookies from the socket request to authenticate the user
 	const cookieString = socket.request.headers.cookie;
-	const cookies = parseCookies(cookieString); // You'll need a function to parse the cookie string
+	const cookies = parseCookies(cookieString);
 	// console.log(cookies);
-	const token = cookies.token; // Replace 'token' with the name of your cookie
+	const token = cookies.token;
 	// console.log("Headers:", socket.request.headers);
 
-	// Verify the token. The implementation depends on your authentication system
+	// Attempt to authenticate the user using the provided token
 	authenticateSocketToken(token)
 		.then((decoded) => {
 			// console.log("Authenticated user:", decoded.userId);
+			// Notify the client of successful authentication by emitting the userId
 			socket.emit("userId", { userId: decoded.userId });
 			// console.log(`server side id: ${decoded.userId}`);
-			// Server-side
+
+			/**
+			 * Joins the specified room. This allows messages to be broadcasted to room members only.
+			 * @param {string} roomId - The ID of the room to join.
+			 */
 			socket.on("joinRoom", (roomId) => {
 				socket.join(roomId);
 			});
 
+			/**
+			 * Handles sending messages within a room. Saves the message to the database and broadcasts it to the room.
+			 * @param {Object} data - Contains the message content and the roomId.
+			 */
 			socket.on("sendMessage", async (data) => {
 				const { message, roomId } = data;
 				const userId = decoded.userId; // Assuming this is obtained from token authentication
@@ -1186,6 +1476,11 @@ io.on("connection", (socket) => {
 					// Handle error appropriately
 				}
 			});
+
+			/**
+			 * Broadcasts typing status to all users in a room except the sender.
+			 * @param {Object} data - Contains roomId and typing status.
+			 */
 			socket.on("typing", async (data) => {
 				const { roomId, typing } = data;
 
@@ -1194,6 +1489,11 @@ io.on("connection", (socket) => {
 				username = userData.username;
 				socket.to(roomId).emit("typing", { username: username, typing });
 			});
+
+			/**
+			 * Handles sending image messages within a room. Saves the image message to the database and broadcasts it to the room.
+			 * @param {Object} data - Contains the imageUrl and the roomId.
+			 */
 			socket.on("sendImage", async (data) => {
 				const { imageUrl, roomId } = data;
 				const userId = decoded.userId; // Assuming this is obtained from token authentication
@@ -1233,6 +1533,11 @@ io.on("connection", (socket) => {
 		});
 });
 
+/**
+ * Authenticates the socket connection using a JWT token.
+ * @param {string} token - The JWT token to authenticate.
+ * @returns {Promise} - A promise that resolves with the decoded token if authentication succeeds, or rejects with an error if it fails.
+ */
 function authenticateSocketToken(token) {
 	return new Promise((resolve, reject) => {
 		if (!token) {
@@ -1262,6 +1567,11 @@ function authenticateSocketToken(token) {
 	});
 }
 
+/**
+ * Parses a cookie string into an object with key-value pairs.
+ * @param {string} cookieString - The string containing the cookie data.
+ * @returns {Object} - An object where each key is a cookie name and each value is the corresponding cookie value.
+ */
 function parseCookies(cookieString) {
 	const list = {};
 	cookieString?.split(";").forEach((cookie) => {
@@ -1273,6 +1583,11 @@ function parseCookies(cookieString) {
 	return list;
 }
 
+/**
+ * Retrieves user data by user ID.
+ * @param {number} userId - The ID of the user to retrieve data for.
+ * @returns {Promise<Object>} - A promise that resolves with the user data, or rejects with an error if the user cannot be found.
+ */
 async function getUserDataById(userId) {
 	try {
 		const user = await User.findByPk(userId, {
@@ -1293,6 +1608,11 @@ async function getUserDataById(userId) {
 	}
 }
 
+/**
+ * Retrieves server data by server ID.
+ * @param {number} serverId - The ID of the server to retrieve data for.
+ * @returns {Promise<Object>} - A promise that resolves with the server data, or rejects with an error if the server cannot be found.
+ */
 async function getServerDataById(serverId) {
 	try {
 		// Assuming 'Server' is your Sequelize model for the server table

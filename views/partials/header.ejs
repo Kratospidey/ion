@@ -217,8 +217,16 @@
 				<!-- Server Creator Message -->
 				<div id="serverCreatorMessage" style="display: none">
 					<h3>Server Settings</h3>
+					<button
+						id="leaveServerButtonNonOwner"
+						class="btn btn-danger"
+						style="margin-top: 10px"
+					>
+						Leave Server
+					</button>
+					<hr />
 					<p>
-						You need to be the creator of the server to modify these settings.
+						You need to be the creator of the server to modify other settings.
 					</p>
 				</div>
 				<div id="serverSettingsSection" style="display: none">
@@ -301,6 +309,14 @@
 					<form id="deleteServerForm">
 						<button type="submit" class="btn btn-danger">Delete Server</button>
 					</form>
+					<hr />
+					<button
+						id="leaveServerButtonOwner"
+						class="btn btn-danger"
+						style="margin-top: 10px"
+					>
+						Leave Server
+					</button>
 				</div>
 			</div>
 		</div>
@@ -310,6 +326,68 @@
 <script src="/onboardingScript.js"></script>
 
 <script defer>
+	async function getCurrentUserId() {
+		try {
+			const response = await fetch("/api/get-current-user", {
+				credentials: "include", // Include cookies
+			});
+			const data = await response.json();
+			return data.currentUserId;
+		} catch (error) {
+			console.error("Error fetching current user ID:", error);
+			return null;
+		}
+	}
+
+	async function leaveServer(serverId, userId) {
+		try {
+			const response = await fetch(`/leave-server/${serverId}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ userId }),
+				credentials: "include",
+			});
+
+			const result = await response.json(); // Parse the JSON result
+
+			if (response.ok) {
+				alert(result.message);
+				if (result.redirectUrl) {
+					window.location.href = result.redirectUrl; // Redirect to the provided URL
+				}
+			} else {
+				throw new Error(result.message || "Failed to leave server");
+			}
+		} catch (error) {
+			console.error("Error leaving server:", error);
+			alert(error.message || "Error leaving server");
+		}
+	}
+
+	window.addEventListener("DOMContentLoaded", async (event) => {
+		const serverId = getServerIdFromUrl(); // Reuse your existing function to get server ID from URL
+		const userId = await getCurrentUserId(); // Fetch the current user's ID
+
+		const leaveServerButtonOwner = document.getElementById(
+			"leaveServerButtonOwner"
+		);
+		const leaveServerButtonNonOwner = document.getElementById(
+			"leaveServerButtonNonOwner"
+		);
+
+		[leaveServerButtonOwner, leaveServerButtonNonOwner].forEach((button) => {
+			if (button) {
+				button.addEventListener("click", async () => {
+					if (confirm("Are you sure you want to leave this server?")) {
+						await leaveServer(serverId, userId);
+					}
+				});
+			}
+		});
+	});
+
 	window.addEventListener("DOMContentLoaded", (event) => {
 		const changeUsernameForm = document.getElementById("changeUsernameForm");
 		const changeUsernameButton = document.getElementById(

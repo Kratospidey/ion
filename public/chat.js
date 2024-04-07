@@ -44,7 +44,21 @@ socket.on("chatMessage", function (data) {
 	messageContainer.scrollTop = messageContainer.scrollHeight;
 });
 
-// Function to create and append message element
+/**
+ * Appends a new message to the chat window. This function dynamically creates HTML elements
+ * to display the message content, sender's username, profile picture, and timestamp. It supports
+ * rendering text messages, image URLs, and applying rich text formatting based on markdown-like
+ * syntax. The function also ensures the chat window scrolls to the latest message.
+ *
+ * @function appendMessage
+ * @param {Object} messageData - The message details to be displayed.
+ * @param {string} messageData.userId - The unique ID of the user who sent the message.
+ * @param {string} messageData.message - The message content, which can be plain text or an image URL.
+ * @param {string} messageData.username - The username of the sender.
+ * @param {string} messageData.timestamp - The timestamp of when the message was sent.
+ * @param {string} messageData.profilePicture - The URL to the sender's profile picture.
+ * @sideEffects - Modifies the DOM to include the new message and scrolls the message container.
+ */
 function appendMessage({
 	userId,
 	message,
@@ -128,6 +142,14 @@ function renderFormattedMessage(message) {
 	return formattedMessage;
 }
 
+/**
+ * Sanitizes a given HTML string to prevent Cross-Site Scripting (XSS) attacks. This function is
+ * essential for ensuring that user-generated content does not compromise the security of the application.
+ *
+ * @function sanitizeHTML
+ * @param {string} html - The HTML string to be sanitized.
+ * @returns {string} The sanitized HTML string, safe for insertion into the DOM.
+ */
 function sanitizeHTML(html) {
 	return DOMPurify.sanitize(html);
 }
@@ -173,7 +195,19 @@ document.getElementById("messageForm").addEventListener("submit", function (e) {
 	}
 });
 
-// Fetch and display historical messages when the user enters a chat room
+/**
+ * Fetches historical messages for a given chat room from the server and displays them in the chat window.
+ * This function makes an HTTP GET request to retrieve messages and then iterates over the response
+ * to render each message. It ensures messages are displayed in chronological order and the chat window
+ * scrolls to show the most recent messages.
+ *
+ * @async
+ * @function fetchAndDisplayMessages
+ * @param {string} roomId - The unique ID of the chat room for which messages are being fetched.
+ * @returns {Promise<void>} A promise that resolves when all messages have been fetched and displayed.
+ * @throws {Error} Throws an error if the fetch request fails or if messages cannot be rendered properly.
+ * @sideEffects - Makes an HTTP request to the server, modifies the DOM to display messages, and scrolls the message container.
+ */
 function fetchAndDisplayMessages(roomId) {
 	fetch(`/messages/${roomId}`)
 		.then((response) => {
@@ -260,7 +294,14 @@ socket.on("typing", (data) => {
 	}
 });
 
-// Function to format timestamp into "DD/MM/YYYY HH:mm" format
+/**
+ * Formats a UNIX timestamp into a human-readable date and time string. This function improves the readability
+ * of timestamps in the chat interface by converting them into a more familiar format.
+ *
+ * @function formatTimestamp
+ * @param {number|string} timestamp - The UNIX timestamp to be formatted.
+ * @returns {string} The formatted date and time string.
+ */
 function formatTimestamp(timestamp) {
 	const date = new Date(timestamp);
 	const day = date.getDate().toString().padStart(2, "0");
@@ -322,12 +363,31 @@ function uploadImage(file) {
 		});
 }
 
+/**
+ * Checks if a given URL points to an image by matching it against known image file extensions.
+ * This function is useful for determining how to render messages that contain URLs.
+ *
+ * @function isImageUrl
+ * @param {string} url - The URL to be tested.
+ * @returns {boolean} True if the URL ends with an image file extension, false otherwise.
+ */
 function isImageUrl(url) {
 	// Check if the URL has recognizable image file extensions before any query parameters
 	const withoutQuery = url.split("?")[0];
 	return /\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(withoutQuery);
 }
 
+/**
+ * Fetches user details from the server using the user's unique ID. This function sends a GET request
+ * to a predefined endpoint and updates the user's profile picture in the chat interface upon success.
+ * It handles both successful and error responses.
+ *
+ * @async
+ * @function fetchUserDetails
+ * @param {string} userId - The unique identifier of the user whose details are being fetched.
+ * @sideEffects - Makes an HTTP request to the server, and may modify the DOM by setting a user's profile picture.
+ * @throws {Error} Throws an error if the request fails or if the response data is not as expected.
+ */
 function fetchUserDetails(userId) {
 	fetch(`/user/${userId}`)
 		.then((response) => response.json())
@@ -340,6 +400,15 @@ function fetchUserDetails(userId) {
 		.catch((error) => console.error("Error fetching user details:", error));
 }
 
+/**
+ * Converts plaintext URLs in a given text into clickable HTML anchor tags. This function enhances
+ * the chat experience by allowing users to easily navigate to links shared within messages.
+ * It also differentiates between image URLs and other URLs to avoid modifying image links.
+ *
+ * @function linkify
+ * @param {string} text - The text content that may contain plaintext URLs.
+ * @returns {string} The modified text with URLs replaced by HTML anchor tags.
+ */
 function linkify(text) {
 	const urlRegex =
 		/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi;
@@ -408,6 +477,13 @@ document.addEventListener("DOMContentLoaded", function () {
 	});
 });
 
+/**
+ * Scrolls the chat window to the bottom. This function is called after new messages are added to the chat
+ * to ensure that the latest messages are visible to the user.
+ *
+ * @function scrollToBottomOfChat
+ * @sideEffects - Modifies the scrollTop property of the chat container, causing the view to scroll.
+ */
 function scrollToBottomOfChat() {
 	var chatDiv = document.getElementById("chat"); // Replace "chat" with the actual ID of your chat div
 	chatDiv.scrollTop = chatDiv.scrollHeight;
@@ -447,6 +523,14 @@ messageInput.addEventListener("keydown", function (e) {
 	}
 });
 
+/**
+ * Applies markdown-like syntax to the selected text within the message input field. This function
+ * enhances the user experience by allowing for quick formatting of messages using keyboard shortcuts.
+ *
+ * @function applyMarkdownSyntax
+ * @param {string} syntax - The markdown-like syntax to be applied (e.g., "**" for bold).
+ * @sideEffects - Modifies the value of the message input field and adjusts the cursor position.
+ */
 function applyMarkdownSyntax(syntax) {
 	const { value, selectionStart, selectionEnd } = messageInput;
 	let selectedText = value.substring(selectionStart, selectionEnd);
@@ -491,6 +575,14 @@ function applyMarkdownSyntax(syntax) {
 	messageInput.setSelectionRange(newCursorPos, newCursorPos);
 }
 
+/**
+ * Initializes emoji functionalities by fetching emoji data and setting up the search index.
+ * This allows users to search for and select emojis when composing messages. The function also
+ * handles input events for emoji search and selection.
+ *
+ * @sideEffects - Fetches emoji data from an external source, modifies the DOM to display emoji search results,
+ *                and sets up event listeners for emoji selection.
+ */
 fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 	.then((response) => response.json())
 	.then((data) => {
@@ -499,6 +591,15 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 		let currentEmojiIndex = -1;
 		let emojiResults = [];
 
+		/**
+		 * Detects if the cursor is adjacent to an emoji character within the message input. This function is used
+		 * to improve the user experience by preventing emoji search and selection functionalities from being triggered
+		 * inappropriately when the user's cursor is next to an existing emoji.
+		 *
+		 * @function isCursorNextToEmoji
+		 * @param {HTMLInputElement} input - The input element where the user types the message.
+		 * @returns {boolean} True if the cursor is next to an emoji, false otherwise.
+		 */
 		function isCursorNextToEmoji(input) {
 			const cursorPosition = input.selectionStart;
 			const textBeforeCursor = input.value.slice(0, cursorPosition);
@@ -514,6 +615,15 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 			);
 		}
 
+		/**
+		 * Initiates a search for emojis based on the user's query and displays the results. This function enhances
+		 * the chat application by allowing users to search for emojis by typing a colon followed by the search term.
+		 * The search results are made clickable for easy insertion into the message input.
+		 *
+		 * @function emojiSearch
+		 * @param {string} query - The search term entered by the user after the colon.
+		 * @sideEffects - Modifies the DOM to display emoji search results and may change the emoji selection mode state.
+		 */
 		function emojiSearch(query) {
 			if (!query) {
 				document.getElementById("emoji-search-results").style.display = "none";
@@ -554,6 +664,15 @@ fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")
 			});
 		}
 
+		/**
+		 * Inserts the selected emoji into the message input field at the current cursor position. This function
+		 * improves user interaction by allowing users to select emojis from search results and have them automatically
+		 * added to their message.
+		 *
+		 * @function insertEmoji
+		 * @param {string} emoji - The emoji character to be inserted into the message input.
+		 * @sideEffects - Modifies the value of the message input field and hides the emoji search results.
+		 */
 		function insertEmoji(emoji) {
 			const input = document.getElementById("messageInput");
 			let currentValue = input.value;
