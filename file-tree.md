@@ -8,7 +8,7 @@ description: explains the file tree of the project
 
 ### File Tree Overview
 
-{% code title="filetree" %}
+{% code title="filetree" lineNumbers="true" %}
 ```
 .
 ├── README.md

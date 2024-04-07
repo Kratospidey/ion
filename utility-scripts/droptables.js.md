@@ -17,13 +17,16 @@ The script targets a Sequelize-based application's database and sequentially dro
 
     * The script begins by importing the Sequelize models object, which contains definitions for all the tables in the database.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const db = require("../models"); // Adjust the path according to your project structure
     ```
+    {% endcode %}
 2.  **Drop Tables in Order**:
 
     * The function `dropAllTablesConsideringDependencies` is defined to drop tables sequentially, starting with those that have no dependencies or are dependencies of other tables.
 
+    {% code lineNumbers="true" %}
     ```javascript
     async function dropAllTablesConsideringDependencies() {
         try {
@@ -49,10 +52,13 @@ The script targets a Sequelize-based application's database and sequentially dro
         }
     }
     ```
+    {% endcode %}
 3.  **Executing the Drop Script**:
 
     * The function is invoked to execute the table dropping process. The console logs provide real-time feedback on the script's progress and any potential errors.
 
+    {% code lineNumbers="true" %}
     ```javascript
     dropAllTablesConsideringDependencies();
     ```
+    {% endcode %}

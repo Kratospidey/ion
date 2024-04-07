@@ -33,6 +33,7 @@ The `Server` model is associated with the `User` model in two significant ways:
 
 When setting up Sequelize within the application, the `Server` model is defined with its respective fields and configurations, aligning with the database schema and application requirements.
 
+{% code lineNumbers="true" %}
 ```javascript
 const Server = sequelize.define('Server', {
   name: DataTypes.STRING,
@@ -42,16 +43,19 @@ const Server = sequelize.define('Server', {
   ownerId: DataTypes.INTEGER,
 });
 ```
+{% endcode %}
 
 **Using the addUser Method**
 
 The `addUser` method facilitates adding a new member to a server, ensuring that the user is not already a member of the server. This method is particularly useful when managing server memberships through the application's UI or API endpoints.
 
+{% code lineNumbers="true" %}
 ```javascript
 Server.findOne({ where: { name: 'Study Lounge' } })
   .then(server => server.addUser(1)) // Assuming '1' is the userId
   .then(serverUser => console.log(`Added user to server: ${serverUser}`))
   .catch(error => console.error(error));
 ```
+{% endcode %}
 
 In this example, a server named `Study Lounge` is queried, and a user with `userId` 1 is added to it. The method internally checks for existing membership before adding the user, ensuring no duplicate memberships.

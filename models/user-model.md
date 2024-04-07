@@ -31,6 +31,7 @@ The `User` model is associated with the `Server` model through a many-to-many re
 
 In the Sequelize setup, the `User` model is defined with its fields and constraints. Each field is configured with specific data types and properties, such as `allowNull` and `unique`, to maintain data integrity and enforce rules like unique usernames and emails.
 
+{% code lineNumbers="true" %}
 ```javascript
 const User = sequelize.define('User', {
   username: DataTypes.STRING,
@@ -41,15 +42,18 @@ const User = sequelize.define('User', {
   lastLogin: DataTypes.DATE,
 });
 ```
+{% endcode %}
 
 **Using the comparePassword Method**
 
 The `comparePassword` method is used to compare a plaintext password with the hashed password stored in the database. This is typically used during the login process to authenticate users.
 
+{% code lineNumbers="true" %}
 ```javascript
 User.findOne({ where: { username: 'johnDoe' } })
   .then(user => user.comparePassword('password123'))
   .then(isMatch => console.log('Password match:', isMatch));
 ```
+{% endcode %}
 
 In this example, a user with the username `johnDoe` is retrieved from the database, and the `comparePassword` method is invoked with a candidate password. The method returns a boolean indicating whether the provided password matches the stored hashed password.

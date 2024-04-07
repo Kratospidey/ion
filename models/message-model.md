@@ -26,6 +26,7 @@ To contextualize each message within the application, the `Message` model is ass
 
 The process of creating a new message involves specifying the content of the message along with the identifiers for the sender and the server where the message is to be posted.
 
+{% code lineNumbers="true" %}
 ```javascript
 Message.create({
   content: 'Hello, world!',
@@ -33,5 +34,6 @@ Message.create({
   serverId: 2, // ID of the server where the message is posted
 });
 ```
+{% endcode %}
 
 In this example, a new message with the content "Hello, world!" is created. The `userId` is set to 1, indicating the sender, and `serverId` is set to 2, specifying the server in which the message is sent. This operation results in a new entry in the `messages` table that contains the message content along with references to both the sender and the server.

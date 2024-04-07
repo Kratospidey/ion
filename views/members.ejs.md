@@ -2,6 +2,7 @@
 
 **Copy Invite Link Functionality**
 
+{% code lineNumbers="true" %}
 ```ejs
 /**
  * Copies the server invite link to the user's clipboard.
@@ -25,6 +26,7 @@ function copyInviteLink(code) {
 	);
 }
 ```
+{% endcode %}
 
 The script includes a function named `copyInviteLink`, which is triggered when the user clicks the 'Copy Invite' button. This function constructs a full invite link to the server using the server's unique code passed as a parameter and the current window's origin. It attempts to copy this constructed link to the user's clipboard using the Clipboard API. The function provides immediate feedback to the user:
 
@@ -37,6 +39,7 @@ This feature enhances the user experience by facilitating the easy sharing of se
 
 Additionally, the script manages hover interactions over the members' div. It utilizes event listeners for 'mouseover' and 'mouseout' events to control UI behavior based on user interaction.
 
+{% code lineNumbers="true" %}
 ```ejs
 /**
  * Initializes hover interaction behaviors on the members' div.
@@ -58,6 +61,7 @@ membersDiv.addEventListener("mouseout", function () {
 	}, 500);
 });
 ```
+{% endcode %}
 
 * On `mouseover`: Any pending timeout set to potentially shrink the members' div (or perform any other UI adjustment) is cleared, ensuring that the operation does not proceed if the user hovers over the div again.
 * On `mouseout`: A timeout is initiated, which, after a delay (currently 500ms), could trigger a UI adjustment operation, such as shrinking the members' div. This delayed operation is intended to enhance the interface by not immediately reacting to the mouse leaving the div, providing a smoother user experience.

@@ -18,13 +18,16 @@ The purpose of this script is to synchronize the Sequelize models with the datab
 
     * The script starts by importing the Sequelize models object, which encompasses the Sequelize instance and all defined models.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const db = require("../models"); // Adjust the path based on your project structure.
     ```
+    {% endcode %}
 2.  **Define and Declare Tables**:
 
     * The `defineTables` async function orchestrates the synchronization process, dropping and recreating tables based on the models.
 
+    {% code lineNumbers="true" %}
     ```javascript
     async function defineTables() {
         try {
@@ -35,10 +38,13 @@ The purpose of this script is to synchronize the Sequelize models with the datab
         }
     }
     ```
+    {% endcode %}
 3.  **Executing the Script**:
 
     * The function is called to initiate the table synchronization process. The console logs provide feedback on the operation's success or any encountered errors.
 
+    {% code lineNumbers="true" %}
     ```javascript
     defineTables();
     ```
+    {% endcode %}

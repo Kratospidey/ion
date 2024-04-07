@@ -10,18 +10,23 @@ This part of the script manages the submission of the 'Create Server' form. It p
 
 *   **Event Listener**: Attaches to the 'Create Server' form's `submit` event.
 
+    {% code lineNumbers="true" %}
     ```javascript
     document.getElementById("createServerForm").addEventListener("submit", async function (event) { ... });
     ```
+    {% endcode %}
 *   **Submit Button State Management**: Disables the submit button and changes its text to indicate the ongoing creation process.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const createServerButton = document.querySelector("#createServerForm button");
     createServerButton.innerHTML = 'Creating Server... <i class="fa fa-spinner fa-spin"></i>';
     createServerButton.disabled = true;
     ```
+    {% endcode %}
 *   **Form Data Processing**: Collects the form data and sends a POST request to the `/create-server` endpoint.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const formData = new FormData(this);
     const response = await fetch("/create-server", {
@@ -30,8 +35,10 @@ This part of the script manages the submission of the 'Create Server' form. It p
         credentials: "include",
     });
     ```
+    {% endcode %}
 *   **Server Response Handling**: On successful server creation, redirects the user to the new server's page. In case of errors (e.g., server code conflicts or invalid inputs), displays an appropriate error message.
 
+    {% code lineNumbers="true" %}
     ```javascript
     if (response.ok) {
         const result = await response.json();
@@ -42,6 +49,7 @@ This part of the script manages the submission of the 'Create Server' form. It p
         alert(result);
     }
     ```
+    {% endcode %}
 
 #### Join Server Form Submission Handler
 
@@ -53,18 +61,23 @@ This portion handles the 'Join Server' form submission, employing a similar patt
 
 *   **Event Listener**: Attaches to the 'Join Server' form's `submit` event.
 
+    {% code lineNumbers="true" %}
     ```javascript
     document.getElementById("joinServerForm").addEventListener("submit", async function (event) { ... });
     ```
+    {% endcode %}
 *   **Submit Button State Management**: Updates the join button's state to reflect the ongoing join process.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const joinServerButton = document.querySelector("#joinServerForm button");
     joinServerButton.innerHTML = 'Joining Server... <i class="fa fa-spinner fa-spin"></i>';
     joinServerButton.disabled = true;
     ```
+    {% endcode %}
 *   **Server Code Submission**: Sends the server code through a POST request to the `/join-server` endpoint and handles the response.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const serverCode = document.getElementById("serverCode").value;
     const response = await fetch("/join-server", {
@@ -74,8 +87,10 @@ This portion handles the 'Join Server' form submission, employing a similar patt
         credentials: "include",
     });
     ```
+    {% endcode %}
 *   **Server Response and User Redirection**: Redirects the user to the joined server's page on success, or alerts the user in case of a failure.
 
+    {% code lineNumbers="true" %}
     ```javascript
     if (response.ok) {
         const result = await response.json();
@@ -85,3 +100,4 @@ This portion handles the 'Join Server' form submission, employing a similar patt
         alert("Failed to join server. Please check the code and try again.");
     }
     ```
+    {% endcode %}

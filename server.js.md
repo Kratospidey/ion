@@ -10,15 +10,18 @@ This documentation provides detailed insights into the server-side functionaliti
 
 *   **dotenv**: Used for loading environment variables from a `.env` file to manage sensitive information like database credentials and API keys securely.
 
+    {% code lineNumbers="true" %}
     ```javascript
     require("dotenv").config();
     ```
+    {% endcode %}
 
 #### Library Imports
 
 * **Core Libraries**: The application uses `express` for the server framework, `cookie-parser` for parsing cookies, `jsonwebtoken` for handling JWTs, and `sequelize` for ORM functionalities.
 *   **File Upload and Emoji Conversion**: Implements `multer` for handling file uploads and `emoji-js` for converting emoji shortcodes to Unicode.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const express = require("express");
     const cookieParser = require("cookie-parser");
@@ -27,22 +30,26 @@ This documentation provides detailed insights into the server-side functionaliti
     const multer = require("multer");
     const EmojiConvertor = require("emoji-js");
     ```
+    {% endcode %}
 
 #### Database and ORM Configuration
 
 *   **Sequelize**: Establishes a connection with the database and imports models such as `User`, `Server`, `ServerUser`, and `Message` to interact with database tables.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const db = require("./models/index");
     const sequelize = db.sequelize;
     sequelize.authenticate();
     ```
+    {% endcode %}
 
 #### Express Server Setup and Middleware Configuration
 
 * **Server and Middleware**: Sets up an Express app, configuring middleware for CORS, cookie parsing, and body parsing. It also serves static files and sets EJS as the view engine.
 *   **HTTPS Redirection Middleware**: Ensures secure communication by redirecting HTTP requests to HTTPS in production environments.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const app = express();
     app.use(cors());
@@ -51,23 +58,28 @@ This documentation provides detailed insights into the server-side functionaliti
     app.use(express.static("public"));
     app.set("view engine", "ejs");
     ```
+    {% endcode %}
 
 #### Google Cloud Storage for File Uploads
 
 *   **Google Cloud Storage Configuration**: Integrates Google Cloud Storage for file uploads, using credentials from environment variables.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const googleStorage = new Storage({ credentials: googleCredentials });
     const bucket = googleStorage.bucket(bucketName);
     ```
+    {% endcode %}
 
 #### Authentication and JWT Handling
 
 *   **JWT Secret Key**: Utilizes a secret key from environment variables for signing and verifying JWTs.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const SECRET_KEY = process.env.JWT_SECRET;
     ```
+    {% endcode %}
 
 #### Route Definitions and Functionalities
 
@@ -76,34 +88,278 @@ This documentation provides detailed insights into the server-side functionaliti
 * **GET /login**: Renders the login page, redirecting authenticated users to the home page based on token validation.
 *   **POST /login**: Authenticates users by verifying credentials, generating a JWT for successful logins, and setting it in the user's cookies.
 
+    {% code lineNumbers="true" %}
     ```javascript
-    app.get("/login", (req, res) => {...});
-    app.post("/login", async (req, res) => {...});
+    app.get("/login", (req, res) => {
+    	// Always render the login page regardless of any existing tokens or user state
+    	res.render("login");
+    });
+
+    /**
+     * Route to handle user login. It checks the user's credentials, and if valid, a JWT token is generated and sent back to the client.
+     *
+     * @route POST /login
+     * @param {string} req.body.email - The email of the user attempting to log in.
+     * @param {string} [req.body.username] - The username of the user attempting to log in (alternative to email).
+     * @param {string} req.body.password - The password of the user.
+     * @access Public
+     */
+    app.post("/login", async (req, res) => {
+    	try {
+    		const { email, username, password } = req.body;
+
+    		// Initialize a query object
+    		let query = {};
+
+    		// Check if email or username was provided and adjust the query accordingly
+    		if (email) {
+    			query.email = email;
+    		} else if (username) {
+    			query.username = username;
+    		}
+
+    		// Find the user by email or username
+    		const user = await User.findOne({ where: query });
+
+    		if (!user) {
+    			return res.status(401).send("User not found");
+    		}
+
+    		// Compare the provided password with the stored hashed password
+    		const isMatch = await user.comparePassword(password);
+    		if (!isMatch) {
+    			return res.status(401).send("Invalid password");
+    		}
+
+    		// If the login credentials are valid, generate a JWT and send it back to the client
+    		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+    			expiresIn: "7d",
+    		});
+    		res.cookie("token", token, {
+    			httpOnly: true,
+    			secure: true,
+    			sameSite: "strict",
+    		});
+    		res.status(200).send("Logged in successfully");
+    	} catch (err) {
+    		console.error("Error during login:", err);
+    		res.status(500).send("Internal server error");
+    	}
+    });
     ```
+    {% endcode %}
+
+
 
 **Home Route**
 
 *   **GET /home**: Fetches and displays servers that the authenticated user is part of, redirecting to the onboarding page if the user is not part of any servers.
 
+    {% code lineNumbers="true" %}
     ```javascript
-    app.get("/home", authenticateToken, async (req, res) => {...});
+    /**
+     * Route to display the home page for the authenticated user. It fetches and displays servers that the user is a part of.
+     *
+     * @route GET /home
+     * @access Private (requires authentication)
+     */
+    app.get("/home", authenticateToken, async (req, res) => {
+    	try {
+    		const user = await User.findByPk(req.user.userId, {
+    			include: [
+    				{
+    					model: Server,
+    					as: "Servers", // Make sure this alias matches your association alias
+    					through: { attributes: [] },
+    					attributes: [
+    						"id",
+    						"name",
+    						"profilePicture",
+    						"filePaths",
+    						"createdAt",
+    						"updatedAt",
+    					],
+    				},
+    			],
+    		});
+
+    		// Check if the user is part of any servers
+    		if (user && user.Servers.length > 0) {
+    			// User is part of one or more servers, render the home page with the servers
+    			res.render("layout", { servers: user.Servers, showMembers: false });
+    		} else {
+    			// User is not part of any servers, redirect to the onboarding page
+    			res.redirect("/onboarding");
+    		}
+    	} catch (err) {
+    		console.error("Error fetching servers or redirecting user:", err);
+    		res.status(500).send("Internal server error");
+    	}
+    });
     ```
+    {% endcode %}
 
 **Server Route**
 
 *   **GET /server/:serverId**: Displays a specific server based on the server ID if the authenticated user is a member, including server and user details.
 
+    {% code lineNumbers="true" %}
     ```javascript
-    app.get("/server/:serverId", authenticateToken, async (req, res) => {...});
+    /**
+     * Route to display a specific server by its ID. It checks if the user is a member of the server and displays it if they are.
+     *
+     * @route GET /server/:serverId
+     * @param {string} req.params.serverId - The ID of the server to display.
+     * @access Private (requires authentication and server membership)
+     */
+    app.get("/server/:serverId", authenticateToken, async (req, res) => {
+    	try {
+    		const server = await Server.findByPk(req.params.serverId, {
+    			include: [
+    				{
+    					model: User,
+    					as: "Users",
+    					attributes: ["id", "username", "email", "profilePicture"],
+    					through: { attributes: [] },
+    				},
+    			],
+    		});
+
+    		if (!server) {
+    			return res.status(404).send("Server not found.");
+    		}
+
+    		const isMember = server.Users.some((user) => user.id === req.user.userId);
+    		if (!isMember) {
+    			return res.status(403).send("User is not a member of this server.");
+    		}
+
+    		const userServers = await User.findByPk(req.user.userId, {
+    			include: [
+    				{
+    					model: Server,
+    					as: "Servers",
+    					attributes: ["id", "name", "profilePicture", "filePaths"],
+    					through: { attributes: [] },
+    				},
+    			],
+    		});
+
+    		// Validate file paths before rendering
+    		// server.filePaths = await validateFilePaths(
+    		// 	server.filePaths || [],
+    		// 	server.id
+    		// );
+
+    		res.render("layout", {
+    			servers: userServers ? userServers.Servers : [],
+    			members: server.Users,
+    			showMembers: true,
+    			currentServer: server,
+    			serverCode: server.serverCode,
+    			id: server.id,
+    		});
+    	} catch (err) {
+    		console.error("Error:", err);
+    		res.status(500).send("Internal server error");
+    	}
+    });
     ```
+    {% endcode %}
 
 **File Upload Route**
 
 *   **POST /upload**: Handles file uploads to a specified server for authenticated and authorized users, validating file constraints and updating server information with the file path.
 
+    {% code lineNumbers="true" %}
     ```javascript
-    app.post("/upload", upload.single("file"), authenticateToken, async (req, res) => {...});
+    /**
+     * Route for uploading files to a specific server. It validates the user's membership in the server and the file constraints before uploading.
+     *
+     * @route POST /upload
+     * @param {string} req.body.serverId - The ID of the server where the file is to be uploaded.
+     * @param {file} req.file - The file to upload.
+     * @access Private (requires authentication and server membership)
+     */
+    app.post(
+    	"/upload",
+    	upload.single("file"),
+    	authenticateToken,
+    	async (req, res) => {
+    		try {
+    			const serverId = req.body.serverId;
+    			const userId = req.user.userId;
+
+    			// Check if there's an entry in the ServerUser join table for this user and server
+    			const serverUser = await ServerUser.findOne({
+    				where: {
+    					serverId: serverId,
+    					userId: userId,
+    				},
+    			});
+
+    			if (!serverUser) {
+    				return res
+    					.status(404)
+    					.send("Server not found or user is not a member.");
+    			}
+
+    			// Check the number of files already uploaded
+    			const server = await Server.findByPk(serverId);
+    			if (!server) {
+    				return res.status(404).send("Server not found.");
+    			}
+
+    			if (server.filePaths && server.filePaths.length >= 10) {
+    				return res
+    					.status(400)
+    					.json({ message: "You can only upload up to 10 files." });
+    			}
+
+    			// Check the size of the uploaded file
+    			if (req.file.size > 20 * 1024 * 1024) {
+    				// 20 MB
+    				return res
+    					.status(400)
+    					.json({ message: "File cannot be larger than 20 MB." });
+    			}
+
+    			// Create a new blob in the bucket and upload the file data
+    			const blob = bucket.file(`${serverId}/${req.file.originalname}`);
+    			const blobStream = blob.createWriteStream({
+    				resumable: true,
+    			});
+
+    			blobStream.on("error", (err) => {
+    				console.error(err);
+    				res.status(500).send("Error uploading to Google Cloud Storage.");
+    			});
+
+    			blobStream.on("finish", async () => {
+    				// Make the file public and get its public URL
+    				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+    				// Update the server's filePaths array
+    				const updatedFilePaths = server.filePaths
+    					? [...server.filePaths, publicUrl]
+    					: [publicUrl];
+    				await server.update({ filePaths: updatedFilePaths });
+
+    				// Send a response to the client
+    				res
+    					.status(200)
+    					.json({ message: "File uploaded successfully", filePath: publicUrl });
+    			});
+
+    			blobStream.end(req.file.buffer);
+    		} catch (err) {
+    			console.error("Error uploading file:", err);
+    			res.status(500).send("Internal server error");
+    		}
+    	}
+    );
     ```
+    {% endcode %}
 
 #### Real-time Communication with Socket.IO
 
@@ -121,11 +377,50 @@ This documentation provides detailed insights into the server-side functionaliti
 
 This middleware function authenticates incoming requests by verifying the JWT token stored in cookies. If the token is valid, the decoded information is attached to the request object; otherwise, it responds with an appropriate HTTP error.
 
+{% code lineNumbers="true" fullWidth="false" %}
 ```javascript
+/**
+ * Middleware function to authenticate the incoming requests by verifying the JWT token stored in cookies.
+ * It checks for the presence of a 'token' cookie and attempts to verify it. If the verification is successful,
+ * the decoded token information is attached to the request object (req.user).
+ * If the token is missing, invalid, or expired, an appropriate HTTP status code and message are sent back.
+ *
+ * @param {Object} req - The request object, containing cookies among other properties.
+ * @param {Object} res - The response object, used to send back the HTTP response.
+ * @param {Function} next - The next middleware function in the stack.
+ */
 function authenticateToken(req, res, next) {
-    // Token verification logic...
+	const token = req.cookies.token;
+	if (!token) {
+		return res.status(401).send("Access denied. No token provided.");
+	}
+
+	try {
+		const decoded = jwt.verify(token, SECRET_KEY);
+		req.user = decoded;
+		// console.log(`auth token ${req.user.userId}`); // Debugging line
+		next();
+	} catch (ex) {
+		console.error("Token verification failed:", ex);
+		if (ex instanceof jwt.JsonWebTokenError) {
+			// Invalid signature or malformed token
+			return res.status(401).send("Invalid token.");
+		} else if (ex instanceof jwt.NotBeforeError) {
+			// Token used before its nbf claim
+			return res.status(401).send("Token used before its valid date.");
+		} else if (ex instanceof jwt.TokenExpiredError) {
+			// Token expired
+			return res.status(401).send("Token expired.");
+		} else {
+			// Other errors
+			return res
+				.status(400)
+				.send("An error occurred while verifying the token.");
+		}
+	}
 }
 ```
+{% endcode %}
 
 #### User Registration and Profile Management
 
@@ -147,6 +442,7 @@ app.get("/signup", (req, res) => {
 
 Handles the registration of new users, including validations and profile picture upload. On successful registration, the user is redirected to the onboarding page.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route handler for POST requests to the "/signup" endpoint. It processes the sign-up form submission, including user details
@@ -239,6 +535,7 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 **Onboarding Page Rendering**
 
@@ -246,6 +543,7 @@ app.post("/signup", upload.single("profilePicture"), async (req, res) => {
 
 Renders the onboarding page for newly registered users, guiding them through initial setup. This route requires authentication.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route handler for GET requests to the "/onboarding" endpoint. It renders the onboarding page for newly registered users
@@ -261,6 +559,7 @@ app.get("/onboarding", authenticateToken, (req, res) => {
 	res.render("onboarding");
 });
 ```
+{% endcode %}
 
 #### Server Management
 
@@ -270,6 +569,7 @@ app.get("/onboarding", authenticateToken, (req, res) => {
 
 Allows authenticated users to create a new server with a mandatory profile picture. The server creator automatically becomes a member of the server.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for creating a new server with a mandatory server profile picture. The creator of the server automatically becomes a member.
@@ -338,6 +638,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 **Join Server**
 
@@ -345,6 +646,7 @@ app.post(
 
 Enables authenticated users to join an existing server using a unique server code.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for joining an existing server using a unique server code.
@@ -393,6 +695,7 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### Utility Functions
 
@@ -400,6 +703,7 @@ app.post("/join-server", authenticateToken, async (req, res) => {
 
 Sanitizes filenames by replacing non-alphanumeric and special characters with underscores, ensuring filenames are safe for storage.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Utility function to sanitize filenames by replacing any characters that are not alphanumeric, dashes, underscores,
@@ -414,6 +718,7 @@ function sanitizeFilename(filename) {
 	return filename.replace(/[^a-zA-Z0-9\-_.]/g, "_");
 }
 ```
+{% endcode %}
 
 #### Profile Picture Management
 
@@ -423,6 +728,7 @@ function sanitizeFilename(filename) {
 
 Allows authenticated users to upload a new profile picture. The picture is stored in Google Cloud Storage, and the user's profile is updated with the new picture URL.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for uploading a new profile picture for the user.
@@ -471,6 +777,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 **Upload Server Profile Picture**
 
@@ -478,6 +785,7 @@ app.post(
 
 Authenticated users with appropriate permissions can upload a new profile picture for a server. The picture is stored, and the server's profile is updated accordingly.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for uploading a new profile picture for a server.
@@ -526,6 +834,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 #### Username Management
 
@@ -535,6 +844,7 @@ app.post(
 
 Authenticated users can change their username. This endpoint includes server-side validation for the new username.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for changing the username of the authenticated user.
@@ -587,6 +897,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 User Account Management
 
@@ -596,6 +907,7 @@ User Account Management
 
 Allows authenticated users to delete their account, including all owned servers, memberships, and messages. This route requires authentication.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for deleting the authenticated user's account, including owned servers, memberships, and messages.
@@ -637,6 +949,7 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### Server Ownership Verification
 
@@ -646,6 +959,7 @@ app.delete("/delete-account", authenticateToken, async (req, res) => {
 
 Determines if the authenticated user is the creator of a specified server. It returns a boolean indicating the ownership.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for checking if the authenticated user is the creator of a specified server.
@@ -673,6 +987,7 @@ app.get("/api/is-creator/:serverId", authenticateToken, async (req, res) => {
 });
 
 ```
+{% endcode %}
 
 #### Server Name Management
 
@@ -682,6 +997,7 @@ app.get("/api/is-creator/:serverId", authenticateToken, async (req, res) => {
 
 Enables the server owner to change the server's name. This action is restricted to the server's owner and requires authentication.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for changing the name of a server. Only the server owner can change the name.
@@ -723,6 +1039,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 #### Server Membership Management
 
@@ -732,6 +1049,7 @@ app.post(
 
 Allows the server owner to remove a member from the server. This route is protected and requires the requester to be the server's owner.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for removing a member from a server. This can only be done by the server owner.
@@ -786,6 +1104,7 @@ app.post("/remove-member", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 **List Server Members**
 
@@ -793,6 +1112,7 @@ app.post("/remove-member", authenticateToken, async (req, res) => {
 
 Fetches the list of members belonging to a specified server. Access is restricted to the server's members.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for fetching the members of a server. Only accessible to members of the server.
@@ -842,6 +1162,7 @@ app.get(
 	}
 );
 ```
+{% endcode %}
 
 #### Server Deletion
 
@@ -851,6 +1172,7 @@ app.get(
 
 Enables the server owner to delete the server. This route is protected and requires the requester to be the server's owner.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for deleting a server. This can only be done by the server owner.
@@ -892,6 +1214,7 @@ app.delete("/delete-server/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### Server Information Retrieval
 
@@ -901,6 +1224,7 @@ app.delete("/delete-server/:serverId", authenticateToken, async (req, res) => {
 
 Retrieves the name of a specified server. This route is protected and requires the requester to be authenticated.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for fetching the name of a server.
@@ -930,6 +1254,7 @@ app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### File Management Utility Functions
 
@@ -937,6 +1262,7 @@ app.get("/api/server/:serverId/name", authenticateToken, async (req, res) => {
 
 Extracts the file path from a given URL, useful for file operations in cloud storage.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Extracts the file path from a given URL. This is useful for operations that require the path portion of a URL,
@@ -952,11 +1278,13 @@ function extractFilePath(fileUrl) {
 	return url.pathname.substring(url.pathname.indexOf("/", 1) + 1);
 }
 ```
+{% endcode %}
 
 **`deleteFileFromCloud(filepath)`**
 
 Deletes a file from cloud storage based on its path. This function encapsulates the deletion operation and logs the outcome.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Deletes a file from cloud storage based on the provided file path. This function encapsulates the operation
@@ -979,6 +1307,7 @@ async function deleteFileFromCloud(filepath) {
 	}
 }
 ```
+{% endcode %}
 
 #### File Deletion
 
@@ -988,6 +1317,7 @@ async function deleteFileFromCloud(filepath) {
 
 Allows members of a server to delete a specific file from the server's storage. It ensures that the user has the necessary permissions and updates the server's file list.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to delete a specific file from a server's storage. Validates that the user belongs to the server
@@ -1028,6 +1358,7 @@ app.post("/delete-file", authenticateToken, async (req, res) => {
 });
 
 ```
+{% endcode %}
 
 #### User Session Management
 
@@ -1037,6 +1368,7 @@ app.post("/delete-file", authenticateToken, async (req, res) => {
 
 Logs out the current user by clearing their authentication token and redirects to the login page.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to log out the current user. Clears the user's authentication token and redirects to the login page.
@@ -1050,6 +1382,7 @@ app.get("/logout", (req, res) => {
 	res.redirect("/login"); // Redirect user to the login page
 });
 ```
+{% endcode %}
 
 #### User Identity Retrieval
 
@@ -1059,6 +1392,7 @@ app.get("/logout", (req, res) => {
 
 Retrieves the current authenticated user's ID, useful for client-side operations requiring the user's identity.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to retrieve the current authenticated user's ID. Useful for client-side operations that require the user's identity.
@@ -1076,6 +1410,7 @@ app.get("/api/get-current-user", authenticateToken, (req, res) => {
 });
 
 ```
+{% endcode %}
 
 #### Messaging System
 
@@ -1085,6 +1420,7 @@ app.get("/api/get-current-user", authenticateToken, (req, res) => {
 
 Retrieves all messages for a specified server along with the sender's information. This endpoint is secured, requiring authentication and server membership.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to fetch all messages for a given server. Includes sender information for display.
@@ -1116,6 +1452,7 @@ app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### File Upload System
 
@@ -1125,6 +1462,7 @@ app.get("/messages/:serverId", authenticateToken, async (req, res) => {
 
 Validates and uploads an image file, ensuring the file is an image and within the size limit. This endpoint requires user authentication.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to upload an image file. Validates that the file is an image and within size limits before uploading.
@@ -1191,6 +1529,7 @@ app.post(
 	}
 );
 ```
+{% endcode %}
 
 #### Server Membership System
 
@@ -1200,6 +1539,7 @@ app.post(
 
 Allows a user to join a server using an invite code, ensuring the user is not already a member. This endpoint requires authentication.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route to allow a user to join a server using an invite code. Validates the invite code and adds the user to the server.
@@ -1249,6 +1589,7 @@ app.get("/joinserver/:inviteCode", authenticateToken, async (req, res) => {
 });
 
 ```
+{% endcode %}
 
 **Leave Server or Delete Server**
 
@@ -1256,6 +1597,7 @@ app.get("/joinserver/:inviteCode", authenticateToken, async (req, res) => {
 
 Permits an authenticated user to leave a server. If the user is the owner, the entire server and associated data are deleted.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Route for an authenticated user to leave a server. If the user is the owner of the server, the entire server is deleted.
@@ -1312,6 +1654,7 @@ app.post("/leave-server/:serverId", authenticateToken, async (req, res) => {
 	}
 });
 ```
+{% endcode %}
 
 #### WebSockets with Socket.IO
 
@@ -1331,6 +1674,7 @@ io.on("connection", (socket) => {
 
 Verifies the JWT token for WebSocket connections, ensuring that only authenticated users can establish a socket connection.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Authenticates the socket connection using a JWT token.
@@ -1366,11 +1710,13 @@ function authenticateSocketToken(token) {
 	});
 }
 ```
+{% endcode %}
 
 **Parse Cookies**
 
 Parses the cookie string from WebSocket headers into an object of key-value pairs, facilitating the extraction of authentication tokens.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Parses a cookie string into an object with key-value pairs.
@@ -1389,11 +1735,13 @@ function parseCookies(cookieString) {
 }
 
 ```
+{% endcode %}
 
 **Retrieve User Data**
 
 Fetches user data based on user ID, providing essential information such as username and profile picture for messaging and user identification purposes.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Retrieves user data by user ID.
@@ -1420,11 +1768,13 @@ async function getUserDataById(userId) {
 	}
 }
 ```
+{% endcode %}
 
 **Retrieve Server Data**
 
 Fetches server data by server ID, offering details like server name and profile picture necessary for messaging contexts and server management.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Retrieves server data by server ID.
@@ -1453,3 +1803,4 @@ async function getServerDataById(serverId) {
 	}
 }
 ```
+{% endcode %}

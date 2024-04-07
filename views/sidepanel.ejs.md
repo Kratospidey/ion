@@ -11,6 +11,7 @@ The file upload script enhances the user experience by providing immediate feedb
 
 **Code Snippet for File Upload**
 
+{% code lineNumbers="true" %}
 ```javascript
 const uploadButton = document.querySelector(".uploadbtn");
 uploadButton.innerHTML = 'Uploading... <i class="fa fa-spinner fa-spin"></i>';
@@ -32,6 +33,7 @@ xhr.onload = function () {
 xhr.open("POST", "/upload", true);
 xhr.send(formData);
 ```
+{% endcode %}
 
 **File Deletion Functionality**
 
@@ -44,6 +46,7 @@ The file deletion script provides a straightforward mechanism for users to remov
 
 **Code Snippet for File Deletion**
 
+{% code lineNumbers="true" %}
 ```javascript
 const isConfirmed = confirm(`Are you sure you want to delete "${fileName}"?`);
 if (!isConfirmed) { return; }
@@ -64,5 +67,6 @@ if (response.ok) {
     alert("Error deleting file.");
 }
 ```
+{% endcode %}
 
 Both the file upload and deletion scripts work together within the `sidepanel.ejs` template to manage file-related functionalities, offering a user-friendly interface for uploading and managing files within the application.
