@@ -379,7 +379,7 @@ function fetchUserDetails(userId) {
 3. **Underline**
    * **Manually**: Surround the text with `__` (double underscores).
      * Example: `__This text will be underlined__`
-   * **Keyboard Shortcut**: Ctrl + U
+   * **Keyboard Shortcut**: Ctrl + Shift + U
      * Action: Toggles `__` around selected text.
 4. **Strikethrough**
    * **Manually**: Surround the text with `~~` (double tildes).
