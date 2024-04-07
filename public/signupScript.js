@@ -1,3 +1,16 @@
+/**
+ * Handles the submission of the 'Sign Up' form on the registration page. It intercepts the default form submission,
+ * performs validations, and then sends a POST request to the '/signup' endpoint with the user's sign-up data. The function
+ * manages the submit button state to provide visual feedback by displaying a loading indicator and disabling the button during
+ * the submission process. Upon successful account creation, the user is redirected to the onboarding page. If the submission fails,
+ * an appropriate error message is displayed to the user.
+ *
+ * The function gathers form data, including username, email, profile picture, and password, and submits it using the Fetch API.
+ * The username is converted to lowercase to ensure consistency. Error handling includes both server-side errors (e.g., username
+ * already taken) and network issues, providing feedback to the user in each case.
+ *
+ * @listens submit - Adds an event listener to the 'Sign Up' form submission event, preventing the default form submission action.
+ */
 document
 	.getElementById("signupForm")
 	.addEventListener("submit", async function (event) {

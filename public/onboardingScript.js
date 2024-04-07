@@ -1,4 +1,18 @@
-// Handle creating a new server
+/**
+ * This script handles user interactions on the onboarding page, specifically for creating new servers
+ * and joining existing ones. It listens for form submissions on both the 'Create Server' and 'Join Server'
+ * forms, processes the input, and communicates with the server via fetch API calls to either create a new
+ * server or join an existing one based on the provided server code.
+ */
+
+/**
+ * Handles the submission of the 'Create Server' form. When the form is submitted, it disables the submit
+ * button and displays a loading indicator. It then sends a POST request to the '/create-server' endpoint
+ * with the form data. Based on the response from the server, it either redirects the user to the new server's
+ * page, displays an error message, or re-enables the form for correction and resubmission.
+ *
+ * @listens submit - Attaches an event listener to the 'Create Server' form submission.
+ */
 document
 	.getElementById("createServerForm")
 	.addEventListener("submit", async function (event) {
@@ -39,7 +53,14 @@ document
 		}
 	});
 
-// Handle joining an existing server
+/**
+ * Handles the submission of the 'Join Server' form. This function is triggered when the form is submitted,
+ * disabling the submit button and showing a loading indicator. It sends a POST request to the '/join-server'
+ * endpoint with the server code. If successful, the user is redirected to the server's page or informed about
+ * the successful join. If the attempt fails, an error message is displayed, and the form is reset for another attempt.
+ *
+ * @listens submit - Attaches an event listener to the 'Join Server' form submission.
+ */
 document
 	.getElementById("joinServerForm")
 	.addEventListener("submit", async function (event) {
