@@ -26,13 +26,6 @@
  * <button data-bs-toggle="tooltip" title="Tooltip on top">Tooltip</button>
  */
 
-// const tooltipTriggerList = document.querySelectorAll(
-// 	"[data-bs-toggle='tooltip']"
-// );
-// const tooltipList = [...tooltipTriggerList].map(
-// 	(tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-// );
-
 // Select all buttons with the class 'sidebuttons'
 const buttons = document.querySelectorAll(".sidebuttons");
 
