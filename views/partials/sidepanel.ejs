@@ -72,22 +72,21 @@
 <!-- views/partials/sidepanel.ejs -->
 <script defer>
 	/**
-	 * Prevents the default submission of the file upload form and handles the file upload process.
-	 * Validates the file selection, ensuring that a file is selected and its size does not exceed 20 MB.
-	 * Submits the selected file(s) to the server using XMLHttpRequest and provides feedback to the user
-	 * through alerts and UI updates.
+	 * Handles the file upload process using the Fetch API, with modern JavaScript syntax.
+	 * Validates the file selection, checks for file size limits, and provides user feedback through alerts and UI updates.
+	 * The submit button is updated with a spinning icon and disabled during the upload process, then reset afterwards.
 	 *
-	 * @listens submit - Attaches an event listener to the file upload form's submit event.
+	 * @listens submit - Adds an event listener to the file upload form's submit event to prevent default submission and handle file uploads.
 	 */
 	document
 		.getElementById("uploadForm")
-		.addEventListener("submit", function (event) {
+		.addEventListener("submit", async function (event) {
 			event.preventDefault(); // Prevent the default form submission
 
 			const fileInput = document.getElementById("file-input");
 			if (!fileInput.files.length) {
 				alert("Please select a file to upload.");
-				return; // Stop the function here if no file is selected
+				return; // Exit the function if no file is selected
 			}
 
 			if (fileInput.files.length > 10) {
@@ -95,52 +94,46 @@
 				return;
 			}
 
-			// Check the size of each file
 			for (let i = 0; i < fileInput.files.length; i++) {
 				if (fileInput.files[i].size > 20 * 1024 * 1024) {
-					// 20 MB
+					// 20 MB limit
 					alert("Each file must be no larger than 20 MB.");
 					return;
 				}
 			}
 
-			const formData = new FormData(this); // Create a FormData instance from the form
-			const xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest instance
+			const formData = new FormData(this); // Create a FormData object from the form
 			const uploadButton = document.querySelector(".uploadbtn"); // Select the upload button
 
-			// Change button text and disable it during upload
+			// Update button text with spinner icon and disable button
 			uploadButton.innerHTML =
 				'Uploading... <i class="fa fa-spinner fa-spin"></i>';
 			uploadButton.disabled = true;
 
-			xhr.open("POST", "/upload", true); // Initialize the request
-			xhr.responseType = "json"; // Expect a JSON response
+			try {
+				const response = await fetch("/upload", {
+					method: "POST",
+					body: formData,
+				});
 
-			xhr.onload = function () {
-				if (xhr.status === 200) {
-					// Handle successful upload
-					alert(xhr.response.message); // Show a success message
-					setTimeout(function () {
-						location.reload(); // Reload the page after a delay
-					}, 2000); // Delay in milliseconds (2000ms = 2 seconds)
-					// Restore button text and enable it
-					uploadButton.innerHTML = "Upload File";
-					uploadButton.disabled = false;
+				if (response.ok) {
+					const result = await response.json();
+					alert(result.message); // Display success message
+					setTimeout(() => {
+						location.reload(); // Reload the page after 2 seconds
+					}, 2000);
 				} else {
-					const errorMsg =
-						xhr.response && xhr.response.message
-							? xhr.response.message
-							: "An error occurred during the upload.";
-					alert(errorMsg);
-					// Restore button text and enable it
-					uploadButton.innerHTML = "Upload File";
-					uploadButton.disabled = false;
+					const errorMsg = await response.text();
+					alert(`Upload failed: ${errorMsg}`);
 				}
-			};
-			// Restore button text and enable it
-			uploadButton.innerHTML = "Upload File";
-			uploadButton.disabled = false;
-			xhr.send(formData); // Send the FormData object
+			} catch (error) {
+				console.error("Upload error:", error);
+				alert(`Error during upload: ${error.message}`);
+			} finally {
+				// Reset button text and re-enable button regardless of request outcome
+				uploadButton.innerHTML = "Upload File";
+				uploadButton.disabled = false;
+			}
 		});
 </script>
 
