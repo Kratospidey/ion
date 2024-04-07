@@ -365,8 +365,6 @@ app.post(
     const io = require("socket.io")(server, { cors: {...} });
     ```
 
-### Technical Documentation for Chat Application Server (Continuation)
-
 #### Authentication Middleware
 
 **`authenticateToken(req, res, next)`**
