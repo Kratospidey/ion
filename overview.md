@@ -27,3 +27,4 @@ The choice of technologies for this project was driven by functionality, ease of
 * **jQuery**: For simpler DOM manipulation, event handling, and AJAX calls, jQuery was incorporated, speeding up the development of interactive features without the complexity of modern frontend frameworks.
 * **EmojiMart**: Integrated via CDN, EmojiMart provided a rich, customizable emoji picker, enhancing the chat experience with a wide range of expressive options.
 * **JDoodle API**: This API was integrated to support the execution of code snippets in various languages, adding a unique dimension to the application by allowing users to compile and run code directly within the chat interface.
+* **nanoid**: A compact and secure library for generating unique, URL-friendly IDs, used for creating distinct server invite codes.
