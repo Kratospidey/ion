@@ -1,4 +1,31 @@
 // models/index.js
+
+/**
+ * Initializes Sequelize and imports all model definitions within the application. This script sets up the Sequelize
+ * connection based on the environment (development or production) and dynamically reads all JavaScript files in the
+ * current directory, excluding itself, to import and configure model definitions.
+ *
+ * In production environments, it uses environment variables to configure the Sequelize connection, including database
+ * credentials and connection details. For all environments, it assumes a MySQL dialect and configures connection pooling
+ * and SSL settings as necessary.
+ *
+ * After importing all models, it iterates over them to establish any defined associations, effectively setting up the
+ * relational mappings between different entities in the application. The Sequelize instance and the Sequelize library
+ * itself are then attached to the exported `db` object, allowing for easy access throughout the application.
+ *
+ * @module models/index
+ * @requires fs
+ * @requires path
+ * @requires dotenv
+ * @requires sequelize
+ * 
+ * @example
+ * // Accessing the db object to use models and Sequelize in your application
+ * const db = require('./models');
+ * const { User, Message } = db;
+ * // Use User, Message, etc. for database operations
+ */
+
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });

@@ -1,6 +1,37 @@
 // models/Server.js
 const { nanoid } = require("nanoid");
 
+/**
+ * Defines the Server model using Sequelize, representing chat servers within the application. Each server has a
+ * name, a profile picture, an optional JSON field for file paths related to the server, and a unique server code
+ * generated using the `nanoid` library. The `ownerId` field establishes ownership of a server by a user.
+ *
+ * Associations include a many-to-many relationship with the User model through the ServerUser join table, allowing
+ * users to be part of multiple servers. Additionally, a one-to-many relationship exists between users and servers,
+ * indicating that a user can own multiple servers but each server has only one owner.
+ *
+ * The model extends with a method `addUser`, which adds a user to the server if they are not already a member,
+ * leveraging the ServerUser model. This method provides an interface to manage server memberships.
+ *
+ * @module Server
+ * @param {object} sequelize - Sequelize instance.
+ * @param {object} DataTypes - Sequelize data types.
+ * @returns {object} The Sequelize model for Server.
+ * 
+ * @example
+ * // Defining the Server model in your Sequelize setup
+ * const Server = sequelize.define('Server', {
+ *   name: DataTypes.STRING,
+ *   // other fields...
+ * });
+ *
+ * @example
+ * // Using the addUser method to add a user to a server
+ * Server.findOne({ where: { name: 'Gaming Lounge' } })
+ *   .then(server => server.addUser(1)) // Assuming '1' is the userId
+ *   .then(serverUser => console.log(`Added user to server: ${serverUser}`))
+ *   .catch(error => console.error(error));
+ */
 module.exports = (sequelize, DataTypes) => {
 	const Server = sequelize.define("Server", {
 		name: {
