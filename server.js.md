@@ -19,347 +19,343 @@ This documentation provides detailed insights into the server-side functionaliti
 #### Library Imports
 
 * **Core Libraries**: The application uses `express` for the server framework, `cookie-parser` for parsing cookies, `jsonwebtoken` for handling JWTs, and `sequelize` for ORM functionalities.
-*   **File Upload and Emoji Conversion**: Implements `multer` for handling file uploads and `emoji-js` for converting emoji shortcodes to Unicode.
+* **File Upload and Emoji Conversion**: Implements `multer` for handling file uploads and `emoji-js` for converting emoji shortcodes to Unicode.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    const express = require("express");
-    const cookieParser = require("cookie-parser");
-    const jwt = require("jsonwebtoken");
-    const { Sequelize, Op } = require("sequelize");
-    const multer = require("multer");
-    const EmojiConvertor = require("emoji-js");
-    ```
-    {% endcode %}
+{% code lineNumbers="true" %}
+```javascript
+
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { Sequelize, Op } = require("sequelize");
+const multer = require("multer");
+const EmojiConvertor = require("emoji-js");
+```
+{% endcode %}
 
 #### Database and ORM Configuration
 
-*   **Sequelize**: Establishes a connection with the database and imports models such as `User`, `Server`, `ServerUser`, and `Message` to interact with database tables.
+* **Sequelize**: Establishes a connection with the database and imports models such as `User`, `Server`, `ServerUser`, and `Message` to interact with database tables.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    const db = require("./models/index");
-    const sequelize = db.sequelize;
-    sequelize.authenticate();
-    ```
-    {% endcode %}
+<pre class="language-javascript" data-line-numbers><code class="lang-javascript">const db = require("./models/index");
+<strong>const sequelize = db.sequelize;
+</strong>sequelize.authenticate();
+</code></pre>
 
 #### Express Server Setup and Middleware Configuration
 
 * **Server and Middleware**: Sets up an Express app, configuring middleware for CORS, cookie parsing, and body parsing. It also serves static files and sets EJS as the view engine.
-*   **HTTPS Redirection Middleware**: Ensures secure communication by redirecting HTTP requests to HTTPS in production environments.
+* **HTTPS Redirection Middleware**: Ensures secure communication by redirecting HTTP requests to HTTPS in production environments.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    const app = express();
-    app.use(cors());
-    app.use(cookieParser());
-    app.use(bodyParser.json());
-    app.use(express.static("public"));
-    app.set("view engine", "ejs");
-    ```
-    {% endcode %}
+{% code lineNumbers="true" %}
+```javascript
+const app = express();
+app.use(cors());
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(express.static("public"));
+app.set("view engine", "ejs");
+```
+{% endcode %}
 
 #### Google Cloud Storage for File Uploads
 
-*   **Google Cloud Storage Configuration**: Integrates Google Cloud Storage for file uploads, using credentials from environment variables.
+* **Google Cloud Storage Configuration**: Integrates Google Cloud Storage for file uploads, using credentials from environment variables.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    const googleStorage = new Storage({ credentials: googleCredentials });
-    const bucket = googleStorage.bucket(bucketName);
-    ```
-    {% endcode %}
+{% code lineNumbers="true" %}
+```javascript
+const googleStorage = new Storage({ credentials: googleCredentials });
+const bucket = googleStorage.bucket(bucketName);
+```
+{% endcode %}
 
 #### Authentication and JWT Handling
 
-*   **JWT Secret Key**: Utilizes a secret key from environment variables for signing and verifying JWTs.
+* **JWT Secret Key**: Utilizes a secret key from environment variables for signing and verifying JWTs.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    const SECRET_KEY = process.env.JWT_SECRET;
-    ```
-    {% endcode %}
+{% code lineNumbers="true" %}
+```javascript
+const SECRET_KEY = process.env.JWT_SECRET;
+```
+{% endcode %}
 
 #### Route Definitions and Functionalities
 
 **Login Routes**
 
 * **GET /login**: Renders the login page, redirecting authenticated users to the home page based on token validation.
-*   **POST /login**: Authenticates users by verifying credentials, generating a JWT for successful logins, and setting it in the user's cookies.
+* **POST /login**: Authenticates users by verifying credentials, generating a JWT for successful logins, and setting it in the user's cookies.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    app.get("/login", (req, res) => {
-    	// Always render the login page regardless of any existing tokens or user state
-    	res.render("login");
-    });
+{% code lineNumbers="true" %}
+```javascript
+app.get("/login", (req, res) => {
+	// Always render the login page regardless of any existing tokens or user state
+	res.render("login");
+});
 
-    /**
-     * Route to handle user login. It checks the user's credentials, and if valid, a JWT token is generated and sent back to the client.
-     *
-     * @route POST /login
-     * @param {string} req.body.email - The email of the user attempting to log in.
-     * @param {string} [req.body.username] - The username of the user attempting to log in (alternative to email).
-     * @param {string} req.body.password - The password of the user.
-     * @access Public
-     */
-    app.post("/login", async (req, res) => {
-    	try {
-    		const { email, username, password } = req.body;
+/**
+ * Route to handle user login. It checks the user's credentials, and if valid, a JWT token is generated and sent back to the client.
+ *
+ * @route POST /login
+ * @param {string} req.body.email - The email of the user attempting to log in.
+ * @param {string} [req.body.username] - The username of the user attempting to log in (alternative to email).
+ * @param {string} req.body.password - The password of the user.
+ * @access Public
+ */
+app.post("/login", async (req, res) => {
+	try {
+		const { email, username, password } = req.body;
 
-    		// Initialize a query object
-    		let query = {};
+		// Initialize a query object
+		let query = {};
 
-    		// Check if email or username was provided and adjust the query accordingly
-    		if (email) {
-    			query.email = email;
-    		} else if (username) {
-    			query.username = username;
-    		}
+		// Check if email or username was provided and adjust the query accordingly
+		if (email) {
+			query.email = email;
+		} else if (username) {
+			query.username = username;
+		}
 
-    		// Find the user by email or username
-    		const user = await User.findOne({ where: query });
+		// Find the user by email or username
+		const user = await User.findOne({ where: query });
 
-    		if (!user) {
-    			return res.status(401).send("User not found");
-    		}
+		if (!user) {
+			return res.status(401).send("User not found");
+		}
 
-    		// Compare the provided password with the stored hashed password
-    		const isMatch = await user.comparePassword(password);
-    		if (!isMatch) {
-    			return res.status(401).send("Invalid password");
-    		}
+		// Compare the provided password with the stored hashed password
+		const isMatch = await user.comparePassword(password);
+		if (!isMatch) {
+			return res.status(401).send("Invalid password");
+		}
 
-    		// If the login credentials are valid, generate a JWT and send it back to the client
-    		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-    			expiresIn: "7d",
-    		});
-    		res.cookie("token", token, {
-    			httpOnly: true,
-    			secure: true,
-    			sameSite: "strict",
-    		});
-    		res.status(200).send("Logged in successfully");
-    	} catch (err) {
-    		console.error("Error during login:", err);
-    		res.status(500).send("Internal server error");
-    	}
-    });
-    ```
-    {% endcode %}
-
-
+		// If the login credentials are valid, generate a JWT and send it back to the client
+		const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+			expiresIn: "7d",
+		});
+		res.cookie("token", token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: "strict",
+		});
+		res.status(200).send("Logged in successfully");
+	} catch (err) {
+		console.error("Error during login:", err);
+		res.status(500).send("Internal server error");
+	}
+});
+```
+{% endcode %}
 
 **Home Route**
 
-*   **GET /home**: Fetches and displays servers that the authenticated user is part of, redirecting to the onboarding page if the user is not part of any servers.
+* **GET /home**: Fetches and displays servers that the authenticated user is part of, redirecting to the onboarding page if the user is not part of any servers.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    /**
-     * Route to display the home page for the authenticated user. It fetches and displays servers that the user is a part of.
-     *
-     * @route GET /home
-     * @access Private (requires authentication)
-     */
-    app.get("/home", authenticateToken, async (req, res) => {
-    	try {
-    		const user = await User.findByPk(req.user.userId, {
-    			include: [
-    				{
-    					model: Server,
-    					as: "Servers", // Make sure this alias matches your association alias
-    					through: { attributes: [] },
-    					attributes: [
-    						"id",
-    						"name",
-    						"profilePicture",
-    						"filePaths",
-    						"createdAt",
-    						"updatedAt",
-    					],
-    				},
-    			],
-    		});
+{% code lineNumbers="true" %}
+```javascript
+/**
+ * Route to display the home page for the authenticated user. It fetches and displays servers that the user is a part of.
+ *
+ * @route GET /home
+ * @access Private (requires authentication)
+ */
+app.get("/home", authenticateToken, async (req, res) => {
+	try {
+		const user = await User.findByPk(req.user.userId, {
+			include: [
+				{
+					model: Server,
+					as: "Servers", // Make sure this alias matches your association alias
+					through: { attributes: [] },
+					attributes: [
+						"id",
+						"name",
+						"profilePicture",
+						"filePaths",
+						"createdAt",
+						"updatedAt",
+					],
+				},
+			],
+		});
 
-    		// Check if the user is part of any servers
-    		if (user && user.Servers.length > 0) {
-    			// User is part of one or more servers, render the home page with the servers
-    			res.render("layout", { servers: user.Servers, showMembers: false });
-    		} else {
-    			// User is not part of any servers, redirect to the onboarding page
-    			res.redirect("/onboarding");
-    		}
-    	} catch (err) {
-    		console.error("Error fetching servers or redirecting user:", err);
-    		res.status(500).send("Internal server error");
-    	}
-    });
-    ```
-    {% endcode %}
+		// Check if the user is part of any servers
+		if (user && user.Servers.length > 0) {
+			// User is part of one or more servers, render the home page with the servers
+			res.render("layout", { servers: user.Servers, showMembers: false });
+		} else {
+			// User is not part of any servers, redirect to the onboarding page
+			res.redirect("/onboarding");
+		}
+	} catch (err) {
+		console.error("Error fetching servers or redirecting user:", err);
+		res.status(500).send("Internal server error");
+	}
+});
+```
+{% endcode %}
 
 **Server Route**
 
-*   **GET /server/:serverId**: Displays a specific server based on the server ID if the authenticated user is a member, including server and user details.
+* **GET /server/:serverId**: Displays a specific server based on the server ID if the authenticated user is a member, including server and user details.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    /**
-     * Route to display a specific server by its ID. It checks if the user is a member of the server and displays it if they are.
-     *
-     * @route GET /server/:serverId
-     * @param {string} req.params.serverId - The ID of the server to display.
-     * @access Private (requires authentication and server membership)
-     */
-    app.get("/server/:serverId", authenticateToken, async (req, res) => {
-    	try {
-    		const server = await Server.findByPk(req.params.serverId, {
-    			include: [
-    				{
-    					model: User,
-    					as: "Users",
-    					attributes: ["id", "username", "email", "profilePicture"],
-    					through: { attributes: [] },
-    				},
-    			],
-    		});
+{% code lineNumbers="true" %}
+```javascript
+/**
+ * Route to display a specific server by its ID. It checks if the user is a member of the server and displays it if they are.
+ *
+ * @route GET /server/:serverId
+ * @param {string} req.params.serverId - The ID of the server to display.
+ * @access Private (requires authentication and server membership)
+ */
+app.get("/server/:serverId", authenticateToken, async (req, res) => {
+	try {
+		const server = await Server.findByPk(req.params.serverId, {
+			include: [
+				{
+					model: User,
+					as: "Users",
+					attributes: ["id", "username", "email", "profilePicture"],
+					through: { attributes: [] },
+				},
+			],
+		});
 
-    		if (!server) {
-    			return res.status(404).send("Server not found.");
-    		}
+		if (!server) {
+			return res.status(404).send("Server not found.");
+		}
 
-    		const isMember = server.Users.some((user) => user.id === req.user.userId);
-    		if (!isMember) {
-    			return res.status(403).send("User is not a member of this server.");
-    		}
+		const isMember = server.Users.some((user) => user.id === req.user.userId);
+		if (!isMember) {
+			return res.status(403).send("User is not a member of this server.");
+		}
 
-    		const userServers = await User.findByPk(req.user.userId, {
-    			include: [
-    				{
-    					model: Server,
-    					as: "Servers",
-    					attributes: ["id", "name", "profilePicture", "filePaths"],
-    					through: { attributes: [] },
-    				},
-    			],
-    		});
+		const userServers = await User.findByPk(req.user.userId, {
+			include: [
+				{
+					model: Server,
+					as: "Servers",
+					attributes: ["id", "name", "profilePicture", "filePaths"],
+					through: { attributes: [] },
+				},
+			],
+		});
 
-    		// Validate file paths before rendering
-    		// server.filePaths = await validateFilePaths(
-    		// 	server.filePaths || [],
-    		// 	server.id
-    		// );
+		// Validate file paths before rendering
+		// server.filePaths = await validateFilePaths(
+		// 	server.filePaths || [],
+		// 	server.id
+		// );
 
-    		res.render("layout", {
-    			servers: userServers ? userServers.Servers : [],
-    			members: server.Users,
-    			showMembers: true,
-    			currentServer: server,
-    			serverCode: server.serverCode,
-    			id: server.id,
-    		});
-    	} catch (err) {
-    		console.error("Error:", err);
-    		res.status(500).send("Internal server error");
-    	}
-    });
-    ```
-    {% endcode %}
+		res.render("layout", {
+			servers: userServers ? userServers.Servers : [],
+			members: server.Users,
+			showMembers: true,
+			currentServer: server,
+			serverCode: server.serverCode,
+			id: server.id,
+		});
+	} catch (err) {
+		console.error("Error:", err);
+		res.status(500).send("Internal server error");
+	}
+});
+```
+{% endcode %}
 
 **File Upload Route**
 
-*   **POST /upload**: Handles file uploads to a specified server for authenticated and authorized users, validating file constraints and updating server information with the file path.
+* **POST /upload**: Handles file uploads to a specified server for authenticated and authorized users, validating file constraints and updating server information with the file path.
 
-    {% code lineNumbers="true" %}
-    ```javascript
-    /**
-     * Route for uploading files to a specific server. It validates the user's membership in the server and the file constraints before uploading.
-     *
-     * @route POST /upload
-     * @param {string} req.body.serverId - The ID of the server where the file is to be uploaded.
-     * @param {file} req.file - The file to upload.
-     * @access Private (requires authentication and server membership)
-     */
-    app.post(
-    	"/upload",
-    	upload.single("file"),
-    	authenticateToken,
-    	async (req, res) => {
-    		try {
-    			const serverId = req.body.serverId;
-    			const userId = req.user.userId;
+{% code lineNumbers="true" %}
+```javascript
+/**
+ * Route for uploading files to a specific server. It validates the user's membership in the server and the file constraints before uploading.
+ *
+ * @route POST /upload
+ * @param {string} req.body.serverId - The ID of the server where the file is to be uploaded.
+ * @param {file} req.file - The file to upload.
+ * @access Private (requires authentication and server membership)
+ */
+app.post(
+	"/upload",
+	upload.single("file"),
+	authenticateToken,
+	async (req, res) => {
+		try {
+			const serverId = req.body.serverId;
+			const userId = req.user.userId;
 
-    			// Check if there's an entry in the ServerUser join table for this user and server
-    			const serverUser = await ServerUser.findOne({
-    				where: {
-    					serverId: serverId,
-    					userId: userId,
-    				},
-    			});
+			// Check if there's an entry in the ServerUser join table for this user and server
+			const serverUser = await ServerUser.findOne({
+				where: {
+					serverId: serverId,
+					userId: userId,
+				},
+			});
 
-    			if (!serverUser) {
-    				return res
-    					.status(404)
-    					.send("Server not found or user is not a member.");
-    			}
+			if (!serverUser) {
+				return res
+					.status(404)
+					.send("Server not found or user is not a member.");
+			}
 
-    			// Check the number of files already uploaded
-    			const server = await Server.findByPk(serverId);
-    			if (!server) {
-    				return res.status(404).send("Server not found.");
-    			}
+			// Check the number of files already uploaded
+			const server = await Server.findByPk(serverId);
+			if (!server) {
+				return res.status(404).send("Server not found.");
+			}
 
-    			if (server.filePaths && server.filePaths.length >= 10) {
-    				return res
-    					.status(400)
-    					.json({ message: "You can only upload up to 10 files." });
-    			}
+			if (server.filePaths && server.filePaths.length >= 10) {
+				return res
+					.status(400)
+					.json({ message: "You can only upload up to 10 files." });
+			}
 
-    			// Check the size of the uploaded file
-    			if (req.file.size > 20 * 1024 * 1024) {
-    				// 20 MB
-    				return res
-    					.status(400)
-    					.json({ message: "File cannot be larger than 20 MB." });
-    			}
+			// Check the size of the uploaded file
+			if (req.file.size > 20 * 1024 * 1024) {
+				// 20 MB
+				return res
+					.status(400)
+					.json({ message: "File cannot be larger than 20 MB." });
+			}
 
-    			// Create a new blob in the bucket and upload the file data
-    			const blob = bucket.file(`${serverId}/${req.file.originalname}`);
-    			const blobStream = blob.createWriteStream({
-    				resumable: true,
-    			});
+			// Create a new blob in the bucket and upload the file data
+			const blob = bucket.file(`${serverId}/${req.file.originalname}`);
+			const blobStream = blob.createWriteStream({
+				resumable: true,
+			});
 
-    			blobStream.on("error", (err) => {
-    				console.error(err);
-    				res.status(500).send("Error uploading to Google Cloud Storage.");
-    			});
+			blobStream.on("error", (err) => {
+				console.error(err);
+				res.status(500).send("Error uploading to Google Cloud Storage.");
+			});
 
-    			blobStream.on("finish", async () => {
-    				// Make the file public and get its public URL
-    				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+			blobStream.on("finish", async () => {
+				// Make the file public and get its public URL
+				const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
 
-    				// Update the server's filePaths array
-    				const updatedFilePaths = server.filePaths
-    					? [...server.filePaths, publicUrl]
-    					: [publicUrl];
-    				await server.update({ filePaths: updatedFilePaths });
+				// Update the server's filePaths array
+				const updatedFilePaths = server.filePaths
+					? [...server.filePaths, publicUrl]
+					: [publicUrl];
+				await server.update({ filePaths: updatedFilePaths });
 
-    				// Send a response to the client
-    				res
-    					.status(200)
-    					.json({ message: "File uploaded successfully", filePath: publicUrl });
-    			});
+				// Send a response to the client
+				res
+					.status(200)
+					.json({ message: "File uploaded successfully", filePath: publicUrl });
+			});
 
-    			blobStream.end(req.file.buffer);
-    		} catch (err) {
-    			console.error("Error uploading file:", err);
-    			res.status(500).send("Internal server error");
-    		}
-    	}
-    );
-    ```
-    {% endcode %}
+			blobStream.end(req.file.buffer);
+		} catch (err) {
+			console.error("Error uploading file:", err);
+			res.status(500).send("Internal server error");
+		}
+	}
+);
+```
+{% endcode %}
 
 #### Real-time Communication with Socket.IO
 
