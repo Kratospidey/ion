@@ -122,6 +122,25 @@ document.addEventListener("click", function (e) {
 	}
 });
 
+/**
+ * Transforms a message string containing markdown-like syntax into HTML-formatted text. This function supports
+ * various text formatting options including bold, italic, underline, strikethrough, spoilers, and blockquotes.
+ * It enables users to format their chat messages in a more expressive and visually engaging way, improving
+ * the overall chat experience.
+ *
+ * The function uses regular expressions to identify specific patterns in the input message and replaces them
+ * with the corresponding HTML tags. This approach allows for dynamic message formatting based on user input.
+ *
+ * @function renderFormattedMessage
+ * @param {string} message - The input message string potentially containing markdown-like syntax.
+ * @returns {string} The HTML-formatted message with the appropriate text styles applied.
+ *
+ * @example
+ * // Using renderFormattedMessage to format a message
+ * const formattedMessage = renderFormattedMessage("**Hello, World!**");
+ * // Returns: '<strong>Hello, World!</strong>'
+ *
+ */
 function renderFormattedMessage(message) {
 	let formattedMessage = message
 		// Bold and Italic

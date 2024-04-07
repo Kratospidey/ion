@@ -33,6 +33,14 @@
 </div>
 
 <script>
+	/**
+	 * Copies the server invite link to the user's clipboard.
+	 * The function constructs the full invite link using the provided server code and the origin of the current window location.
+	 * It then attempts to write this invite link to the clipboard. Upon success, it alerts the user that the link has been copied.
+	 * In case of failure, it alerts the user that the link copying failed.
+	 *
+	 * @param {string} code - The unique code of the server, used to construct the invite link.
+	 */
 	function copyInviteLink(code) {
 		const inviteLink = `${window.location.origin}/joinserver/${code}`;
 		navigator.clipboard.writeText(inviteLink).then(
@@ -46,6 +54,13 @@
 			}
 		);
 	}
+
+	/**
+	 * Initializes hover interaction behaviors on the members' div.
+	 * It sets up event listeners for 'mouseover' and 'mouseout' events. The 'mouseover' event clears any existing timeouts,
+	 * effectively canceling the shrink operation if the user hovers over the div again. The 'mouseout' event starts a timeout
+	 * which trigger a shrink operation on the members' div after a specified delay, enhancing the UI interaction.
+	 */
 	let membersDiv = document.querySelector(".members");
 	let hoverTimeout;
 
@@ -56,7 +71,7 @@
 	membersDiv.addEventListener("mouseout", function () {
 		hoverTimeout = setTimeout(() => {
 			// This code will execute after 500ms of not hovering over the members div
-			// You can adjust the timeout to control the delay before the div shrinks back
+			// Can adjust the timeout to control the delay before the div shrinks back
 		}, 500);
 	});
 </script>

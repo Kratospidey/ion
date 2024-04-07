@@ -71,6 +71,14 @@
 
 <!-- views/partials/sidepanel.ejs -->
 <script defer>
+	/**
+	 * Prevents the default submission of the file upload form and handles the file upload process.
+	 * Validates the file selection, ensuring that a file is selected and its size does not exceed 20 MB.
+	 * Submits the selected file(s) to the server using XMLHttpRequest and provides feedback to the user
+	 * through alerts and UI updates.
+	 *
+	 * @listens submit - Attaches an event listener to the file upload form's submit event.
+	 */
 	document
 		.getElementById("uploadForm")
 		.addEventListener("submit", function (event) {
@@ -137,6 +145,13 @@
 </script>
 
 <script defer>
+	/**
+	 * Adds click event listeners to all delete file buttons. On click, the script confirms the user's intention to delete,
+	 * then sends a POST request to the server to delete the specified file. Feedback is provided to the user through alerts,
+	 * and upon successful deletion, the file's UI element is removed.
+	 *
+	 * @listens click - Attaches click event listeners to buttons for deleting files.
+	 */
 	document.querySelectorAll(".delete-file-btn").forEach((button) => {
 		button.addEventListener("click", async function () {
 			const fileItem = this.closest(".file-item");
