@@ -17,22 +17,27 @@ This script is responsible for handling the 'Sign Up' form's submission on a reg
 
 1.  **Event Listener Setup**: The script begins by attaching an event listener to the 'Sign Up' form's `submit` event.
 
+    {% code lineNumbers="true" %}
     ```javascript
     document.getElementById("signupForm").addEventListener("submit", async function (event) {
         event.preventDefault();
         ...
     });
     ```
+    {% endcode %}
 2.  **Submit Button State Management**: Changes the submit button's content to "Signing Up..." and disables it to prevent further submissions during the processing period.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const submitButton = document.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
     submitButton.innerHTML = 'Signing Up... <i class="fa fa-spinner fa-spin"></i>';
     submitButton.disabled = true;
     ```
+    {% endcode %}
 3.  **Form Data Collection**: Collects the input data from the form, converts the username to lowercase for consistency, and prepares the data for submission.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const username = document.getElementById("username").value.toLowerCase();
     const formData = new FormData();
@@ -42,8 +47,10 @@ This script is responsible for handling the 'Sign Up' form's submission on a reg
     formData.append("password", document.getElementById("password").value);
     formData.append("confirmPassword", document.getElementById("confirmPassword").value);
     ```
+    {% endcode %}
 4.  **Server Submission and Response Handling**: Submits the form data to the server and handles the response. On success, the user is notified and redirected. On failure, an error message is displayed.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const response = await fetch("/signup", {
         method: "POST",
@@ -58,9 +65,12 @@ This script is responsible for handling the 'Sign Up' form's submission on a reg
         alert(errorMessage);
     }
     ```
+    {% endcode %}
 5.  **Restoring Button State**: After the server response is handled, the submit button's original text is restored, and it's re-enabled for further actions.
 
+    {% code lineNumbers="true" %}
     ```javascript
     submitButton.innerHTML = originalButtonText;
     submitButton.disabled = false;
     ```
+    {% endcode %}

@@ -25,11 +25,13 @@ The `onDelete: "CASCADE"` option is set for both associations, ensuring that if 
 
 When a user joins a server or a server adds a new member, a new `ServerUser` entry is created, linking the user to the server. This process is central to managing server memberships within the application.
 
+{% code lineNumbers="true" %}
 ```javascript
 ServerUser.create({
   userId: 1, // The ID of the user joining the server
   serverId: 2, // The ID of the server being joined
 });
 ```
+{% endcode %}
 
 In this example, a user with an `id` of 1 is associated with a server with an `id` of 2. The `create` method facilitates this association, adding a new entry to the `server_users` table that links the user to the server.

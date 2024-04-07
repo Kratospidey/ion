@@ -19,32 +19,39 @@ The script is tasked with handling the login form submission, employing client-s
 
     * Attaches an event listener to the login form's `submit` event.
 
+    {% code lineNumbers="true" %}
     ```javascript
     document.querySelector("form").addEventListener("submit", async function (event) { ... });
     ```
+    {% endcode %}
 2.  **Submit Button State Management**:
 
     * Temporarily modifies the login button to signal the ongoing login attempt.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const loginButton = document.getElementById("login-button");
     loginButton.disabled = true;
     loginButton.innerHTML = 'Logging in... <i class="fa fa-spinner fa-spin"></i>';
     ```
+    {% endcode %}
 3.  **Client-Side Validation**:
 
     * Validates the email/username input against specific patterns and checks the password length.
 
+    {% code lineNumbers="true" %}
     ```javascript
     var isEmail = emailPattern.test(emailOrUsernameInput.value);
     var isUsername = usernamePattern.test(emailOrUsernameInput.value);
     ...
     if (passwordInput.value.length < minLength) { ... }
     ```
+    {% endcode %}
 4.  **Preparation and Submission of Login Data**:
 
     * Formats the login credentials, distinguishing between email and username logins, and submits the data to the server.
 
+    {% code lineNumbers="true" %}
     ```javascript
     const loginData = { ... };
     const response = await fetch("/login", {
@@ -53,10 +60,12 @@ The script is tasked with handling the login form submission, employing client-s
         body: JSON.stringify(loginData),
     });
     ```
+    {% endcode %}
 5.  **Server Response Handling and User Feedback**:
 
     * On successful login, redirects the user to the home page. Displays an error message in case of failure.
 
+    {% code lineNumbers="true" %}
     ```javascript
     if (response.ok) {
         window.location.href = "/home";
@@ -65,11 +74,14 @@ The script is tasked with handling the login form submission, employing client-s
         alert(errorMessage);
     }
     ```
+    {% endcode %}
 6.  **Restoration of Button State**:
 
     * Restores the login button to its original state after the process concludes.
 
+    {% code lineNumbers="true" %}
     ```javascript
     loginButton.disabled = false;
     loginButton.innerHTML = originalButtonText;
     ```
+    {% endcode %}

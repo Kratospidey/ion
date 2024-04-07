@@ -28,6 +28,7 @@ The `db` object, which is exported by the script, aggregates the Sequelize insta
 
 The exported `db` object can be required in any part of the application to access model definitions and perform database operations. This approach abstracts the database setup and model imports, simplifying the development process.
 
+{% code lineNumbers="true" %}
 ```javascript
 const db = require('./models');
 const { User, Message } = db;
@@ -46,5 +47,6 @@ Message.create({
   console.log("New message created:", message.content);
 });
 ```
+{% endcode %}
 
 In this example, the `User` and `Message` models are accessed through the `db` object to perform database operations—retrieving all users and creating a new message, respectively.

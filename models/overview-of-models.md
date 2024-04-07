@@ -21,17 +21,21 @@ Sequelize is a promise-based ORM for Node.js, which supports multiple database e
 
 Consider a `User` table with fields `id`, `username`, and `email`. To fetch all users with Sequelize, you would write:
 
+{% code lineNumbers="true" %}
 ```javascript
 User.findAll().then(users => {
   console.log(users);
 });
 ```
+{% endcode %}
 
 The equivalent raw SQL query would be:
 
+{% code lineNumbers="true" %}
 ```sql
 SELECT * FROM Users;
 ```
+{% endcode %}
 
 While both accomplish the same task, Sequelize's version is more readable and integrates seamlessly with JavaScript code, leveraging promises for asynchronous operations.
 
@@ -47,6 +51,7 @@ The `index.js` file within the `models` directory is crucial for orchestrating t
 
 For example, to fetch all messages from a specific server along with the details of the user who posted each message, the application can leverage Sequelize's eager loading:
 
+{% code lineNumbers="true" %}
 ```javascript
 Server.findByPk(1, {
   include: [{
@@ -57,9 +62,11 @@ Server.findByPk(1, {
   console.log(JSON.stringify(server, null, 2));
 });
 ```
+{% endcode %}
 
 compared to
 
+{% code lineNumbers="true" %}
 ```sql
 SELECT Servers.*, Messages.*, Users.*
 FROM Servers
@@ -67,5 +74,6 @@ LEFT JOIN Messages ON Messages.serverId = Servers.id
 LEFT JOIN Users ON Messages.userId = Users.id
 WHERE Servers.id = 1;
 ```
+{% endcode %}
 
 This single query replaces multiple complex SQL joins, showcasing the power and convenience of using Sequelize in the application.

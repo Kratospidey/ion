@@ -8,14 +8,17 @@ The `chat.js` script is a comprehensive client-side JavaScript file that powers 
 
 The script initializes a Socket.IO client connection, allowing for real-time bidirectional event-based communication between the web clients and the server.
 
+{% code lineNumbers="true" %}
 ```javascript
 const socket = io();
 ```
+{% endcode %}
 
 **Room Management**
 
 It extracts the server or room ID from the URL and emits a `joinRoom` event to join the specific chat room, enabling scoped message exchanges.
 
+{% code lineNumbers="true" %}
 ```javascript
 let roomId;
 if (match) {
@@ -23,11 +26,13 @@ if (match) {
     socket.emit("joinRoom", roomId);
 }
 ```
+{% endcode %}
 
 **Message Handling**
 
 The script listens for `chatMessage` events from the server and dynamically appends received messages to the chat window, ensuring the chat interface is always up-to-date with the latest messages.
 
+{% code lineNumbers="true" %}
 ```javascript
 socket.on("chatMessage", function (data) {
     appendMessage({
@@ -41,11 +46,13 @@ socket.on("chatMessage", function (data) {
     messageContainer.scrollTop = messageContainer.scrollHeight;
 });
 ```
+{% endcode %}
 
 **Sending Messages**
 
 It captures message input from the user and emits a `sendMessage` event when the user submits a message. The input field is cleared after sending to ready it for the next message.
 
+{% code lineNumbers="true" %}
 ```javascript
 messageInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey && !isEmojiSelectionMode) {
@@ -57,6 +64,7 @@ messageInput.addEventListener("keydown", function (e) {
     }
 });
 ```
+{% endcode %}
 
 #### Advanced Features
 
@@ -64,6 +72,7 @@ messageInput.addEventListener("keydown", function (e) {
 
 The script includes a `renderFormattedMessage` function that applies rich text formatting to messages using a markdown-like syntax, enhancing message readability and presentation.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Transforms a message string containing markdown-like syntax into HTML-formatted text. This function supports
@@ -104,11 +113,13 @@ function renderFormattedMessage(message) {
 	return formattedMessage;
 }
 ```
+{% endcode %}
 
 **Emoji Integration**
 
 It integrates emoji functionalities, allowing users to search for and insert emojis into their messages, enriching the chat experience.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Initiates a search for emojis based on the user's query and displays the results. This function enhances
@@ -160,11 +171,13 @@ function emojiSearch(query) {
 }
 
 ```
+{% endcode %}
 
 **Image Handling**
 
 The script supports image uploads and rendering within the chat. It listens for `sendImage` events and appends the images to the chat interface.
 
+{% code lineNumbers="true" %}
 ```javascript
 // Listen for 'sendImage' event from the server
 socket.on("sendImage", function (data) {
@@ -183,11 +196,13 @@ socket.on("sendImage", function (data) {
 });
 
 ```
+{% endcode %}
 
 **Link Handling**
 
 It includes a `linkify` function that converts plain text URLs in messages into clickable links, facilitating easy navigation to referenced web content.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Converts plaintext URLs in a given text into clickable HTML anchor tags. This function enhances
@@ -221,11 +236,13 @@ function linkify(text) {
 	});
 }
 ```
+{% endcode %}
 
 **Security Considerations**
 
 The script employs a `sanitizeHTML` function to sanitize user-generated content, preventing Cross-Site Scripting (XSS) attacks and ensuring the chat application's security.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Sanitizes a given HTML string to prevent Cross-Site Scripting (XSS) attacks. This function is
@@ -239,11 +256,13 @@ function sanitizeHTML(html) {
 	return DOMPurify.sanitize(html);
 }
 ```
+{% endcode %}
 
 **Typing Indicator**
 
 Implements a typing indicator feature, showing when users are typing in real-time, enhancing the sense of live interaction.
 
+{% code lineNumbers="true" %}
 ```javascript
 let typingTimeout;
 ...
@@ -251,11 +270,13 @@ messageInput.addEventListener("input", () => { ... });
 ...
 socket.on("typing", (data) => { ... });
 ```
+{% endcode %}
 
 **Fetching Historical Messages**
 
 Provides functionality to fetch and display historical messages for a given chat room, ensuring users can view past conversations upon entering a chat room.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Fetches historical messages for a given chat room from the server and displays them in the chat window.
@@ -308,11 +329,13 @@ function fetchAndDisplayMessages(roomId) {
 		.catch((error) => console.error("Failed to fetch messages:", error));
 }
 ```
+{% endcode %}
 
 **User Details Fetching**
 
 Includes the capability to fetch and display user details, such as updating a user's profile picture in the chat interface based on data retrieved from the server.
 
+{% code lineNumbers="true" %}
 ```javascript
 /**
  * Fetches user details from the server using the user's unique ID. This function sends a GET request
@@ -337,6 +360,7 @@ function fetchUserDetails(userId) {
 		.catch((error) => console.error("Error fetching user details:", error));
 }
 ```
+{% endcode %}
 
 ## Keybings for Rich Text Formatting
 
